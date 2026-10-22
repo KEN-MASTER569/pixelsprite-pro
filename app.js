@@ -7217,10 +7217,12 @@ if (originalBtnCloudLoad) {
             let usedMB = 0, totalMB = 512;
             try {
                 const usageRes = await fetch(`${API_BASE_URL}/api/cloud/usage/${encodeURIComponent(window.userState.email)}`);
-                const usageData = await usageRes.json();
-                if (usageData.success) {
-                    usedMB = usageData.usedMB || 0;
-                    totalMB = usageData.totalMB || 512;
+                if (usageRes.ok) { // 🚨 加这个判断，只有 200 才去解析 JSON
+                    const usageData = await usageRes.json();
+                    if (usageData.success) {
+                        usedMB = usageData.usedMB || 0;
+                        totalMB = usageData.totalMB || 512;
+                    }
                 }
             } catch (e) { console.warn('获取容量失败', e); }
 
