@@ -389,6 +389,7 @@
             confirm_delete_project: '确定要彻底删除这个云端工程吗？此操作不可恢复！',
             cloud_delete_success: '🗑️ 工程已成功删除',
             cloud_delete_fail: '删除失败',
+            cloud_storage_used: '已用容量',
         },
         en: {
             lang_name: 'English',
@@ -774,6 +775,7 @@
             confirm_delete_project: 'Are you sure you want to permanently delete this cloud project? This cannot be undone!',
             cloud_delete_success: '🗑️ Project deleted successfully',
             cloud_delete_fail: 'Failed to delete',
+            cloud_storage_used: 'Storage Used',
         },
         ja: {
             lang_name: '日本語',
@@ -1159,6 +1161,7 @@
             confirm_delete_project: 'このクラウドプロジェクトを完全に削除してもよろしいですか？この操作は元に戻せません！',
             cloud_delete_success: '🗑️ プロジェクトが正常に削除されました',
             cloud_delete_fail: '削除に失敗しました',
+            cloud_storage_used: '使用済み容量',
         },
         'zh-TW': {
             lang_name: '繁體中文',
@@ -1544,6 +1547,7 @@
             confirm_delete_project: '確定要徹底刪除這個雲端工程嗎？此操作不可恢復！',
             cloud_delete_success: '🗑️ 工程已成功刪除',
             cloud_delete_fail: '刪除失敗',
+            cloud_storage_used: '已用容量',
         },
         es: {
             lang_name: 'Español',
@@ -1930,6 +1934,7 @@
             confirm_delete_project: '¿Estás seguro de que deseas eliminar permanentemente este proyecto en la nube? ¡Esta acción no se puede deshacer!',
             cloud_delete_success: '🗑️ Proyecto eliminado con éxito',
             cloud_delete_fail: 'Error al eliminar',
+            cloud_storage_used: 'Almacenamiento Usado',
         }
     }
 

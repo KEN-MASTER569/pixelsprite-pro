@@ -24,6 +24,11 @@
 
 const API_BASE_URL = 'https://pixelsprite-backend.onrender.com';
 
+// 🚨 提升作用域：让最底部的代码也能找到这三个元素
+const cloudHistoryModal = document.getElementById('cloud-history-modal');
+const cloudHistoryList = document.getElementById('cloud-history-list');
+const cloudHistoryEmpty = document.getElementById('cloud-history-empty');
+
 window.addEventListener('message', (event) => {
     if (event.data && event.data.type === 'GOOGLE_AUTH_SUCCESS' && event.data.userState) {
         window.userState = { ...window.userState, ...event.data.userState };
@@ -5556,20 +5561,34 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function restoreProjectData(data) {
-        engine.resX = data.resX;
-        engine.resY = data.resY;
-        engine.resolution = Math.max(data.resX, data.resY);
-        if (resCustomX) resCustomX.value = data.resX;
-        if (resCustomY) resCustomY.value = data.resY;
+        // 🚨 核心修复：如果读出来的值是 undefined，就给个默认值，防止报错
+        const resX = data.resX || 32;
+        const resY = data.resY || 32;
 
+        engine.resX = resX;
+        engine.resY = resY;
+        engine.resolution = Math.max(resX, resY);
+
+        // 修改变量之前先判断 DOM 存不存在，并且用 resX 兜底
+        const inputX = document.getElementById('res-custom-x');
+        const inputY = document.getElementById('res-custom-y');
+        if (inputX) inputX.value = resX;
+        if (inputY) inputY.value = resY;
+
+        // FPS 兜底
         fps = data.fps || 12;
+        const fpsInput = document.getElementById('param-fps');
+        const fpsVal = document.getElementById('val-fps');
+        if (fpsInput) fpsInput.value = fps;
+        if (fpsVal) fpsVal.textContent = `${fps} FPS`;
+
         currentFrame = data.currentFrame || 0;
 
         frameBuffers = data.frameBuffers.map(buf => cloneBuffer(buf));
         frameLayers = cloneLayersStack(data.frameLayers);
 
         initFrameLayers(currentFrame);
-        updateCanvasDOMDimensions(data.resX, data.resY);
+        updateCanvasDOMDimensions(resX, resY);
         syncCurrentFrameBuffer();
         renderAll();
     }
@@ -7190,22 +7209,43 @@ if (originalBtnCloudLoad) {
         cloudHistoryEmpty.style.display = 'none';
 
         try {
+            // 1. 拉取工程列表
             const res = await fetch(`${API_BASE_URL}/api/cloud/list/${encodeURIComponent(window.userState.email)}`);
             const result = await res.json();
+
+            // 2. 拉取用户已用容量
+            let usedMB = 0, totalMB = 512;
+            try {
+                const usageRes = await fetch(`${API_BASE_URL}/api/cloud/usage/${encodeURIComponent(window.userState.email)}`);
+                const usageData = await usageRes.json();
+                if (usageData.success) {
+                    usedMB = usageData.usedMB || 0;
+                    totalMB = usageData.totalMB || 512;
+                }
+            } catch (e) { console.warn('获取容量失败', e); }
+
+            // 更新底部提示文字（加容量显示）
+            const footerDiv = document.querySelector('#cloud-history-modal .modal-footer div');
+            if (footerDiv) {
+                footerDiv.innerHTML = `
+                    <span style="color:#00f2fe; font-weight:bold; margin-right: 15px;">💾 ${dict.cloud_storage_used || '已用容量'}: ${usedMB.toFixed(1)} MB / ${totalMB} MB</span>
+                    ${dict.cloud_history_old_pin || '还在用旧密码？'} 
+                    <button id="btn-open-old-load" style="background: none; border: none; color: #00f2fe; cursor: pointer; text-decoration: underline;">
+                        ${dict.cloud_history_input_pin || '输入提取码读取'}
+                    </button>
+                `;
+            }
 
             cloudHistoryList.innerHTML = '';
             if (result.success && result.projects && result.projects.length > 0) {
                 result.projects.forEach(proj => {
                     const card = document.createElement('div');
-                    card.style.cssText = `background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s; text-align: center;`;
+                    card.style.cssText = `position: relative; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s; text-align: center;`;
                     card.onmouseover = () => { card.style.borderColor = '#00f2fe'; card.style.transform = 'translateY(-2px)'; };
                     card.onmouseout = () => { card.style.borderColor = 'rgba(255,255,255,0.1)'; card.style.transform = 'translateY(0)'; };
 
-                    // 给卡片加上相对定位，让删除按钮能绝对定位于右上角
-                    card.style.position = 'relative';
-
                     card.innerHTML = `
-                        <!-- 右上角悬浮删除按钮 -->
+                        <!-- 🗑️ 右上角悬浮删除按钮 -->
                         <button class="delete-cloud-btn" title="删除此工程" style="position: absolute; top: 6px; right: 6px; background: rgba(255, 71, 87, 0.2); border: none; border-radius: 50%; width: 24px; height: 24px; color: #ff4757; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: 0.2s; z-index: 10;">🗑️</button>
                         
                         <div style="font-size: 32px; margin-bottom: 8px;">🖼️</div>
@@ -7221,14 +7261,12 @@ if (originalBtnCloudLoad) {
 
                     deleteBtn.onclick = async (e) => {
                         e.stopPropagation(); // 🚨 极其重要：阻止事件冒泡，防止点击删除时触发了卡片的“点击载入”
-
                         const confirmMsg = dict.confirm_delete_project || '确定要彻底删除这个云端工程吗？此操作不可恢复！';
                         if (!confirm(confirmMsg)) return;
 
                         try {
                             deleteBtn.innerHTML = '⏳';
                             deleteBtn.disabled = true;
-
                             const delRes = await fetch(`${API_BASE_URL}/api/cloud/delete/${proj.pinCode}`, {
                                 method: 'DELETE',
                                 headers: { 'Content-Type': 'application/json' },
@@ -7237,12 +7275,10 @@ if (originalBtnCloudLoad) {
                             const delData = await delRes.json();
 
                             if (delData.success) {
-                                // 删除成功，让卡片滑出并消失
                                 card.style.transform = 'scale(0.8)';
                                 card.style.opacity = '0';
                                 setTimeout(() => {
                                     card.remove();
-                                    // 如果全删光了，显示空状态
                                     if (cloudHistoryList.children.length === 0) {
                                         cloudHistoryEmpty.style.display = 'block';
                                     }
@@ -7259,6 +7295,26 @@ if (originalBtnCloudLoad) {
                             deleteBtn.disabled = false;
                         }
                     };
+
+                    // 🚨 卡片点击加载逻辑
+                    card.addEventListener('click', async () => {
+                        card.innerHTML = `<div style="color:#00f2fe; padding: 20px 0;">⏳ ...</div>`;
+                        try {
+                            const loadRes = await fetch(`${API_BASE_URL}/api/cloud/load/${proj.pinCode}`);
+                            const loadData = await loadRes.json();
+                            if (loadData.success && loadData.data) {
+                                restoreProjectData(loadData.data);
+                                cloudHistoryModal.style.display = 'none';
+                                if (typeof showToast === 'function') showToast(dict.cloud_load_success || '✨ 云端画作恢复成功！');
+                            } else {
+                                alert((dict.cloud_history_load_fail || '加载失败') + ': ' + loadData.error);
+                                card.innerHTML = `<div style="color:#ff4757; padding: 20px 0;">${dict.cloud_history_load_fail || '失败'}</div>`;
+                            }
+                        } catch (e) {
+                            alert(dict.cloud_history_net_error || '网络错误');
+                            card.innerHTML = `<div style="color:#ff4757; padding: 20px 0;">${dict.cloud_history_net_error || '网络错误'}</div>`;
+                        }
+                    });
 
                     cloudHistoryList.appendChild(card);
                 });
