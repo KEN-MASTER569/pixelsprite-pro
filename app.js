@@ -4781,7 +4781,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     try {
                         const res = await fetch(`${API_BASE_URL}/api/cloud/list/${encodeURIComponent(window.userState.email)}`);
-                        if (!res.ok) throw new Error("Network response was not ok");
+                        if (!res.ok) {
+                            // 如果后端返回 404 或 500，我们把它抓出来
+                            const text = await res.text();
+                            console.error("后端返回了错误:", res.status, text);
+                            throw new Error(`服务器返回了 ${res.status}`);
+                        }
                         const result = await res.json();
 
                         cloudHistoryList.innerHTML = '';
