@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixelSprite Pro - 专业级 2D 像素画创作工坊</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Outfit:wght@700;900&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #06080e;
+            --accent-cyan: #00f2fe;
+            --accent-purple: #7f00ff;
+            --text-main: #ffffff;
+            --text-muted: #8a99ad;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* 🌌 赛博朋克背景层 */
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(0, 242, 254, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 242, 254, 0.04) 1px, transparent 1px);
+            background-size: 50px 50px;
+            transform: perspective(500px) rotateX(20deg) translateY(-100px) scale(1.5);
+            transform-origin: top center;
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+            background: radial-gradient(circle at 50% 20%, rgba(0, 242, 254, 0.15) 0%, transparent 60%);
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* 🚀 顶栏 */
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px 0;
+        }
+
+        .nav-logo {
+            font-family: 'Outfit';
+            font-weight: 900;
+            font-size: 24px;
+            letter-spacing: 1px;
+        }
+
+        .nav-logo span {
+            color: var(--accent-cyan);
+            font-style: italic;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 28px;
+            font-weight: 800;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-outline {
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            background: transparent;
+        }
+
+        .btn-outline:hover {
+            background: rgba(0, 242, 254, 0.1);
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
+        }
+
+        .btn-primary {
+            background: var(--accent-cyan);
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.4);
+            font-size: 20px;
+            padding: 18px 40px;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 0 40px rgba(0, 242, 254, 0.8), 0 0 10px #fff inset;
+            background: #ffffff;
+        }
+
+        /* 🎨 首屏 Hero 区域 */
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 80px 0 100px;
+        }
+
+        .hero h1 {
+            font-family: 'Outfit';
+            font-size: 80px;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            letter-spacing: -1px;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+            font-style: italic;
+        }
+
+        .hero p {
+            font-size: 22px;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin-bottom: 50px;
+        }
+
+        /* 快捷键角标 */
+        .shortcut-hint {
+            margin-top: 20px;
+            font-size: 13px;
+            color: var(--text-muted);
+            font-family: monospace;
+        }
+
+        .shortcut-hint kbd {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* 💎 功能解析 (Feature Grid) */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            padding: 80px 0;
+        }
+
+        .feature-card {
+            background: rgba(15, 20, 30, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 40px 30px;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            border-color: rgba(0, 242, 254, 0.4);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 242, 254, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 36px;
+            margin-bottom: 20px;
+            display: inline-block;
+            filter: drop-shadow(0 0 10px var(--accent-cyan));
+        }
+
+        .feature-card h3 {
+            font-family: 'Outfit';
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+
+        .feature-card p {
+            font-size: 15px;
+            color: var(--text-muted);
+        }
+
+        /* 🏁 底部 CTA (行动呼吁) */
+        .cta-bottom {
+            text-align: center;
+            padding: 100px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: linear-gradient(180deg, transparent, rgba(0, 242, 254, 0.05));
+        }
+
+        .cta-bottom h2 {
+            font-family: 'Outfit';
+            font-size: 40px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 50px;
+            }
+
+            .hero p {
+                font-size: 18px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 更新公告区 */
+        .changelog-section {
+            padding: 80px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .changelog-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .changelog-header h2 {
+            font-family: 'Outfit';
+            font-size: 36px;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .changelog-header p {
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        .changelog-card {
+            background: rgba(15, 20, 30, 0.8);
+            border: 1px solid rgba(0, 242, 254, 0.2);
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .changelog-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 20px;
+            bottom: 20px;
+            width: 4px;
+            background: linear-gradient(180deg, #00f2fe, #7f00ff);
+            border-radius: 0 4px 4px 0;
+        }
+
+        .changelog-version {
+            display: inline-block;
+            background: rgba(0, 242, 254, 0.1);
+            color: #00f2fe;
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .changelog-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .changelog-list li {
+            position: relative;
+            padding-left: 24px;
+            margin-bottom: 12px;
+            color: #cbd5e1;
+            font-size: 15px;
+        }
+
+        .changelog-list li::before {
+            content: '✦';
+            position: absolute;
+            left: 0;
+            color: #00f2fe;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 背景特效 -->
+    <div class="bg-glow"></div>
+    <div class="bg-grid"></div>
+
+    <div class="content-wrapper">
+        <!-- 顶栏 -->
+        <nav class="nav">
+            <div class="nav-logo">PixelSprite <span>Pro</span></div>
+            <a href="app.html" class="btn btn-outline">直接进入工作台</a>
+        </nav>
+
+        <!-- 首屏宣传语 -->
+        <header class="hero">
+            <h1>为像素艺术家而生的<br><span>终极创作工坊</span></h1>
+            <p>专业级 2D 像素画与游戏 Sprite 动画引擎。多图层、时间轴、高级调色板、AI 辅助工具，无需下载，打开浏览器即刻创作。</p>
+
+            <!-- 跳转按钮 -->
+            <a href="app.html" class="btn btn-primary">
+                🚀 立即开启 PixelSprite Pro 的创作之旅！
+            </a>
+
+            <div class="shortcut-hint">
+                支持 <kbd>Windows</kbd> / <kbd>Mac</kbd> / <kbd>iPad</kbd> · 完全免费畅玩
+            </div>
+        </header>
+
+        <!-- 核心功能解析 -->
+        <section class="features">
+            <div class="feature-card">
+                <div class="feature-icon">🖌️</div>
+                <h3>极致像素绘制</h3>
+                <p>专为 Pixel Art 优化的笔刷引擎，自带 Pixel Perfect 防双倍像素算法，配合镜像对称与选区变换，让线条极其干净利落。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🗂️</div>
+                <h3>多图层与图层混合</h3>
+                <p>像专业软件一样支持无限图层叠加、不透明度调整、向下合并与自由拖拽。轻松分离线稿、上色与背景，创作有条不紊。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎞️</div>
+                <h3>逐帧动画时间轴</h3>
+                <p>内置强大的动画时间轴（PRO 专属），支持洋葱皮、FPS 调节、正放倒放与拖拽排序，一键导出 GIF 与 Sprite Sheet 图集。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎨</div>
+                <h3>高级调色板工作台</h3>
+                <p>内置 PICO-8、NES 等经典复古调色板。支持从图片提取主色调、色彩和谐生成、以及全局一键颜色替换，极速出片。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🖼️</div>
+                <h3>图片智能像素化</h3>
+                <p>上传任意照片或插画，系统自动提取轮廓并进行颜色量化，瞬间转成极其精美的像素画，支持抖动网格与自定义画布尺寸。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">☁️</div>
+                <h3>本地保存与云端同步</h3>
+                <p>无需担心数据丢失。系统每时每刻自动将工程保存至本地 IndexedDB。更支持生成云端提取码，随时随地在任何电脑上无缝恢复画作。</p>
+            </div>
+        </section>
+
+        <!-- 底部号召 -->
+        <section class="cta-bottom">
+            <h2>准备好创造你的游戏资产了吗？</h2>
+            <a href="app.html" class="btn btn-primary">进入画板开始绘制</a>
+        </section>
+
+        <!-- 更新公告 -->
+        <section class="changelog-section">
+            <div class="changelog-header">
+                <h2>最新版本更新</h2>
+                <p>我们持续为 PixelSprite Pro 注入新的能量</p>
+            </div>
+
+            <div class="changelog-card">
+                <div class="changelog-version">🚀 当前版本 v2.9.0</div>
+                <ul class="changelog-list">
+                    <li>全新赛博朋克 UI 与 3D 故障艺术特效上线。</li>
+                    <li>增加全屏极客风 Loading 与高精度导出。</li>
+                    <li>优化 128×128 大画布模式与动态网格渲染。</li>
+                    <li>新增全球动态折扣系统与高级订阅特权。</li>
+                    <li>引入云端提取码同步，随时随地无缝续画。</li>
+                </ul>
+            </div>
+        </section>
+    </div>
+
+</body>
+
+</html>

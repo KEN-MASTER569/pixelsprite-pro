@@ -1,0 +1,1873 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixelSprite Pro - 专业 2D 像素画与游戏动画创作工坊</title>
+    <!-- Google Identity Services SDK -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- PayPal JavaScript SDK -->
+    <script
+        src="https://www.paypal.com/sdk/js?client-id=BAAdKUn9gGkZ8ROhpVh3QfDv2UB78QyaCuQeK15G6jbUHFl2iG96_bWs_qqJJkzs6ze4RUenflw6En18RU&currency=USD"
+        id="paypal-sdk-script" async defer
+        onerror="console.warn('PayPal SDK network load skipped - using fallback payment gateway');"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=99.0">
+</head>
+
+<body>
+    <!-- 🚨 全屏极客风 Loading -->
+    <div id="global-loader"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5, 11, 20, 0.9); backdrop-filter: blur(10px); z-index: 9999999; flex-direction: column; align-items: center; justify-content: center; gap: 20px;">
+        <!-- 科技感圆环 -->
+        <div style="position: relative; width: 80px; height: 80px;">
+            <div style="position: absolute; inset: 0; border: 4px solid rgba(0, 242, 254, 0.1); border-radius: 50%;">
+            </div>
+            <div
+                style="position: absolute; inset: 0; border: 4px solid transparent; border-top-color: #00f2fe; border-bottom-color: #7f00ff; border-radius: 50%; animation: spin 1s linear infinite;">
+            </div>
+            <div
+                style="position: absolute; inset: 15px; border: 4px solid transparent; border-left-color: #ffea70; border-radius: 50%; animation: spinReverse 1.5s linear infinite;">
+            </div>
+        </div>
+        <!-- 文字 -->
+        <div
+            style="font-family: 'Outfit', sans-serif; color: #00f2fe; font-size: 16px; font-weight: 900; letter-spacing: 4px; text-shadow: 0 0 10px rgba(0,242,254,0.8); animation: pulseText 1.5s infinite alternate;">
+            SYSTEM LOADING...
+        </div>
+    </div>
+    <!-- 强制 Google 登录拦截幕帘 Mandatory Auth Gate -->
+    <div id="mandatory-auth-gate" class="mandatory-auth-gate" style="display: flex;">
+        <div class="mandatory-auth-card"
+            style="background: rgba(5, 8, 15, 0.85); backdrop-filter: blur(30px); border: 1px solid rgba(0, 242, 254, 0.4); box-shadow: 0 0 60px rgba(0, 242, 254, 0.2), inset 0 0 30px rgba(0, 242, 254, 0.1); border-radius: 4px; position: relative; overflow: hidden; padding: 50px 40px; max-width: 460px; width: 100%;">
+
+            <!-- 赛博网格背景 -->
+            <div
+                style="position: absolute; inset: 0; background-image: linear-gradient(rgba(0, 242, 254, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 242, 254, 0.05) 1px, transparent 1px); background-size: 20px 20px; pointer-events: none; z-index: 0;">
+            </div>
+
+            <!-- 顶部扫描线特效 -->
+            <div
+                style="position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #00f2fe, transparent); animation: scanline 3s linear infinite; z-index: 1;">
+            </div>
+
+            <!-- 四角机甲边框 -->
+            <div
+                style="position: absolute; top: 10px; left: 10px; width: 20px; height: 20px; border-top: 2px solid #00f2fe; border-left: 2px solid #00f2fe; z-index: 1;">
+            </div>
+            <div
+                style="position: absolute; bottom: 10px; right: 10px; width: 20px; height: 20px; border-bottom: 2px solid #00f2fe; border-right: 2px solid #00f2fe; z-index: 1;">
+            </div>
+
+            <div class="auth-gate-header" style="position: relative; z-index: 2;">
+                <!-- 专属 3D 魔方 Logo -->
+                <div
+                    style="width: 100px; height: 100px; margin: 0 auto 20px; filter: drop-shadow(0 0 20px rgba(0, 242, 254, 0.6)); animation: float 4s ease-in-out infinite;">
+                    <svg viewBox="0 0 100 100" width="100" height="100">
+                        <defs>
+                            <linearGradient id="login-logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#00f2fe" />
+                                <stop offset="100%" stop-color="#7f00ff" />
+                            </linearGradient>
+                            <filter id="login-glow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feGaussianBlur stdDeviation="3" result="blur" />
+                                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                            </filter>
+                        </defs>
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(0, 242, 254, 0.2)" stroke-width="1"
+                            stroke-dasharray="10 10" class="spin-ring" />
+                        <g filter="url(#login-glow)">
+                            <path d="M 50 15 L 80 35 L 50 55 L 20 35 Z" fill="url(#login-logo-grad)" opacity="0.9" />
+                            <path d="M 20 35 L 50 55 L 50 85 L 20 65 Z" fill="#7f00ff" opacity="0.6" />
+                            <path d="M 80 35 L 50 55 L 50 85 L 80 65 Z" fill="#00f2fe" opacity="0.8" />
+                            <path d="M 50 15 L 80 35 L 80 65 L 50 85 L 20 65 L 20 35 Z" stroke="#ffffff"
+                                stroke-width="1.5" fill="none" opacity="0.5" />
+                        </g>
+                        <circle cx="50" cy="50" r="3" fill="#ffffff" class="core-dot" />
+                    </svg>
+                </div>
+
+                <!-- 赛博故障风标题 -->
+                <h2 class="glitch-text" data-text="PixelSprite Pro"
+                    style="font-family: 'Outfit', sans-serif; font-size: 32px; font-weight: 900; letter-spacing: 2px; color: #ffffff; text-shadow: 0 0 10px rgba(0,242,254,0.8); margin-bottom: 8px;">
+                    PixelSprite Pro
+                </h2>
+                <p data-i18n="auth_gate_subtitle"
+                    style="color: #00f2fe; font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">
+                    专业级 2D 像素画与游戏动画创作工坊</p>
+            </div>
+
+            <div class="auth-gate-body" style="margin-top: 40px; position: relative; z-index: 2;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                    <div style="flex: 1; height: 1px; background: linear-gradient(90deg, transparent, #00f2fe);"></div>
+                    <span style="font-size: 11px; color: #00f2fe; font-family: monospace; letter-spacing: 2px;">SYSTEM
+                        LOGIN</span>
+                    <div style="flex: 1; height: 1px; background: linear-gradient(270deg, transparent, #00f2fe);"></div>
+                </div>
+
+                <!-- 霓虹登录按钮 -->
+                <button id="btn-fast-google-signin-gate" onclick="window.triggerRealGoogleOAuth()"
+                    style="width: 100%; min-height: 56px; background: rgba(0, 0, 0, 0.5); border: 2px solid #00f2fe; color: #00f2fe; font-weight: 800; border-radius: 4px; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 16px; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; box-shadow: 0 0 15px rgba(0, 242, 254, 0.2), inset 0 0 10px rgba(0, 242, 254, 0.1); letter-spacing: 1px;"
+                    onmouseover="this.style.background='rgba(0,242,254,0.2)'; this.style.boxShadow='0 0 30px rgba(0,242,254,0.6), inset 0 0 20px rgba(0,242,254,0.4)'; this.style.color='#ffffff';"
+                    onmouseout="this.style.background='rgba(0,0,0,0.5)'; this.style.boxShadow='0 0 15px rgba(0, 242, 254, 0.2), inset 0 0 10px rgba(0, 242, 254, 0.1)'; this.style.color='#00f2fe';">
+
+                    <div
+                        style="position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(0,242,254,0.4), transparent); animation: btnScan 2.5s infinite;">
+                    </div>
+
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                        <path
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                        <path
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                        <path
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                        <path
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                    </svg>
+                    <span data-i18n="btn_sso_login">谷歌账号 SSO 一键登录</span>
+                </button>
+            </div>
+
+            <div class="auth-gate-footer" style="margin-top: 30px; position: relative; z-index: 2;">
+                <span data-i18n="auth_gate_footer"
+                    style="color: rgba(255,255,255,0.3); font-size: 10px; font-family: monospace; letter-spacing: 1px;">🔒
+                    SECURE OAUTH 2.0 CONNECTION ESTABLISHED</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="app" class="studio-container">
+        <!-- 顶栏 Header -->
+        <header class="studio-header">
+            <div class="logo-area" id="app-logo-trigger" data-i18n-title="logo_tooltip" title="点击查看软件信息"
+                style="position: relative; cursor: pointer;">
+                <!-- 动态赛博 3D 魔方 Logo -->
+                <div class="logo-icon-wrapper">
+                    <svg class="cyber-logo" viewBox="0 0 100 100" width="38" height="38">
+                        <defs>
+                            <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#00f2fe" />
+                                <stop offset="100%" stop-color="#7f00ff" />
+                            </linearGradient>
+                            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feGaussianBlur stdDeviation="3" result="blur" />
+                                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                            </filter>
+                        </defs>
+
+                        <!-- 背景旋转光环 -->
+                        <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(0, 242, 254, 0.3)" stroke-width="1.5"
+                            stroke-dasharray="10 15" class="spin-ring" />
+
+                        <!-- 3D 等距立体魔方主体 -->
+                        <g filter="url(#glow)">
+                            <!-- 顶部菱形 -->
+                            <path d="M 50 15 L 80 35 L 50 55 L 20 35 Z" fill="url(#logo-grad)" opacity="0.9" />
+                            <!-- 左侧暗面 -->
+                            <path d="M 20 35 L 50 55 L 50 85 L 20 65 Z" fill="#7f00ff" opacity="0.6" />
+                            <!-- 右侧亮面 -->
+                            <path d="M 80 35 L 50 55 L 50 85 L 80 65 Z" fill="#00f2fe" opacity="0.8" />
+                            <!-- 核心科幻线框 -->
+                            <path d="M 50 15 L 80 35 L 80 65 L 50 85 L 20 65 L 20 35 Z" stroke="#ffffff"
+                                stroke-width="1.5" fill="none" opacity="0.5" />
+                        </g>
+                        <!-- 中心高光点 -->
+                        <circle cx="50" cy="50" r="2" fill="#ffffff" class="core-dot" />
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1>PixelSprite <span id="logo-pro-tag">Pro</span></h1>
+                    <span class="subtitle" data-i18n="header_subtitle">专业级 2D 像素画与游戏 Sprite 动画创作工坊</span>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <!-- 画布尺寸设置 (Canvas Dimensions) -->
+                <div class="res-selector" style="display: flex; align-items: center; gap: 8px;">
+                    <label style="font-weight: 600; font-size: 13px; color: var(--text-secondary);"
+                        data-i18n="res_label">📐 画布尺寸:</label>
+                    <select id="resolution-select" class="select-input"
+                        style="padding: 4px 8px; font-size: 12px; font-weight: 700;">
+                        <option value="16">16 × 16</option>
+                        <option value="32" selected>32 × 32</option>
+                        <option value="64">64 × 64</option>
+                        <option value="128">128 × 128</option>
+                        <option value="custom" data-i18n="res_custom">自定义 (Custom)</option>
+                    </select>
+                    <!-- 🚨 删掉了内联的黑色背景，全交给 CSS 控制 -->
+                    <div id="custom-res-group"
+                        style="display: flex; align-items: center; gap: 3px; padding: 2px 6px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                        <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">W:</span>
+                        <input type="number" id="res-custom-x" class="select-input" value="32" min="4" max="256"
+                            style="width: 44px; text-align: center; font-weight: 700; padding: 2px; border: none;"
+                            title="宽度 (Width)" data-i18n-title="title_res_width">
+                        <span style="font-size: 11px; color: var(--accent-cyan); font-weight: 800;">×</span>
+                        <span style="font-size: 11px; color: var(--text-muted); font-weight: 700;">H:</span>
+                        <input type="number" id="res-custom-y" class="select-input" value="32" min="4" max="256"
+                            style="width: 44px; text-align: center; font-weight: 700; padding: 2px; border: none;"
+                            title="高度 (Height)" data-i18n-title="title_res_height">
+                        <button id="btn-apply-custom-res" class="btn btn-secondary btn-xs"
+                            style="padding: 2px 6px; font-size: 11px;" data-i18n="btn_apply_res" title="应用分辨率"
+                            data-i18n-title="title_apply_res">应用</button>
+                    </div>
+                    <!-- 假设你放在左下角语言切换按钮旁边 -->
+                    <button id="btn-replay-tour"
+                        style="background: transparent; border: 1px solid #00f2fe; color: #00f2fe; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px; margin-left: 10px;"
+                        data-i18n="tour_btn">🤖 教程</button>
+                </div>
+
+                <!-- 工程保存与导入 -->
+                <button id="btn-save-project" class="btn btn-secondary" data-i18n="btn_save"
+                    title="保存像素工程文件 (.pixelsprite)" data-i18n-title="title_save_project">💾 保存工程</button>
+                <button id="btn-import-project" class="btn btn-secondary" data-i18n="btn_open"
+                    title="导入图片或工程文件 (PNG/JPG/GIF/.pixelsprite)" data-i18n-title="title_import_project">📂 导入文件</button>
+                <input type="file" id="file-import-input" accept="image/*,.pixelsprite,.json" style="display: none;">
+
+                <!-- 导出菜单 Dropdown -->
+                <div class="export-dropdown-wrapper" style="position: relative;">
+                    <button id="btn-export-main" class="btn btn-primary"
+                        style="position: relative; overflow: hidden; display: flex; align-items: center; gap: 6px; font-weight: 800; box-shadow: 0 0 20px rgba(0, 242, 254, 0.4);">
+                        <!-- 扫光特效层 -->
+                        <div
+                            style="position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent); animation: exportScan 3s infinite;">
+                        </div>
+                        <span data-i18n="btn_export">📤 导出作品</span>
+                        <span id="export-arrow"
+                            style="font-size: 10px; opacity: 0.7; transition: transform 0.2s;">▼</span>
+                    </button>
+
+                    <style>
+                        @keyframes exportScan {
+                            0% {
+                                left: -100%;
+                            }
+
+                            50%,
+                            100% {
+                                left: 100%;
+                            }
+                        }
+                    </style>
+                    <div id="export-menu" class="export-menu"
+                        style="display: none; position: absolute; top: calc(100% + 6px); right: 0; background: rgba(20, 26, 38, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(0, 242, 254, 0.3); border-radius: var(--radius-md); padding: 6px; box-shadow: 0 12px 30px rgba(0,0,0,0.6); z-index: 1000; min-width: 220px; flex-direction: column; gap: 4px;">
+                        <button id="btn-export-png" class="btn btn-secondary"
+                            style="width: 100%; justify-content: flex-start; text-align: left; font-size: 13px; padding: 8px 12px; border: none; background: transparent;"
+                            data-i18n="export_png" title="导出单帧 PNG 图片" data-i18n-title="title_export_png">🖼️ 导出 PNG 单图
+                            (Free)</button>
+                        <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 2px 0;"></div>
+                        <!-- PRO Exporters -->
+                        <button id="btn-export-gif" class="btn btn-secondary pro-feature-element"
+                            style="width: 100%; justify-content: flex-start; text-align: left; font-size: 13px; padding: 8px 12px; border: none; background: transparent; color: #ffea70;"
+                            data-i18n="export_gif" title="导出多帧 GIF 动态动画 (PRO)" data-i18n-title="title_export_gif">🎞️ 导出
+                            GIF 动画 <span class="pro-tag-badge">PRO</span></button>
+                        <button id="btn-export-sheet" class="btn btn-secondary pro-feature-element"
+                            style="width: 100%; justify-content: flex-start; text-align: left; font-size: 13px; padding: 8px 12px; border: none; background: transparent; color: #ffea70;"
+                            data-i18n="export_sheet" title="导出游戏 Sprite Sheet 图集 (PRO)"
+                            data-i18n-title="title_export_sheet">📊 导出 Sprite Sheet 图集 <span
+                                class="pro-tag-badge">PRO</span></button>
+                        <button id="btn-export-json-atlas" class="btn btn-secondary pro-feature-element"
+                            style="width: 100%; justify-content: flex-start; text-align: left; font-size: 13px; padding: 8px 12px; border: none; background: transparent; color: #00f2fe;"
+                            data-i18n="export_json" title="导出 Cocos / Unity JSON 动画元数据 (PRO)"
+                            data-i18n-title="title_export_json">🎮 导出 JSON 动画 Atlas <span
+                                class="pro-tag-badge">PRO</span></button>
+                        <button id="btn-export-svg" class="btn btn-secondary pro-feature-element"
+                            style="width: 100%; justify-content: flex-start; text-align: left; font-size: 13px; padding: 8px 12px; border: none; background: transparent; color: #00f2fe;"
+                            data-i18n="export_svg" title="导出矢量 SVG 高清像素格式 (PRO)" data-i18n-title="title_export_svg">🎨
+                            导出矢量 SVG <span class="pro-tag-badge">PRO</span></button>
+                        <!-- 云端保存 -->
+                        <button id="btn-cloud-save" class="btn btn-secondary" data-i18n="btn_cloud_save"
+                            title="保存到云端，在任何电脑凭提取码恢复">
+                            ☁️ 云端保存
+                        </button>
+
+                        <!-- 云端读取 -->
+                        <button id="btn-cloud-load" class="btn btn-secondary" data-i18n="btn_cloud_load"
+                            title="输入提取码从云端恢复作品">
+                            📥 云端读取
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PRO 解锁与用户 profile -->
+                <button id="btn-header-buy-pro" class="btn"
+                    style="background: linear-gradient(135deg, #ffc439 0%, #ff9800 100%); color: #003087; font-weight: 800; font-size: 13px; border: none; border-radius: var(--radius-sm); padding: 6px 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(255, 196, 57, 0.4); transition: transform 0.2s;"
+                    title="通过 PayPal 购买解锁 PRO 终身尊享版 ($19.99 USD)" data-i18n-title="title_buy_pro">
+                    👑 <span data-i18n="btn_header_buy_pro">PayPal 升级 PRO ($19.99)</span>
+                </button>
+                <div id="google-user-container" class="google-user-container">
+                    <button id="btn-google-login" class="btn btn-google-login" title="使用 Google 账号登录"
+                        data-i18n-title="title_google_login">
+                        <svg class="google-icon" viewBox="0 0 24 24" width="16" height="16">
+                            <path fill="#4285F4"
+                                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                            <path fill="#34A853"
+                                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                            <path fill="#FBBC05"
+                                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                            <path fill="#EA4335"
+                                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                        </svg>
+                        <span data-i18n="btn_google_login">谷歌账号登录</span>
+                    </button>
+
+                    <!-- 🚨 删掉 onclick，只留 id 即可 -->
+                    <div id="user-profile-pill" class="user-profile-pill"
+                        style="display: none; pointer-events: auto; position: relative;">
+                        <img id="user-avatar-img" class="user-avatar-img" src="" alt="Avatar" style="display: none;">
+                        <div id="user-avatar-badge" class="user-avatar-badge">M</div>
+                        <div class="user-info-text">
+                            <span id="user-display-name" class="user-display-name">PixelArtist</span>
+                            <span id="user-google-badge" class="badge-google-verified"
+                                data-i18n="google_verified_badge">✓ Google 验证</span>
+                        </div>
+                        <button id="btn-direct-logout" onclick="window.performLogout(event)" class="btn"
+                            style="margin-left: 6px; padding: 4px 10px; font-size: 11px; border: 1px solid rgba(255, 71, 87, 0.6); color: #ff4757; background: rgba(255, 71, 87, 0.2); border-radius: 12px; font-weight: bold; cursor: pointer; transition: all 0.2s; z-index: 10;"
+                            title="点击一键退出当前 Google 账号" data-i18n-title="title_logout" data-i18n="btn_logout">🚪
+                            退出登录</button>
+                    </div>
+
+                    <!-- Profile Dropdown Menu -->
+                    <div id="user-profile-dropdown" class="user-profile-dropdown">
+                        <div class="dropdown-user-header">
+                            <img id="dropdown-avatar-img" class="user-avatar-img" src="" alt="Avatar"
+                                style="display: none;">
+                            <div id="dropdown-avatar-badge" class="dropdown-avatar-badge">M</div>
+                            <div class="dropdown-user-details">
+                                <h4 id="dropdown-user-name">Max Artist</h4>
+                                <span id="dropdown-user-email">user@gmail.com</span>
+                                <span id="dropdown-pro-badge" class="pro-status-tag" data-i18n="pro_trial_badge">🎁 PRO
+                                    1天免费试用中</span>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <!-- 👇 新增这个按钮 👇 -->
+                        <button id="btn-edit-profile" class="dropdown-item-btn"
+                            style="color: var(--accent-cyan); border-color: rgba(0, 242, 254, 0.3);">
+                            <span>✏️ 修改昵称与头像</span>
+                        </button>
+                        <!-- 👆 新增结束 👆 -->
+                        <button id="btn-dropdown-pro-upgrade" class="dropdown-item-btn pro-btn-item">
+                            <span data-i18n="btn_dropdown_pro_upgrade">👑 解锁 PRO 永久尊享版 ($19.99)</span>
+                            <span class="btn-shine-sparkle">✨</span>
+                        </button>
+                        <button id="btn-dropdown-logout" onclick="window.performLogout(event)"
+                            class="dropdown-item-btn danger-item">
+                            <span data-i18n="btn_dropdown_logout">🚪 退出 Google 登录</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主界面三栏布局 (Main Editor View) -->
+        <main class="studio-main">
+            <div id="editor-view-container" class="view-panel active">
+                <div class="editor-layout">
+
+                    <!-- 左侧控制面板 (Left Panel: Free Drawing Tools, Pixel Special, Layers Stack) -->
+                    <aside class="sidebar left-sidebar">
+
+                        <!-- 1. 绘图工具箱 (Free Drawing Tools) -->
+                        <div class="panel-section collapsible-section">
+                            <h3 class="section-title collapsible-header" id="header-tools">
+                                <span data-i18n="section_tools">🖌️ 像素绘图工具</span>
+                                <span class="toggle-arrow" id="arrow-tools">▼</span>
+                            </h3>
+                            <div class="collapsible-content" id="content-tools">
+                                <div class="draw-tools-grid">
+                                    <button class="draw-tool-btn active" data-tool="pencil" data-i18n="tool_pencil"
+                                        title="铅笔画笔 (1)" data-i18n-title="title_pencil">✏️ 铅笔 (1)</button>
+                                    <button class="draw-tool-btn" data-tool="eraser" data-i18n="tool_eraser"
+                                        title="橡皮擦 (2)" data-i18n-title="title_eraser">🧹 橡皮擦 (2)</button>
+                                    <button class="draw-tool-btn" data-tool="picker" data-i18n="tool_picker"
+                                        title="吸管取色 (3)" data-i18n-title="title_picker">👁️ 吸管 (3)</button>
+                                    <button class="draw-tool-btn" data-tool="bucket" data-i18n="tool_bucket"
+                                        title="油漆桶连通填充 (4)" data-i18n-title="title_bucket">🪣 填充 (4)</button>
+                                    <button class="draw-tool-btn" data-tool="line" data-i18n="tool_line"
+                                        title="直线工具 (5)" data-i18n-title="title_line">📏 直线 (5)</button>
+                                    <button class="draw-tool-btn" data-tool="rect" data-i18n="tool_rect"
+                                        title="矩形工具 (6)" data-i18n-title="title_rect">🔲 矩形 (6)</button>
+                                    <button class="draw-tool-btn" data-tool="circle" data-i18n="tool_circle"
+                                        title="椭圆/圆工具 (7)" data-i18n-title="title_circle">⭕ 椭圆 (7)</button>
+                                    <button class="draw-tool-btn" data-tool="select" data-i18n="tool_select"
+                                        title="选区框选工具 (8)" data-i18n-title="title_select">✂️ 选区 (8)</button>
+                                    <button class="draw-tool-btn" data-tool="move" data-tool-move data-i18n="tool_move"
+                                        title="移动选区/图层 (9)" data-i18n-title="title_move">✋ 移动 (9)</button>
+                                    <button class="draw-tool-btn" data-tool="shading" data-i18n="tool_shading"
+                                        title="阴影/高光调色笔刷 (0)" data-i18n-title="title_shading">☀️ 阴影/高光 (0)</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Pixel Art 专用设置 (Pixel Special) -->
+                        <div class="panel-section collapsible-section">
+                            <h3 class="section-title collapsible-header" id="header-pixel-spec">
+                                <span data-i18n="section_pixel_spec">🎯 Pixel Art 专用画笔设置</span>
+                                <span class="toggle-arrow" id="arrow-pixel-spec">▼</span>
+                            </h3>
+                            <div class="collapsible-content" id="content-pixel-spec">
+                                <!-- Brush Size Selector -->
+                                <div class="option-row">
+                                    <label data-i18n="label_brush_size">画笔粗细:</label>
+                                    <div class="btn-toggle-group">
+                                        <button class="size-btn active" data-size="1">1px</button>
+                                        <button class="size-btn" data-size="2">2px</button>
+                                        <button class="size-btn" data-size="3">3px</button>
+                                    </div>
+                                </div>
+
+                                <!-- Pixel Perfect Toggle -->
+                                <div class="option-row" style="margin-top: 8px;">
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="checkbox" id="check-pixel-perfect" checked
+                                            style="width: 16px; height: 16px;">
+                                        <span data-i18n="check_pixel_perfect">✨ Pixel Perfect (防双倍像素)</span>
+                                    </label>
+                                </div>
+
+                                <!-- Mirror Symmetry Drawing -->
+                                <div class="option-row"
+                                    style="margin-top: 8px; flex-direction: column; align-items: flex-start; gap: 4px;">
+                                    <label data-i18n="label_mirror">镜像对称绘画:</label>
+                                    <select id="select-mirror-mode" class="select-input" style="width: 100%;">
+                                        <option value="none" data-i18n="mirror_none">关闭对称 (Off)</option>
+                                        <option value="horizontal" data-i18n="mirror_horiz">↔️ 水平对称</option>
+                                        <option value="vertical" data-i18n="mirror_vert">↕️ 垂直对称</option>
+                                        <option value="dual" data-i18n="mirror_dual">✖️ 双轴对称</option>
+                                    </select>
+                                </div>
+
+                                <!-- Transform Actions -->
+                                <div class="option-row"
+                                    style="margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap;">
+                                    <button id="btn-flip-h" class="btn btn-secondary btn-sm" style="flex: 1;"
+                                        data-i18n="btn_flip_h" title="水平翻转图层/选区" data-i18n-title="title_flip_h">↔️
+                                        水平翻转</button>
+                                    <button id="btn-flip-v" class="btn btn-secondary btn-sm" style="flex: 1;"
+                                        data-i18n="btn_flip_v" title="垂直翻转图层/选区" data-i18n-title="title_flip_v">↕️
+                                        垂直翻转</button>
+                                    <button id="btn-rotate-90" class="btn btn-secondary btn-sm" style="width: 100%;"
+                                        data-i18n="btn_rotate_90" title="顺时针旋转 90 度"
+                                        data-i18n-title="title_rotate_90">🔄 旋转 90°</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. 多图层 Stack 系统 (Free Layer Stack) -->
+                        <div class="panel-section collapsible-section">
+                            <h3 class="section-title collapsible-header" id="header-layers">
+                                <span data-i18n="section_layers">🗂️ 图层管理</span>
+                                <span class="toggle-arrow" id="arrow-layers">▼</span>
+                            </h3>
+                            <div class="collapsible-content" id="content-layers">
+                                <div class="layers-container" id="layers-container">
+                                    <!-- 动态渲染图层列表 -->
+                                </div>
+
+                                <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px;">
+                                    <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                                        <button id="btn-add-layer" class="btn btn-secondary btn-xs" style="flex: 1;"
+                                            data-i18n="btn_layer_add" title="新建图层" data-i18n-title="title_layer_add">➕
+                                            新增</button>
+                                        <button id="btn-dup-layer" class="btn btn-secondary btn-xs" style="flex: 1;"
+                                            data-i18n="btn_layer_dup" title="复制当前图层"
+                                            data-i18n-title="title_layer_dup">📋 复制</button>
+                                        <button id="btn-rename-layer" class="btn btn-secondary btn-xs" style="flex: 1;"
+                                            data-i18n="btn_layer_rename" title="重命名图层"
+                                            data-i18n-title="title_layer_rename">✏️ 重命名</button>
+                                    </div>
+                                    <div style="display: flex; gap: 4px;">
+                                        <button id="btn-layer-up" class="btn btn-secondary btn-xs" style="flex: 1;"
+                                            data-i18n="btn_layer_up" title="上移图层" data-i18n-title="title_layer_up">⬆️
+                                            上移</button>
+                                        <button id="btn-layer-down" class="btn btn-secondary btn-xs" style="flex: 1;"
+                                            data-i18n="btn_layer_down" title="下移图层"
+                                            data-i18n-title="title_layer_down">⬇️ 下移</button>
+                                        <button id="btn-merge-layer" class="btn btn-secondary btn-xs" style="flex: 1;"
+                                            data-i18n="btn_layer_merge" title="向下合并图层"
+                                            data-i18n-title="title_layer_merge">⬇️ 合并</button>
+                                        <button id="btn-del-layer" class="btn danger-btn btn-xs" style="flex: 1;"
+                                            data-i18n="btn_layer_del" title="删除图层" data-i18n-title="title_layer_del">🗑️
+                                            删除</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. 画布与背景设置 (Canvas & BG Settings) -->
+                        <div class="panel-section collapsible-section">
+                            <h3 class="section-title collapsible-header" id="header-canvas-bg">
+                                <span data-i18n="section_canvas_bg">📐 画布背景与透明网格</span>
+                                <span class="toggle-arrow" id="arrow-canvas-bg">▼</span>
+                            </h3>
+                            <div class="collapsible-content" id="content-canvas-bg">
+                                <div class="option-row">
+                                    <label data-i18n="label_bg_mode">背景模式:</label>
+                                    <select id="select-bg-mode" class="select-input" style="flex: 1;">
+                                        <option value="checkered" selected data-i18n="bg_checkered">🏁 透明棋盘网格</option>
+                                        <option value="solid" data-i18n="bg_solid">🎨 纯色背景</option>
+                                    </select>
+                                </div>
+                                <div id="solid-bg-color-group" class="option-row"
+                                    style="margin-top: 6px; display: none;">
+                                    <label data-i18n="label_bg_color">背景颜色:</label>
+                                    <input type="color" id="bg-color-picker" value="#ffffff"
+                                        style="width: 36px; height: 28px; border: none; background: transparent; cursor: pointer;">
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- 中间画布体验区 (Aseprite Workbench) -->
+                    <section class="canvas-area"
+                        style="display: flex; flex-direction: column; height: calc(100vh - 80px); max-height: calc(100vh - 80px); overflow: hidden;">
+
+                        <!-- 快捷编辑工具条 (Quick Edit Bar) -->
+                        <div class="paint-tools-bar">
+                            <div class="tool-group">
+                                <button id="btn-undo" class="tool-btn" data-i18n="btn_undo" title="撤销操作 (Ctrl + Z)"
+                                    data-i18n-title="title_undo">↩️ 撤销</button>
+                                <button id="btn-redo" class="tool-btn" data-i18n="btn_redo" title="重做操作 (Ctrl + Y)"
+                                    data-i18n-title="title_redo">↪️ 重做</button>
+                                <button id="btn-frame-clear" class="tool-btn" data-i18n="btn_clear" title="一键清空当前图层/帧"
+                                    data-i18n-title="title_clear">🧹 清空</button>
+                                <button id="btn-copy" class="tool-btn" data-i18n="btn_copy" title="复制选区或图层 (Ctrl + C)"
+                                    data-i18n-title="title_copy">📋 复制</button>
+                                <button id="btn-paste" class="tool-btn" data-i18n="btn_paste" title="粘贴选区内容 (Ctrl + V)"
+                                    data-i18n-title="title_paste">📥 粘贴</button>
+                                <button id="btn-select-all" class="tool-btn" data-i18n="btn_select_all"
+                                    title="全选当前画布 (Ctrl + A)" data-i18n-title="title_select_all">🔲 全选</button>
+                                <button id="btn-deselect" class="tool-btn" data-i18n="btn_deselect"
+                                    title="取消选区 (Ctrl + D / Esc)" data-i18n-title="title_deselect"
+                                    style="display: none;">✖️ 取消选区</button>
+                                <button id="btn-scale-2x" class="tool-btn" data-i18n="btn_scale_2x" title="选区 2× 放大"
+                                    data-i18n-title="title_scale_2x" style="display: none;">🔍 2× 放大</button>
+                                <button id="btn-scale-half" class="tool-btn" data-i18n="btn_scale_half"
+                                    title="选区 0.5× 缩小" data-i18n-title="title_scale_half" style="display: none;">🔎 0.5×
+                                    缩小</button>
+                                <button id="btn-commit-selection" class="tool-btn" data-i18n="btn_commit_selection"
+                                    title="确认并固定选区到图层 (Enter)" data-i18n-title="title_commit_selection"
+                                    style="display: none; color: var(--accent-cyan); font-weight: 700;">✔️ 确认固定</button>
+                                <button id="btn-delete-selection" class="tool-btn danger-btn"
+                                    data-i18n="btn_del_selection" title="删除当前选区 (Delete)"
+                                    data-i18n-title="title_del_selection" style="display: none;">🗑️ 删除选区</button>
+                            </div>
+
+                            <div class="tool-group">
+                                <button id="btn-toggle-grid" class="tool-btn active" data-i18n="btn_toggle_grid"
+                                    title="显示/隐藏像素网格" data-i18n-title="title_toggle_grid">🌐 网格</button>
+                                <button id="btn-zoom-out" class="tool-btn" title="缩小"
+                                    data-i18n-title="title_zoom_out">➖</button>
+                                <div class="zoom-readout" id="btn-zoom-reset" title="点击重置缩放 (16x)"
+                                    data-i18n-title="title_zoom_reset" style="cursor: pointer;"><span
+                                        data-i18n="zoom_label">缩放:</span> <span id="zoom-value">16x</span></div>
+                                <button id="btn-zoom-in" class="tool-btn" title="放大"
+                                    data-i18n-title="title_zoom_in">➕</button>
+                            </div>
+                        </div>
+
+                        <!-- 画布容器 (Canvas Container Box) -->
+                        <div class="canvas-container-box"
+                            style="flex: 1 !important; min-height: 0 !important; overflow: auto !important; display: flex !important; align-items: center !important; justify-content: center !important; padding: 20px;">
+                            <div class="canvas-wrapper" id="canvas-wrapper">
+                                <canvas id="pixel-canvas" width="512" height="512"></canvas>
+                                <canvas id="grid-overlay" width="512" height="512"></canvas>
+                                <canvas id="symmetry-overlay" width="512" height="512"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- 底部 PRO 动画时间轴 & 洋葱皮 (Timeline Bar: Locked to PRO) -->
+                        <div class="timeline-bar"
+                            style="flex-shrink: 0 !important; height: 180px !important; min-height: 180px !important; max-height: 180px !important; overflow: hidden; width: 100%;">
+                            <!-- PRO 动画未激活时的锁定遮罩 Header -->
+                            <div id="timeline-pro-locked-banner" class="pro-locked-banner-timeline"
+                                style="display: none;">
+                                <span data-i18n="timeline_locked_text">👑 帧动画时间轴 (Timeline) 与洋葱皮为 PRO 专属功能</span>
+                                <button id="btn-unlock-pro-timeline" class="btn btn-pro-vip btn-xs"
+                                    data-i18n="btn_unlock_timeline">解锁 PRO 尊享版 ($19.99)</button>
+                            </div>
+
+                            <div id="timeline-controls-wrapper" class="timeline-controls-wrapper">
+                                <div class="timeline-top-controls">
+                                    <div class="anim-btn-group">
+                                        <button id="btn-anim-play" class="anim-btn" data-i18n="btn_anim_play">▶
+                                            播放动画</button>
+                                        <button id="btn-anim-prev" class="anim-btn" data-i18n="btn_anim_prev">⏮
+                                            上一帧</button>
+                                        <button id="btn-anim-next" class="anim-btn" data-i18n="btn_anim_next">⏭
+                                            下一帧</button>
+                                        <select id="select-loop-mode" class="select-input" style="font-size: 11px;">
+                                            <option value="loop" data-i18n="loop_mode_loop">🔁 正向循环</option>
+                                            <option value="reverse" data-i18n="loop_mode_reverse">⏮ 倒放</option>
+                                            <option value="pingpong" data-i18n="loop_mode_pingpong">🏓 乒乓往复</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="anim-btn-group">
+                                        <button id="btn-frame-add" class="anim-btn" data-i18n="btn_frame_add"
+                                            title="新建空白帧" data-i18n-title="title_frame_add">➕ 新增帧</button>
+                                        <button id="btn-frame-duplicate" class="anim-btn" data-i18n="btn_frame_dup"
+                                            title="复制当前帧" data-i18n-title="title_frame_dup">📋 复制帧</button>
+                                        <button id="btn-frame-delete" class="anim-btn danger-btn"
+                                            data-i18n="btn_frame_del" title="删除当前帧"
+                                            data-i18n-title="title_frame_del">🗑️ 删除帧</button>
+                                    </div>
+
+                                    <!-- 洋葱皮 控制 (Onion Skin) -->
+                                    <div class="onion-skin-group" style="display: flex; align-items: center; gap: 6px;">
+                                        <button id="btn-toggle-onion" class="tool-btn" data-i18n="btn_toggle_onion"
+                                            title="开启洋葱皮" data-i18n-title="title_toggle_onion">🧅 洋葱皮</button>
+                                        <label
+                                            style="font-size: 11px; display: flex; align-items: center; gap: 4px; color: var(--text-muted);">
+                                            <input type="checkbox" id="check-onion-tint" style="cursor: pointer;">
+                                            <span data-i18n="check_onion_tint">🔴🔵 红蓝对比</span>
+                                        </label>
+                                    </div>
+
+                                    <div class="speed-control">
+                                        <label>FPS:</label>
+                                        <input type="range" id="param-fps" min="1" max="30" value="12"
+                                            class="slider-input" style="width: 70px;">
+                                        <span id="val-fps">12 FPS</span>
+                                    </div>
+                                </div>
+
+                                <!-- 帧缩略图胶片 (Filmstrip) -->
+                                <div class="frame-filmstrip" id="frame-filmstrip">
+                                    <!-- 动态渲染帧卡片 -->
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 右侧面板 (Palettes & Advanced PRO Power Features) -->
+                    <aside class="sidebar right-sidebar">
+
+                        <!-- 1. 色彩工作台与调色板 (Color Workbench - FREE) -->
+                        <div class="panel-section">
+                            <h3 class="section-title" data-i18n="section_colors">🎨 选色与调色板</h3>
+
+                            <!-- 🎨 双色工作台 (左键色 / 右键色) -->
+                            <div class="dual-color-workbench"
+                                style="display: flex; align-items: center; justify-content: space-between; background: rgba(10, 15, 24, 0.6); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 8px 10px; margin-bottom: 10px;">
+                                <!-- 左键色 -->
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                                    <span style="font-size: 10px; font-weight: 700; color: var(--accent-cyan);">🖱️
+                                        <div data-i18n="color_primary">左键色</div>
+                                    </span>
+                                    <div style="position: relative; width: 32px; height: 32px;">
+                                        <div id="addon-primary-swatch"
+                                            style="width: 100%; height: 100%; border-radius: 6px; background-color: #ffea70; border: 2px solid #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.5); cursor: pointer; overflow: hidden;">
+                                            <input type="color" id="addon-primary-picker" value="#ffea70"
+                                                style="position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer;">
+                                        </div>
+                                    </div>
+                                    <span id="addon-primary-hex"
+                                        style="font-size: 9px; font-family: monospace; font-weight: 700; color: var(--accent-cyan);">#FFEA70</span>
+                                </div>
+
+                                <!-- 互换按钮 -->
+                                <button id="addon-swap-btn"
+                                    style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--accent-cyan); font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"
+                                    title="互换左键与右键颜色 (快捷键: X)">⇄</button>
+
+                                <!-- 右键色 -->
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                                    <span style="font-size: 10px; font-weight: 700; color: var(--text-muted);">🖱️
+                                        <div data-i18n="color_secondary">右键色</div>
+                                    </span>
+                                    <div style="position: relative; width: 32px; height: 32px;">
+                                        <div id="addon-secondary-swatch"
+                                            style="width: 100%; height: 100%; border-radius: 6px; background-color: #050b14; border: 2px solid rgba(255,255,255,0.4); box-shadow: 0 2px 6px rgba(0,0,0,0.5); cursor: pointer; overflow: hidden;">
+                                            <input type="color" id="addon-secondary-picker" value="#050b14"
+                                                style="position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer;">
+                                        </div>
+                                    </div>
+                                    <span id="addon-secondary-hex"
+                                        style="font-size: 9px; font-family: monospace; font-weight: 700; color: var(--text-muted);">#050B14</span>
+                                </div>
+                            </div>
+
+                            <!-- HEX 颜色输入框 (隐藏掉原生单色面板) -->
+                            <div class="color-value-inputs" style="display: none;">
+                                <input type="color" id="primary-color-picker" value="#ffea70">
+                                <div id="active-color-indicator" class="active-color-swatch"
+                                    style="background-color: #ffea70;"></div>
+                                <input type="text" id="hex-color-input" value="#FFEA70">
+                            </div>
+
+                            <div class="color-spectrum-container">
+                                <canvas id="color-spectrum-canvas" width="220" height="120" title="点击或拖拽选择颜色"
+                                    data-i18n-title="title_color_spectrum"></canvas>
+                            </div>
+
+                            <!-- Recent Colors Bar (最近使用颜色) -->
+                            <div style="margin-top: 8px;">
+                                <span
+                                    style="font-size: 11px; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 4px;"
+                                    data-i18n="label_recent_colors">最近使用颜色:</span>
+                                <div id="recent-colors-bar"
+                                    style="display: flex; gap: 4px; overflow-x: auto; padding-bottom: 4px;">
+                                    <!-- 动态充填 -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. 调色板库 (Palette Swatches - FREE) -->
+                        <div class="panel-section">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <h3 class="section-title" style="margin-bottom: 0;" data-i18n="section_palette">🎨 调色板库
+                                </h3>
+                                <button id="btn-add-swatch" class="btn btn-secondary btn-xs" data-i18n="btn_add_swatch"
+                                    title="将当前选色加到调色板" data-i18n-title="title_add_swatch">➕ 添加色块</button>
+                            </div>
+                            <div class="palette-swatches" id="palette-swatches">
+                                <!-- 动态渲染色块 -->
+                            </div>
+                        </div>
+
+                        <!-- 3. PRO 游戏开发与高级像素工具 (PRO Power Features) -->
+                        <div id="section-pro-power-tools" class="panel-section collapsible-section">
+                            <h3 class="section-title collapsible-header" id="header-pro-tools">
+                                <span data-i18n="section_pro_tools">⭐ PRO 游戏开发高级功能库 <span
+                                        class="pro-tag-badge">PRO</span></span>
+                                <span class="toggle-arrow" id="arrow-pro-tools">▼</span>
+                            </h3>
+                            <div class="collapsible-content" id="content-pro-tools">
+                                <div class="pro-tools-vertical-list">
+
+                                    <!-- 📦 Sprite Sheet 切割器 -->
+                                    <button id="btn-open-slicer" class="btn btn-pro-item">
+                                        <span data-i18n="btn_slicer">📦 Sprite Sheet 图集切割器</span>
+                                        <span class="pro-tag-badge">PRO</span>
+                                    </button>
+
+                                    <!-- 🧱 无缝 Tile 模式 -->
+                                    <button id="btn-toggle-tile-mode" class="btn btn-pro-item">
+                                        <span data-i18n="btn_tile_mode">🧱 Seamless Tile 无缝瓷砖模式</span>
+                                        <span class="pro-tag-badge">PRO</span>
+                                    </button>
+
+                                    <!-- 🖼️ 图片转像素画 -->
+                                    <button id="btn-open-pixelate" class="btn btn-pro-item">
+                                        <span data-i18n="btn_pixelate">🖼️ 照片 / 图片转像素画转换器</span>
+                                        <span class="pro-tag-badge">PRO</span>
+                                    </button>
+
+                                    <!-- 🎨 高级调色板工具 -->
+                                    <div class="pro-sub-box">
+                                        <button id="btn-open-advanced-palette" class="btn btn-pro-item"
+                                            style="width: 100%; margin-bottom: 6px; padding: 6px 10px; justify-content: space-between;">
+                                            <span data-i18n="sub_adv_palette">🎨 高级调色板工作台</span>
+                                            <span class="pro-tag-badge">PRO</span>
+                                        </button>
+                                        <button id="btn-open-palette-extractor" class="btn btn-secondary btn-xs"
+                                            style="width: 100%;" data-i18n="btn_extract_palette"
+                                            title="上传一张图片，自动提取主要颜色替换当前调色板" data-i18n-title="title_extract_palette">🖼️
+                                            从图片自动提取调色板</button>
+                                        <div style="display: flex; gap: 4px; margin-top: 4px;">
+                                            <button id="btn-color-harmony" class="btn btn-secondary btn-xs"
+                                                style="flex: 1;" data-i18n="btn_color_harmony"
+                                                title="根据当前主色生成互补色、类似色与高光阴影色阶并加入调色板"
+                                                data-i18n-title="title_color_harmony">✨ 色彩和谐</button>
+                                            <button id="btn-palette-swap" class="btn btn-secondary btn-xs"
+                                                style="flex: 1;" data-i18n="btn_palette_swap"
+                                                title="在画布上点击一个颜色，把当前图层中该颜色全部替换为当前画笔颜色"
+                                                data-i18n-title="title_palette_swap">🔄 颜色替换</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- ✨ 高级笔刷工具 -->
+                                    <div class="pro-sub-box">
+                                        <span class="sub-box-title" data-i18n="sub_pixel_tools">✨ 像素画高级笔刷</span>
+                                        <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+                                            <select id="select-dither-pattern" class="select-input"
+                                                style="font-size: 11px;">
+                                                <option value="none" data-i18n="dither_none">关闭网格抖动 (No Dithering)
+                                                </option>
+                                                <option value="bayer2x2" data-i18n="dither_bayer2x2">░ Bayer 2x2 网格抖动
+                                                </option>
+                                                <option value="bayer4x4" data-i18n="dither_bayer4x4">▒ Bayer 4x4 高阶抖动
+                                                </option>
+                                                <option value="checkerboard" data-i18n="dither_checkerboard">▓ 棋盘交错抖动
+                                                </option>
+                                            </select>
+                                            <div style="display: flex; gap: 4px;">
+                                                <button id="btn-shading-lighten" class="btn btn-secondary btn-xs"
+                                                    style="flex: 1;" data-i18n="btn_lighten" title="自动高光加亮"
+                                                    data-i18n-title="title_lighten">☀️ 加亮高光</button>
+                                                <button id="btn-shading-darken" class="btn btn-secondary btn-xs"
+                                                    style="flex: 1;" data-i18n="btn_darken" title="自动加深阴影"
+                                                    data-i18n-title="title_darken">🌙 加深阴影</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 🔄 RotSprite 算法旋转形变 -->
+                                    <button id="btn-rotsprite-rotate" class="btn btn-pro-item">
+                                        <span data-i18n="btn_rotsprite">🔄 RotSprite 算法无损像素旋转</span>
+                                        <span class="pro-tag-badge">PRO</span>
+                                    </button>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </aside>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 右下角悬浮 PRO VIP 尊享卡片 Widget (已根据需求隐藏，移入小人互动与顶栏) -->
+    <div id="pro-floating-widget" class="pro-floating-widget" style="display: none !important;">
+        <div class="pro-floating-content">
+            <div class="pro-badge-header">
+                <span class="pro-icon">👑</span>
+                <div class="pro-title-box">
+                    <strong id="pro-widget-title">PixelSprite PRO</strong>
+                    <span id="pro-widget-status" class="pro-widget-status" data-i18n="pro_widget_status">🎁 首日 24
+                        小时全功能免费体验中</span>
+                </div>
+            </div>
+            <div id="pro-trial-timer-box" class="pro-trial-timer-box">
+                <span data-i18n="pro_widget_timer">⏳ 免费试用剩余: <strong id="pro-timer-countdown">23:59:59</strong></span>
+            </div>
+            <button id="btn-pro-widget-action" class="btn btn-pro-action" data-i18n="btn_pro_widget_action">$19.99 永久解锁
+                PRO</button>
+        </div>
+    </div>
+
+    <!-- 每一个小时巡游互动的像素人 (Hourly Pixel PRO Mascot Walker) -->
+    <div id="pixel-pro-walker-track" class="pixel-pro-walker-track">
+        <div id="pixel-pro-walker" class="pixel-pro-walker" style="display: none;" title="点击升级 PRO 尊享版！">
+            <!-- 对话气泡 (Speech Bubble) -->
+            <div class="walker-speech-bubble" id="walker-speech-bubble">
+                <div class="bubble-header">
+                    <span class="bubble-crown">👑</span>
+                    <strong class="bubble-title">PixelSprite PRO 终身版</strong>
+                </div>
+                <div class="bubble-body">
+                    <p class="bubble-main-text">✨ 点击我立即升级 PRO 尊享版！</p>
+                    <span class="bubble-timer-hint" id="walker-timer-hint">⏳ 24小时免费试用中 · 点击查看所有特权</span>
+                </div>
+                <div class="bubble-tail"></div>
+            </div>
+
+            <!-- 像素小人本体容器 -->
+            <div class="walker-mascot-visual">
+                <!-- 奔跑扬起的像素烟尘 (Running Dust Puffs) -->
+                <div class="walker-dust-layer" id="walker-dust-layer">
+                    <span class="dust-cloud dust-1">💨</span>
+                    <span class="dust-cloud dust-2">💨</span>
+                </div>
+
+                <!-- 像素小人完整 SVG (Crisp Pixel Art Sprite) -->
+                <svg class="walker-svg" viewBox="0 0 48 56" width="76" height="88" shape-rendering="crispEdges">
+                    <!-- PRO 告示牌 (Signboard) -->
+                    <g class="anim-pro-sign" id="svg-anim-sign">
+                        <!-- 木杆 / 支架 -->
+                        <rect x="30" y="8" width="3" height="32" fill="#8B5A2B" />
+                        <rect x="31" y="8" width="1" height="32" fill="#CD853F" />
+                        <!-- 牌子主体 (金光闪闪) -->
+                        <rect x="18" y="2" width="28" height="18" rx="2" fill="#2D2006" stroke="#FFD700"
+                            stroke-width="1.5" />
+                        <rect x="20" y="4" width="24" height="14" fill="#FFA500" />
+                        <rect x="20" y="4" width="24" height="4" fill="#FFD700" />
+                        <!-- 牌面文字 "PRO" 像素字 -->
+                        <!-- P -->
+                        <rect x="23" y="9" width="1.5" height="6" fill="#003087" />
+                        <rect x="24.5" y="9" width="3" height="1.5" fill="#003087" />
+                        <rect x="26.5" y="10.5" width="1.5" height="1.5" fill="#003087" />
+                        <rect x="24.5" y="12" width="3" height="1.5" fill="#003087" />
+                        <!-- R -->
+                        <rect x="29" y="9" width="1.5" height="6" fill="#003087" />
+                        <rect x="30.5" y="9" width="3" height="1.5" fill="#003087" />
+                        <rect x="32.5" y="10.5" width="1.5" height="1.5" fill="#003087" />
+                        <rect x="30.5" y="12" width="2.5" height="1.5" fill="#003087" />
+                        <rect x="32.5" y="13.5" width="1.5" height="1.5" fill="#003087" />
+                        <!-- O -->
+                        <rect x="35" y="9.5" width="1.5" height="5" fill="#003087" />
+                        <rect x="39" y="9.5" width="1.5" height="5" fill="#003087" />
+                        <rect x="36.5" y="9" width="2.5" height="1.5" fill="#003087" />
+                        <rect x="36.5" y="13.5" width="2.5" height="1.5" fill="#003087" />
+                        <!-- 牌面小皇冠 -->
+                        <path d="M 28 5 L 29.5 7 L 31 5 L 32.5 7 L 34 5 L 34 8 L 28 8 Z" fill="#FFEAA7" />
+                        <!-- 闪烁星芒 -->
+                        <circle cx="43" cy="4" r="1.5" fill="#FFFFFF" class="sparkle-star" />
+                    </g>
+
+                    <!-- 角色身体组 (Mascot Body Group) -->
+                    <g class="anim-mascot-body" id="svg-mascot-body">
+                        <!-- 头部帽子 (Cyan Beret / Cap) -->
+                        <rect x="8" y="18" width="16" height="4" fill="#00F2FE" />
+                        <rect x="6" y="19" width="18" height="3" fill="#00D2E6" />
+                        <rect x="5" y="21" width="7" height="2" fill="#00A2B8" />
+                        <!-- 头发 -->
+                        <rect x="7" y="22" width="16" height="3" fill="#4B382A" />
+                        <!-- 脸部 -->
+                        <rect x="8" y="24" width="14" height="9" fill="#FFDCB6" />
+                        <!-- 腮红 -->
+                        <rect x="9" y="29" width="2.5" height="1.5" fill="#FFAAA6" />
+                        <rect x="18.5" y="29" width="2.5" height="1.5" fill="#FFAAA6" />
+                        <!-- 眼睛 (带眨眼动画类) -->
+                        <g class="anim-mascot-eyes">
+                            <rect x="11" y="26" width="2" height="3" fill="#1E272E" />
+                            <rect x="11" y="26" width="1" height="1" fill="#FFFFFF" />
+                            <rect x="17" y="26" width="2" height="3" fill="#1E272E" />
+                            <rect x="17" y="26" width="1" height="1" fill="#FFFFFF" />
+                        </g>
+                        <!-- 嘴巴 (微笑着) -->
+                        <rect x="14" y="30" width="3" height="1.5" fill="#C23616" />
+
+                        <!-- 躯干 & 衣服 (Cyan Cyber Jacket / Overalls) -->
+                        <rect x="8" y="33" width="14" height="9" fill="#2C3A47" />
+                        <rect x="10" y="33" width="10" height="9" fill="#00F2FE" />
+                        <rect x="13" y="35" width="4" height="6" fill="#FFFFFF" />
+                        <rect x="9" y="41" width="12" height="2" fill="#E1B12C" />
+
+                        <!-- 右手 (握住牌子) -->
+                        <rect x="22" y="34" width="4" height="4" fill="#FFDCB6" />
+                        <rect x="24" y="33" width="4" height="4" fill="#00F2FE" />
+
+                        <!-- 左手臂与手 (挥手组件) -->
+                        <g class="anim-waving-arm" id="svg-waving-arm">
+                            <rect x="3" y="33" width="5" height="4" fill="#00F2FE" />
+                            <rect x="1" y="34" width="4" height="4" fill="#FFDCB6" />
+                            <!-- 展开的手掌 -->
+                            <rect x="0" y="32" width="4" height="3" fill="#FFDCB6" />
+                        </g>
+
+                        <!-- 左腿 (Leg Left) -->
+                        <g class="anim-leg-left" id="svg-leg-left">
+                            <rect x="9" y="43" width="4" height="6" fill="#1E272E" />
+                            <rect x="8" y="48" width="6" height="3" fill="#FF4757" />
+                            <rect x="8" y="50" width="6" height="1.5" fill="#FFFFFF" />
+                        </g>
+
+                        <!-- 右腿 (Leg Right) -->
+                        <g class="anim-leg-right" id="svg-leg-right">
+                            <rect x="16" y="43" width="4" height="6" fill="#2F3640" />
+                            <rect x="15" y="48" width="6" height="3" fill="#FF4757" />
+                            <rect x="15" y="50" width="6" height="1.5" fill="#FFFFFF" />
+                        </g>
+                    </g>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- PRO 尊享版会员升级弹窗 Pro VIP Modal -->
+    <div id="pro-modal" class="modal-backdrop" style="display: none;">
+        <div class="modal-card pro-modal-card">
+            <div class="modal-header">
+                <h3 data-i18n="pro_modal_title">👑 PixelSprite PRO 终身尊享版解锁 ($19.99 USD)</h3>
+                <button id="pro-modal-close" class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="pro-banner">
+                    <div class="pro-crown">👑</div>
+                    <h2 data-i18n="pro_banner_h2">解锁专业级 2D 游戏开发与像素动画全套高级功能</h2>
+                    <p data-i18n="pro_banner_p">新用户赠送 1 天全功能免费试用！终身买断只需 $19.99 美金！</p>
+                </div>
+
+                <!-- Feature Comparison Table -->
+                <div class="pro-feature-comparison">
+                    <table class="pro-table">
+                        <thead>
+                            <tr>
+                                <th data-i18n="th_feature">功能特性</th>
+                                <th data-i18n="th_free">🆓 标准普通版</th>
+                                <th class="pro-col" data-i18n="th_pro">👑 PRO 尊享版</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td data-i18n="tr_draw">🖌️ 基础像素绘图 (Pencil/Eraser/Shapes)</td>
+                                <td data-i18n="tr_draw_free">✅ 完整支持</td>
+                                <td class="pro-col" data-i18n="tr_draw_pro">✅ 完整支持</td>
+                            </tr>
+                            <tr>
+                                <td data-i18n="tr_layers">🗂️ 多图层管理 (Layers Stack)</td>
+                                <td data-i18n="tr_layers_free">✅ 完整支持 (多图层/不透明度)</td>
+                                <td class="pro-col" data-i18n="tr_draw_pro">✅ 完整支持</td>
+                            </tr>
+                            <tr>
+                                <td data-i18n="tr_timeline">🎞️ 逐帧动画时间轴 (Timeline & Loop)</td>
+                                <td data-i18n="tr_locked">❌ 锁定</td>
+                                <td class="pro-col" data-i18n="tr_timeline_pro">⭐ 专属支持 (时间轴/FPS/帧管理)</td>
+                            </tr>
+                            <tr>
+                                <td data-i18n="tr_onion">👻 透光洋葱皮 (Onion Skin)</td>
+                                <td data-i18n="tr_locked">❌ 锁定</td>
+                                <td class="pro-col" data-i18n="tr_onion_pro">⭐ 专属支持 (红蓝对比/透明度)</td>
+                            </tr>
+                            <tr>
+                                <td data-i18n="tr_slicer">📦 Sprite Sheet 自动切割器 (Slicer)</td>
+                                <td data-i18n="tr_locked">❌ 锁定</td>
+                                <td class="pro-col" data-i18n="tr_slicer_pro">⭐ 专属支持 (网格/Auto Slicing)</td>
+                            </tr>
+                            <tr>
+                                <td data-i18n="tr_export">🎮 游戏 Sprite Sheet 图集/JSON 导出</td>
+                                <td data-i18n="tr_export_free">❌ 仅支持 PNG 单图</td>
+                                <td class="pro-col" data-i18n="tr_export_pro">⭐ 专属支持 (GIF/Sheet/JSON/APNG)</td>
+                            </tr>
+                            <tr>
+                                <td data-i18n="tr_dither">░ 抖动网格 (Dithering) & 阴影刷 (Shading)</td>
+                                <td data-i18n="tr_locked">❌ 锁定</td>
+                                <td class="pro-col" data-i18n="tr_dither_pro">⭐ 专属支持 (Bayer抖动/阴影笔)</td>
+                            </tr>
+                            <tr>
+                                <td data-i18n="tr_tile">🧱 Seamless Tile 无缝瓷砖平铺预览</td>
+                                <td data-i18n="tr_locked">❌ 锁定</td>
+                                <td class="pro-col" data-i18n="tr_tile_pro">⭐ 专属支持 (3x3 无缝平铺)</td>
+                            </tr>
+                            <tr>
+                                <td data-i18n="tr_pixelate">🖼️ 照片 / 图片一键转像素画 (Pixelate)</td>
+                                <td data-i18n="tr_locked">❌ 锁定</td>
+                                <td class="pro-col" data-i18n="tr_pixelate_pro">⭐ 专属支持 (AI 量化/抖动)</td>
+                            </tr>
+                            <tr>
+                                <td data-i18n="tr_rotsprite">🔄 RotSprite 算法像素旋转 (RotSprite)</td>
+                                <td data-i18n="tr_locked">❌ 锁定</td>
+                                <td class="pro-col" data-i18n="tr_rotsprite_pro">⭐ 专属支持 (无损像素旋转)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- PayPal Button Container -->
+                <!-- 🚨 重构版：Itch.io 购买与激活操作面板 -->
+                <div
+                    style="display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; max-width: 380px; margin: 20px auto 10px auto; padding: 20px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 12px; box-shadow: inset 0 0 20px rgba(0, 242, 254, 0.05);">
+
+                    <!-- 购买按钮 -->
+                    <a href="https://kenmaster-q2x.itch.io" target="_blank" class="btn"
+                        style="width: 100%; padding: 14px; background: linear-gradient(135deg, #fa5c5c 0%, #ff4757 100%); color: #fff; font-weight: 800; border-radius: 6px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(250, 92, 92, 0.4); transition: all 0.3s;"
+                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(250, 92, 92, 0.6)';"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(250, 92, 92, 0.4)';">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="#ffffff">
+                            <path
+                                d="M2 5 a2 2 0 0 1 2 -2 h16 a2 2 0 0 1 2 2 v3 a2 2 0 0 1 -4 0 a2 2 0 0 1 -4 0 a2 2 0 0 1 -4 0 a2 2 0 0 1 -4 0 a2 2 0 0 1 -4 0 z" />
+                            <path
+                                d="M2 9 a2 2 0 0 0 4 0 a2 2 0 0 0 4 0 a2 2 0 0 0 4 0 a2 2 0 0 0 4 0 a2 2 0 0 0 4 0 v10 a2 2 0 0 1 -2 2 h-16 a2 2 0 0 1 -2 -2 z"
+                                fill-rule="evenodd" clip-rule="evenodd" fill="#ffffff" />
+                            <path
+                                d="M6 12 c-1.5 0 -2 1.5 -2 3 s1 5 2.5 5 s2 -2 2.5 -3.5 h6 c.5 1.5 1 3.5 2.5 3.5 s2.5 -3.5 2.5 -5 s-.5 -3 -2 -3 z"
+                                fill="#fa5c5c" />
+                            <path d="M12 12 l-3 3.5 h2 v2.5 h2 v-2.5 h2 z" fill="#ffffff" />
+                        </svg>
+                        <span data-i18n="itch_buy_btn">Buy PRO on Itch.io ($19.99)</span>
+                    </a>
+
+                    <!-- 分割线 -->
+                    <div style="display: flex; align-items: center; width: 100%; gap: 10px;">
+                        <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></div>
+                        <span style="font-size: 11px; color: var(--text-muted); font-family: monospace;">OR</span>
+                        <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></div>
+                    </div>
+
+                    <!-- 激活码区域 -->
+                    <div style="width: 100%; display: flex; flex-direction: column; gap: 8px;">
+                        <p data-i18n="itch_activate_title"
+                            style="color: #00f2fe; font-size: 12px; font-weight: 600; margin: 0; text-align: center;">
+                            Enter your license key below to activate
+                        </p>
+                        <div style="display: flex; gap: 8px; width: 100%;">
+                            <input type="text" id="itch-activation-input"
+                                data-i18n-placeholder="itch_activate_placeholder" placeholder="Enter PRO-XXXX-XXXX"
+                                style="flex: 1; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 10px 12px; border-radius: 6px; font-family: monospace; font-size: 13px; outline: none; transition: border 0.2s;"
+                                onfocus="this.style.borderColor='#00f2fe'"
+                                onblur="this.style.borderColor='rgba(255,255,255,0.2)'">
+                            <button id="btn-activate-itch" class="btn btn-primary"
+                                style="padding: 0 20px; font-weight: 800; font-size: 13px; border-radius: 6px; white-space: nowrap;">
+                                <span data-i18n="itch_activate_btn">Activate</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📦 PRO: Sprite Sheet 切割器弹窗 (Slicer Modal) -->
+    <div id="slicer-modal" class="modal-backdrop" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 data-i18n="slicer_modal_title">📦 Sprite Sheet 自动切割器 (Slicer)</h3>
+                <button id="slicer-modal-close" class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" style="width: 100%;">
+                    <label data-i18n="label_slicer_file">选择 Sprite Sheet 图片文件 (PNG/JPG):</label>
+                    <input type="file" id="slicer-file-input" accept="image/*" class="select-input"
+                        style="width: 100%;">
+                </div>
+                <div class="modal-image-box" style="max-height: 200px;">
+                    <canvas id="slicer-preview-canvas" width="256" height="256"></canvas>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%;">
+                    <div class="form-group">
+                        <label data-i18n="label_frame_w">单帧宽度 (Frame Width):</label>
+                        <input type="number" id="slicer-frame-w" class="select-input" value="32">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="label_frame_h">单帧高度 (Frame Height):</label>
+                        <input type="number" id="slicer-frame-h" class="select-input" value="32">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-confirm-slice" class="btn btn-primary" data-i18n="btn_confirm_slice">✨
+                    切割并载入到动画时间轴</button>
+                <button id="btn-slicer-cancel" class="btn btn-secondary" data-i18n="btn_cancel">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🖼️ PRO: 照片转像素画弹窗 (Pixelate Modal) -->
+    <div id="pixelate-modal" class="modal-backdrop" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 data-i18n="pixelate_modal_title">🖼️ 照片 / 图片转像素画转换器</h3>
+                <button id="pixelate-modal-close" class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" style="width: 100%;">
+                    <label data-i18n="label_pixelate_file">上传原图 (Photo/Image):</label>
+                    <input type="file" id="pixelate-file-input" accept="image/*" class="select-input"
+                        style="width: 100%;">
+                </div>
+                <div class="modal-image-box" style="max-height: 200px;">
+                    <canvas id="pixelate-preview-canvas" width="256" height="256"></canvas>
+                </div>
+                <div class="form-group" style="width: 100%;">
+                    <label data-i18n="label_quantize_colors">限制主色调数量 (Colors Quantization):</label>
+                    <input type="range" id="param-quantize-colors" min="4" max="32" value="16" class="slider-input">
+                    <span id="val-quantize-colors" style="font-size: 11px; color: var(--accent-cyan);">16 色</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-confirm-pixelate" class="btn btn-primary" data-i18n="btn_confirm_pixelate">✨
+                    转换并载入到画布</button>
+                <button id="btn-pixelate-cancel" class="btn btn-secondary" data-i18n="btn_cancel">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🎨 PRO: 高级调色板工作台弹窗 (Advanced Palette Modal) -->
+    <div id="advanced-palette-modal" class="modal-backdrop" style="display: none;">
+        <div class="modal-card" style="width: 580px; max-width: 95vw;">
+            <div class="modal-header">
+                <h3 data-i18n="adv_palette_modal_title">🎨 高级调色板工作台 (Advanced Palette Studio)</h3>
+                <button id="adv-palette-modal-close" class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body" style="gap: 16px; max-height: 75vh; overflow-y: auto;">
+
+                <!-- 1. 经典复古像素画调色板库 (Retro Presets) -->
+                <div class="adv-palette-section">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <strong style="font-size: 13px; color: var(--accent-cyan);"
+                            data-i18n="adv_palette_presets_title">🕹️ 经典复古像素画调色板库 (Retro Presets)</strong>
+                        <span style="font-size: 11px; color: var(--text-muted);"
+                            data-i18n="adv_palette_presets_hint">点击即可一键载入</span>
+                    </div>
+                    <div id="adv-palette-presets-grid" class="adv-palette-presets-grid">
+                        <!-- 动态渲染 Pico-8, Game Boy, NES, Endesga 32, Cyberpunk, Pastel, etc. -->
+                    </div>
+                </div>
+
+                <!-- 2. 当前颜色和谐与光影色阶 (Color Harmony & Ramps) -->
+                <div class="adv-palette-section">
+                    <strong style="font-size: 13px; color: var(--accent-purple); display: block; margin-bottom: 8px;"
+                        data-i18n="adv_palette_harmony_title">✨ 当前颜色和谐与光影色阶 (Color Harmony & Ramps)</strong>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                        <span style="font-size: 11px; color: var(--text-muted);"
+                            data-i18n="adv_cur_color_label">基准主色:</span>
+                        <div id="adv-harmony-base-swatch"
+                            style="width: 24px; height: 24px; border-radius: 4px; border: 2px solid #fff; background-color: #ffea70;">
+                        </div>
+                        <span id="adv-harmony-base-hex"
+                            style="font-size: 12px; font-weight: bold; font-family: monospace; color: var(--text-main);">#FFEA70</span>
+                        <button id="btn-adv-add-harmony" class="btn btn-primary btn-xs" style="margin-left: auto;"
+                            data-i18n="btn_add_harmony_all">➕ 将和谐配色加入调色板</button>
+                    </div>
+                    <div id="adv-harmony-swatches-box" class="adv-harmony-swatches-box">
+                        <!-- 动态充填互补色、类似色、三角色与高光阴影 -->
+                    </div>
+                </div>
+
+                <!-- 3. 图片自动提取与全局颜色替换快捷工具 -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%;">
+                    <div class="adv-palette-tool-card">
+                        <strong style="font-size: 12px; color: var(--text-main); display: block; margin-bottom: 4px;"
+                            data-i18n="adv_tool_extract_title">🖼️ 图片提取调色板</strong>
+                        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px; line-height: 1.4;"
+                            data-i18n="adv_tool_extract_desc">上传任意图片，智能提取主色调替换当前调色板</p>
+                        <button id="btn-modal-extract-palette" class="btn btn-secondary btn-xs" style="width: 100%;"
+                            data-i18n="btn_modal_extract_now">📂 上传图片提取</button>
+                    </div>
+                    <div class="adv-palette-tool-card">
+                        <strong style="font-size: 12px; color: var(--text-main); display: block; margin-bottom: 4px;"
+                            data-i18n="adv_tool_swap_title">🔄 画布颜色全局替换</strong>
+                        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px; line-height: 1.4;"
+                            data-i18n="adv_tool_swap_desc">在画布上点击任意颜色，批量替换为当前画笔颜色</p>
+                        <button id="btn-modal-palette-swap" class="btn btn-secondary btn-xs" style="width: 100%;"
+                            data-i18n="btn_modal_swap_now">🎯 开始选色替换</button>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button id="adv-palette-modal-close-btn" class="btn btn-secondary" data-i18n="btn_close">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导出预览弹窗 Export Preview Modal -->
+    <div id="export-modal" class="modal-backdrop" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modal-title" data-i18n="export_modal_title">✨ 资产导出成功</h3>
+                <button id="modal-close" class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-image-box">
+                    <img id="modal-preview-img" src="" alt="Export Preview">
+                </div>
+                <div class="modal-info">
+                    <span id="modal-badge" class="badge">PNG | 512x512</span>
+
+                    <div class="path-selector-box">
+                        <label class="path-label" data-i18n="label_path">📂 保存文件名与路径选择:</label>
+                        <div class="path-input-group">
+                            <input type="text" id="export-filename-input" class="select-input path-field"
+                                placeholder="project_32x32.png">
+                            <button id="btn-custom-path-save" class="btn btn-secondary btn-path-picker"
+                                data-i18n="btn_browse_path" title="选择 Windows 本地保存路径">📂 浏览保存路径</button>
+                        </div>
+                    </div>
+
+                    <p id="modal-desc" data-i18n="export_desc">可随时点击“浏览保存路径”选择本地保存目录！</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a id="modal-download-link" href="#" download="" class="btn btn-primary" data-i18n="btn_quick_download"
+                    target="_blank">⬇️ 快速下载</a>
+                <button id="btn-modal-close" class="btn btn-secondary" data-i18n="btn_close">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔒 强制谷歌 SSO 登录遮罩 Mandatory Google Login Gate (Bypassed/Disabled per user instruction) -->
+    <div id="mandatory-auth-gate" class="modal-backdrop"
+        style="display: none; z-index: 99999; background: rgba(10, 10, 18, 0.95); backdrop-filter: blur(12px);">
+        <div class="modal-card auth-modal-card"
+            style="max-width: 440px; text-align: center; border: 1px solid var(--accent-cyan-border); box-shadow: 0 0 30px rgba(0, 242, 254, 0.2);">
+            <div style="padding: 24px 16px;">
+                <div
+                    style="width: 64px; height: 64px; margin: 0 auto 16px; background: rgba(66, 133, 244, 0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <svg viewBox="0 0 24 24" width="36" height="36">
+                        <path fill="#4285F4"
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                        <path fill="#34A853"
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                        <path fill="#FBBC05"
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                        <path fill="#EA4335"
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                    </svg>
+                </div>
+                <h2 style="font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 8px;"
+                    data-i18n="auth_gate_title">欢迎使用 PixelSprite Pro</h2>
+                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 20px;"
+                    data-i18n="auth_gate_subtitle">使用 Google 账号验证登录后即可正式开始使用画廊与画布</p>
+
+                <div id="mandatory-gis-btn-container"
+                    style="display: flex; justify-content: center; margin-bottom: 16px;"></div>
+
+                <button id="btn-fast-google-signin-gate"
+                    onclick="window.triggerRealGoogleOAuth('http://localhost:8080/')" class="btn btn-primary"
+                    style="width: 100%; padding: 12px; font-size: 14px; font-weight: bold; border-radius: 24px; box-shadow: var(--neon-glow); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px;">
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                        <path fill="#4285F4"
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                        <path fill="#34A853"
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                        <path fill="#FBBC05"
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                        <path fill="#EA4335"
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                    </svg>
+                    <span data-i18n="btn_sso_login">Google 官方 Sign In</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 谷歌账号登录弹窗 Google Login Modal -->
+    <div id="google-login-modal" class="modal-backdrop" style="display: none;">
+        <div class="modal-card auth-modal-card">
+            <div class="modal-header">
+                <h3 data-i18n="google_login_modal_title">🔑 谷歌账号登录 / Google OAuth SSO</h3>
+                <button id="google-login-modal-close" class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="google-auth-box">
+                    <div class="google-auth-header">
+                        <svg class="google-big-logo" viewBox="0 0 24 24" width="44" height="44">
+                            <path fill="#4285F4"
+                                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                            <path fill="#34A853"
+                                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                            <path fill="#FBBC05"
+                                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                            <path fill="#EA4335"
+                                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                        </svg>
+                        <h4 data-i18n="google_login_h4">登录 Google 账号同步画廊与配置</h4>
+                        <p data-i18n="google_login_p">使用 Google Client ID 授权验证登录</p>
+                    </div>
+
+                    <div style="margin-top: 16px; width: 100%; display: flex; flex-direction: column; gap: 10px;">
+                        <button id="btn-fast-google-signin" onclick="window.triggerRealGoogleOAuth()" class="btn"
+                            style="width: 100%; min-height: 46px; background: #ffffff; color: #1f2937; font-weight: 700; border-radius: 24px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.25); cursor: pointer; transition: all 0.2s;">
+                            <svg viewBox="0 0 24 24" width="20" height="20">
+                                <path fill="#4285F4"
+                                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                <path fill="#34A853"
+                                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                <path fill="#FBBC05"
+                                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                                <path fill="#EA4335"
+                                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                            </svg>
+                            <span data-i18n="btn_sso_login">使用 Google 官方 SSO 一键验证登录</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🌐 谷歌账号选择与 OAuth 验证弹窗 Google Account Selector Modal -->
+    <div id="google-account-picker-modal" class="modal-backdrop" style="display: none; z-index: 999999 !important;">
+        <div class="modal-card" style="max-width: 400px; padding: 24px;">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path fill="#4285F4"
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                        <path fill="#34A853"
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                        <path fill="#FBBC05"
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                        <path fill="#EA4335"
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                    </svg>
+                    <h3 style="font-size: 16px; color: #fff;" data-i18n="google_oauth_title">Google 账号 OAuth 登录</h3>
+                </div>
+                <button id="google-account-picker-close" onclick="window.closeAccountPicker()"
+                    class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body" style="padding-top: 16px; display: flex; flex-direction: column; gap: 12px;">
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">应用 Client ID: <code
+                        style="color: var(--accent-cyan);">507575159415-m4q68pnv2dkmll...</code></p>
+
+                <button id="btn-real-google-oauth-trigger" onclick="window.triggerRealGoogleOAuth()" class="btn"
+                    style="width: 100%; min-height: 48px; background: linear-gradient(135deg, #4285F4, #34A853); color: #ffffff; font-weight: 700; border-radius: 24px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 15px; box-shadow: 0 4px 14px rgba(66, 133, 244, 0.4); cursor: pointer; border: none; transition: transform 0.2s;">
+                    <svg viewBox="0 0 24 24" width="22" height="22">
+                        <path fill="#ffffff"
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                        <path fill="#ffffff"
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                        <path fill="#ffffff"
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                        <path fill="#ffffff"
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                    </svg>
+                    <span data-i18n="btn_sso_login">🌐 谷歌账号 SSO 一键登录</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 站长安全设置弹窗 Admin Auth Modal -->
+    <div id="admin-auth-modal" class="modal-backdrop" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 data-i18n="admin_auth_title">🛡️ 站长安全身份验证</h3>
+                <button id="admin-auth-modal-close" class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" style="width: 100%;">
+                    <label data-i18n="admin_key_label">请输入站长安全密钥 (Admin Key):</label>
+                    <input type="password" id="admin-password-input" class="select-input" placeholder="默认: ADMIN2026"
+                        data-i18n-placeholder="admin_key_ph">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-verify-admin-pass" class="btn btn-primary" data-i18n="btn_verify_admin">验证进入</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 站长收款控制台 Modal -->
+    <div id="merchant-settings-modal" class="modal-backdrop" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 data-i18n="merchant_modal_title">⚙️ 站长收款账户与 API 控制台</h3>
+                <button id="merchant-modal-close" class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" style="width: 100%;">
+                    <label data-i18n="merchant_paypal_label">PayPal REST Client ID (买断收款号):</label>
+                    <input type="text" id="setting-paypal-client-id" class="select-input" value="test">
+                </div>
+                <div class="form-group" style="width: 100%;">
+                    <label data-i18n="merchant_google_label">Google OAuth Client ID:</label>
+                    <input type="text" id="setting-google-client-id" class="select-input"
+                        value="507575159415-m4q68pnv2dkmll4osu59patd7fpdkp56.apps.googleusercontent.com">
+                </div>
+                <div class="form-group" style="width: 100%;">
+                    <label data-i18n="merchant_redirect_label">Google OAuth Authorized Redirect URI (重定向地址):</label>
+                    <input type="text" id="setting-google-redirect-uri" class="select-input"
+                        value="http://localhost:8080/">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-save-merchant-settings" class="btn btn-primary" data-i18n="btn_save_merchant">💾
+                    保存收款配置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Language Switcher Widget -->
+    <div class="lang-switcher-container">
+        <button id="lang-toggle-btn" class="lang-toggle-btn" title="切换语言 (Switch Language)">
+            <span id="lang-current-flag">🇨🇳</span>
+            <span id="lang-current-label">简体中文</span>
+            <span class="lang-arrow">▲</span>
+        </button>
+        <div id="lang-menu" class="lang-menu" style="display: none;">
+            <div class="lang-menu-header" data-i18n="lang_select_header">🌐 选择语言 / Select Language</div>
+            <button class="lang-option-btn active" data-lang="zh">
+                <span>🇨🇳</span>
+                <span class="lang-name">简体中文</span>
+                <span class="lang-check">✓</span>
+            </button>
+            <button class="lang-option-btn" data-lang="en">
+                <span>🇺🇸</span>
+                <span class="lang-name">English</span>
+                <span class="lang-check">✓</span>
+            </button>
+            <button class="lang-option-btn" data-lang="ja">
+                <span>🇯🇵</span>
+                <span class="lang-name">日本語</span>
+                <span class="lang-check">✓</span>
+            </button>
+            <button class="lang-option-btn" data-lang="zh-TW">
+                <span>🇹🇼</span>
+                <span class="lang-name">繁體中文</span>
+                <span class="lang-check">✓</span>
+            </button>
+            <button class="lang-option-btn" data-lang="es">
+                <span>🇪🇸</span>
+                <span class="lang-name">Español</span>
+                <span class="lang-check">✓</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 🖼️ 修改个人资料弹窗 -->
+    <div id="edit-profile-modal" class="modal-backdrop" style="display: none; z-index: 1000000;">
+        <div class="modal-card" style="width: 380px;">
+            <div class="modal-header">
+                <h3 data-i18n="edit_profile_title">✏️ 修改个人资料</h3>
+                <button id="edit-profile-close" class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body" style="align-items: center; gap: 20px;">
+
+                <!-- 👇 核心改动：点击头像直接换 👇 -->
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                    <div id="edit-avatar-container"
+                        style="position: relative; width: 80px; height: 80px; border-radius: 50%; cursor: pointer; border: 3px solid var(--accent-cyan); box-shadow: 0 0 15px rgba(0, 242, 254, 0.4); overflow: hidden; transition: transform 0.2s;"
+                        onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                        <img id="edit-avatar-preview-img" src="" alt="Avatar"
+                            style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                        <div id="edit-avatar-preview-badge"
+                            style="width: 100%; height: 100%; background: var(--primary-gradient); color: #050b14; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800;">
+                            M</div>
+                        <!-- 悬浮的相机图标 -->
+                        <div
+                            style="position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.6); color: white; text-align: center; font-size: 14px; padding: 2px 0;">
+                            📷</div>
+                    </div>
+                    <span style="font-size: 11px; color: var(--text-muted);" data-i18n="edit_avatar_hint">点击头像更换</span>
+                    <!-- 隐藏的真实文件上传框 -->
+                    <input type="file" id="input-edit-avatar" accept="image/*" style="display: none;">
+                </div>
+
+                <div class="form-group" style="width: 100%;">
+                    <label data-i18n="edit_nickname_label">修改昵称:</label>
+                    <input type="text" id="input-edit-nickname" class="select-input" style="width: 100%;"
+                        data-i18n-placeholder="edit_nickname_placeholder" placeholder="输入你的新昵称...">
+                </div>
+
+            </div>
+            <div class="modal-footer" style="margin-top: 24px;">
+                <button id="btn-save-profile" class="btn btn-primary" style="width: 100%;" data-i18n="edit_save_btn">💾
+                    保存修改</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🚀 软件信息与关于弹窗 -->
+    <div id="about-app-modal" class="modal-backdrop" style="display: none; z-index: 100000;">
+        <div class="modal-card"
+            style="width: 420px; text-align: center; overflow: hidden; position: relative; border: 1px solid rgba(0, 242, 254, 0.3); box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(0, 242, 254, 0.15);">
+
+            <!-- 顶部背景光效 -->
+            <div
+                style="position: absolute; top: 0; left: 0; width: 100%; height: 120px; background: linear-gradient(180deg, rgba(0,242,254,0.15) 0%, transparent 100%); pointer-events: none;">
+            </div>
+
+            <div class="modal-header"
+                style="position: relative; z-index: 2; border-bottom: none; padding-bottom: 0; justify-content: flex-end;">
+                <button id="about-modal-close" class="modal-close-btn" style="color: #ffffff;">&times;</button>
+            </div>
+
+            <div class="modal-body"
+                style="position: relative; z-index: 2; align-items: center; gap: 12px; padding-top: 0;">
+
+                <!-- 🚨 替换这里：放大版的 3D 魔方 Logo -->
+                <div class="logo-icon-wrapper" style="width: 90px; height: 90px; margin: 0 auto;">
+                    <svg class="cyber-logo" viewBox="0 0 100 100" width="90" height="90">
+                        <defs>
+                            <linearGradient id="modal-logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#00f2fe" />
+                                <stop offset="100%" stop-color="#7f00ff" />
+                            </linearGradient>
+                            <filter id="modal-glow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feGaussianBlur stdDeviation="4" result="blur" />
+                                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                            </filter>
+                        </defs>
+
+                        <!-- 背景旋转光环 -->
+                        <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(0, 242, 254, 0.4)" stroke-width="1.5"
+                            stroke-dasharray="10 15" class="spin-ring" style="animation-duration: 10s;" />
+
+                        <!-- 3D 等距立体魔方主体 -->
+                        <g filter="url(#modal-glow)">
+                            <!-- 顶部菱形 -->
+                            <path d="M 50 15 L 80 35 L 50 55 L 20 35 Z" fill="url(#modal-logo-grad)" opacity="0.9" />
+                            <!-- 左侧暗面 -->
+                            <path d="M 20 35 L 50 55 L 50 85 L 20 65 Z" fill="#7f00ff" opacity="0.6" />
+                            <!-- 右侧亮面 -->
+                            <path d="M 80 35 L 50 55 L 50 85 L 80 65 Z" fill="#00f2fe" opacity="0.8" />
+                            <!-- 核心科幻线框 -->
+                            <path d="M 50 15 L 80 35 L 80 65 L 50 85 L 20 65 L 20 35 Z" stroke="#ffffff"
+                                stroke-width="1.5" fill="none" opacity="0.6" />
+                        </g>
+                        <!-- 中心高光点 -->
+                        <circle cx="50" cy="50" r="3" fill="#ffffff" class="core-dot" />
+                    </svg>
+                </div>
+
+                <!-- 高级流光标题 -->
+                <h2 class="modal-premium-title">
+                    PixelSprite <span>Pro</span>
+                </h2>
+
+                <!-- 版本号徽章 -->
+                <div class="badge"
+                    style="background: rgba(0,242,254,0.1); border-color: rgba(0,242,254,0.3); color: var(--accent-cyan); font-size: 12px; padding: 4px 12px; margin-bottom: 10px;">
+                    <span data-i18n="about_version">版本</span> v2.9.0 (Build 2026)
+                </div>
+
+                <!-- 介绍文字 -->
+                <p class="modal-desc-text" data-i18n="about_desc" style="margin-bottom: 16px;">
+                    专业级 2D 像素画与游戏 Sprite 动画创作工坊。<br>专为独立游戏开发者与像素艺术家打造。
+                </p>
+
+                <!-- 🚨 更新日志区 (支持多语言) -->
+                <div
+                    style="width: 100%; background: rgba(0, 0, 0, 0.3); border-left: 3px solid #00f2fe; padding: 10px 14px; border-radius: 4px; text-align: left; margin-bottom: 16px;">
+                    <h4 data-i18n="changelog_title"
+                        style="color: #fff; font-size: 13px; margin-bottom: 6px; font-weight: 700;">🚀 v2.9.0 更新日志 (最新版)
+                    </h4>
+                    <ul
+                        style="font-size: 11px; color: var(--text-muted); line-height: 1.6; padding-left: 16px; margin: 0;">
+                        <li data-i18n="changelog_item_1">全新赛博朋克 UI 与 3D 故障艺术特效上线。</li>
+                        <li data-i18n="changelog_item_2">增加全屏极客风 Loading 与高精度导出。</li>
+                        <li data-i18n="changelog_item_3">优化 128×128 大画布模式与动态网格渲染。</li>
+                        <li data-i18n="changelog_item_4">新增全球动态折扣系统与高级订阅特权。</li>
+                    </ul>
+                </div>
+
+                <!-- 🚨 社交链接组 (支持多语言) -->
+                <style>
+                    .cyber-social-btn {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        width: 100%;
+                        padding: 12px 16px;
+                        background: rgba(0, 0, 0, 0.4);
+                        border: 1px solid rgba(255, 255, 255, 0.1);
+                        border-radius: 4px;
+                        text-decoration: none;
+                        position: relative;
+                        overflow: hidden;
+                        transition: all 0.3s;
+                    }
+
+                    .cyber-social-btn::before {
+                        content: '';
+                        position: absolute;
+                        left: 0;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        width: 3px;
+                        height: 20px;
+                        background: currentColor;
+                        transition: height 0.3s;
+                    }
+
+                    .cyber-social-btn:hover {
+                        background: rgba(255, 255, 255, 0.05);
+                        transform: translateX(4px);
+                        border-color: currentColor;
+                    }
+
+                    .cyber-social-btn:hover::before {
+                        height: 100%;
+                    }
+
+                    .social-icon-box {
+                        width: 36px;
+                        height: 36px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border-radius: 6px;
+                        margin-right: 12px;
+                    }
+                </style>
+
+                <div style="display: flex; flex-direction: column; gap: 10px; width: 100%; margin-bottom: 10px;">
+                    <!-- Itch.io -->
+                    <a href="https://kenmaster-q2x.itch.io" target="_blank" class="cyber-social-btn"
+                        style="color: #fa5c5c; border-color: rgba(250, 92, 92, 0.4);">
+                        <div style="display: flex; align-items: center;">
+                            <div class="social-icon-box"
+                                style="background: #fa5c5c; border: none; box-shadow: 0 0 10px rgba(250, 92, 92, 0.4); padding: 4px;">
+                                <svg viewBox="0 0 24 24" width="100%" height="100%" fill="#ffffff"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M2 5 a2 2 0 0 1 2 -2 h16 a2 2 0 0 1 2 2 v3 a2 2 0 0 1 -4 0 a2 2 0 0 1 -4 0 a2 2 0 0 1 -4 0 a2 2 0 0 1 -4 0 a2 2 0 0 1 -4 0 z" />
+                                    <path
+                                        d="M2 9 a2 2 0 0 0 4 0 a2 2 0 0 0 4 0 a2 2 0 0 0 4 0 a2 2 0 0 0 4 0 a2 2 0 0 0 4 0 v10 a2 2 0 0 1 -2 2 h-16 a2 2 0 0 1 -2 -2 z"
+                                        fill-rule="evenodd" clip-rule="evenodd" fill="#ffffff" />
+                                    <path
+                                        d="M6 12 c-1.5 0 -2 1.5 -2 3 s1 5 2.5 5 s2 -2 2.5 -3.5 h6 c.5 1.5 1 3.5 2.5 3.5 s2.5 -3.5 2.5 -5 s-.5 -3 -2 -3 z"
+                                        fill="#fa5c5c" />
+                                    <path d="M12 12 l-3 3.5 h2 v2.5 h2 v-2.5 h2 z" fill="#ffffff" />
+                                </svg>
+                            </div>
+                            <div style="display: flex; flex-direction: column; text-align: left; margin-left: 12px;">
+                                <span data-i18n="link_itch_title"
+                                    style="font-family: 'Outfit'; font-size: 14px; font-weight: 800; color: #fff;">ITCH.IO</span>
+                                <span data-i18n="link_itch_desc"
+                                    style="font-size: 11px; color: var(--text-muted);">进入官方软件入口页</span>
+                            </div>
+                        </div>
+                        <span data-i18n="link_action_launch"
+                            style="font-size: 12px; font-weight: bold; opacity: 0.6;">启动 ➔</span>
+                    </a>
+
+                    <!-- Discord -->
+                    <a href="https://discord.gg/kj8dRJzPg" target="_blank" class="cyber-social-btn"
+                        style="color: #5865F2; border-color: rgba(88, 101, 242, 0.4);">
+                        <div style="display: flex; align-items: center;">
+                            <div class="social-icon-box"
+                                style="background: #5865F2; border: none; box-shadow: 0 0 10px rgba(88, 101, 242, 0.4);">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="#ffffff">
+                                    <path
+                                        d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.09 16.09 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02c-2.72 4.07-3.47 8.03-3.1 11.95c0 .02.01.04.03.05c1.8 1.32 3.53 2.12 5.24 2.65c.03.01.06 0 .07-.02c.4-.55.76-1.13 1.07-1.74c.02-.04 0-.08-.04-.09c-.57-.22-1.11-.48-1.64-.78c-.04-.02-.04-.08-.01-.11c.11-.08.22-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05 0 .07.01c.11.09.22.17.33.26c.04.03.04.09-.01.11c-.52.31-1.07.56-1.64.78c-.04.01-.05.06-.04.09c.32.61.68 1.19 1.07 1.74c.02.02.05.03.07.02c1.72-.53 3.45-1.33 5.25-2.65c.02-.01.03-.03.03-.05c.44-4.53-.73-8.46-3.1-11.95c-.01-.01-.02-.02-.04-.02zM8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.84 2.12-1.89 2.12zm6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.83 2.12-1.89 2.12z" />
+                                </svg>
+                            </div>
+                            <div style="display: flex; flex-direction: column; text-align: left; margin-left: 12px;">
+                                <span data-i18n="link_discord_title"
+                                    style="font-family: 'Outfit'; font-size: 14px; font-weight: 800; color: #fff;">DISCORD</span>
+                                <span data-i18n="link_discord_desc"
+                                    style="font-size: 11px; color: var(--text-muted);">加入创作者社区交流</span>
+                            </div>
+                        </div>
+                        <span data-i18n="link_action_connect"
+                            style="font-size: 12px; font-weight: bold; opacity: 0.6;">连接 ➔</span>
+                    </a>
+
+                    <!-- X (Twitter) -->
+                    <a href="https://x.com/KenLoo424416" target="_blank" class="cyber-social-btn"
+                        style="color: #ffffff; border-color: rgba(255, 255, 255, 0.3);">
+                        <div style="display: flex; align-items: center;">
+                            <div class="social-icon-box"
+                                style="background: #ffffff; border: none; box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="#000000">
+                                    <path
+                                        d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                                </svg>
+                            </div>
+                            <div style="display: flex; flex-direction: column; text-align: left; margin-left: 12px;">
+                                <span data-i18n="link_x_title"
+                                    style="font-family: 'Outfit'; font-size: 14px; font-weight: 800; color: #fff;">X
+                                    PLATFORM</span>
+                                <span data-i18n="link_x_desc"
+                                    style="font-size: 11px; color: var(--text-muted);">关注开发者日常动态</span>
+                            </div>
+                        </div>
+                        <span data-i18n="link_action_connect"
+                            style="font-size: 12px; font-weight: bold; opacity: 0.6;">连接 ➔</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 专属撒花特效 -->
+    <canvas id="confetti-canvas"
+        style="position:fixed; top:0; left:0; width:100vw; height:100vh; pointer-events:none; z-index:999999; display:none;"></canvas>
+
+    <!-- 🌐 社区与更新公告弹窗 -->
+    <div id="community-modal" class="modal-backdrop" style="display: none; z-index: 1000000;">
+        <div class="modal-card"
+            style="width: 500px; max-width: 95vw; background: rgba(10, 15, 25, 0.95); border: 1px solid rgba(0, 242, 254, 0.4); box-shadow: 0 0 40px rgba(0,242,254,0.2);">
+
+            <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px;">
+                <h3 style="color: #00f2fe; font-family: 'Outfit'; font-size: 20px;">📢 版本更新与社区链接</h3>
+                <button id="community-modal-close" class="modal-close-btn">&times;</button>
+            </div>
+
+            <div class="modal-body" style="display: flex; flex-direction: column; gap: 20px; margin-top: 16px;">
+
+                <!-- 版本公告区 -->
+                <div
+                    style="background: rgba(0, 0, 0, 0.4); border-left: 3px solid #00f2fe; padding: 12px 16px; border-radius: 4px;">
+                    <h4 style="color: #fff; font-size: 14px; margin-bottom: 6px; font-weight: 700;">🚀 v2.9.0 更新日志 (最新版)
+                    </h4>
+                    <ul style="font-size: 12px; color: var(--text-muted); line-height: 1.6; padding-left: 16px;">
+                        <li>全新赛博朋克 UI 与 3D 故障艺术特效上线。</li>
+                        <li>增加全屏极客风 Loading 与高精度导出。</li>
+                        <li>优化 128×128 大画布模式与动态网格渲染。</li>
+                        <li>新增全球动态折扣系统与高级订阅特权。</li>
+                    </ul>
+                </div>
+
+                <!-- 社区链接区 -->
+                <div>
+                    <h4 style="color: #fff; font-size: 14px; margin-bottom: 12px; font-weight: 700;">🌐 加入我们的创作者社区</h4>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <!-- Itch.io -->
+                        <a href="https://你的itchio用户名.itch.io" target="_blank"
+                            style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: rgba(250, 92, 92, 0.1); border: 1px solid rgba(250, 92, 92, 0.4); border-radius: 8px; text-decoration: none; color: #fff; transition: all 0.2s;"
+                            onmouseover="this.style.background='rgba(250,92,92,0.2)'"
+                            onmouseout="this.style.background='rgba(250,92,92,0.1)'">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 20px;">🎮</span>
+                                <div>
+                                    <div style="font-weight: 700; font-size: 13px;">Itch.io</div>
+                                    <div style="font-size: 11px; color: var(--text-muted);">在此下载、支持并关注最新版本</div>
+                                </div>
+                            </div>
+                            <span style="color: #fa5c5c;">➔</span>
+                        </a>
+
+                        <!-- Discord -->
+                        <a href="https://discord.gg/kj8dRJzPg" target="_blank"
+                            style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: rgba(88, 101, 242, 0.1); border: 1px solid rgba(88, 101, 242, 0.4); border-radius: 8px; text-decoration: none; color: #fff; transition: all 0.2s;"
+                            onmouseover="this.style.background='rgba(88,101,242,0.2)'"
+                            onmouseout="this.style.background='rgba(88,101,242,0.1)'">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 20px;">💬</span>
+                                <div>
+                                    <div style="font-weight: 700; font-size: 13px;">Discord 社区</div>
+                                    <div style="font-size: 11px; color: var(--text-muted);">交流技术、反馈 Bug、寻找画友</div>
+                                </div>
+                            </div>
+                            <span style="color: #5865F2;">➔</span>
+                        </a>
+
+                        <!-- X (Twitter) -->
+                        <a href="https://x.com/KenLoo424416" target="_blank"
+                            style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; text-decoration: none; color: #fff; transition: all 0.2s;"
+                            onmouseover="this.style.background='rgba(255,255,255,0.1)'"
+                            onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 20px;">✖️</span>
+                                <div>
+                                    <div style="font-weight: 700; font-size: 13px;">X (Twitter)</div>
+                                    <div style="font-size: 11px; color: var(--text-muted);">关注开发者的日常与动态</div>
+                                </div>
+                            </div>
+                            <span style="color: #fff;">➔</span>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="gif_encoder.js?v=2.9"></script>
+    <script src="pixel_engine.js?v=2.9"></script>
+    <script src="addon-i18n.js?v=1.0"></script>
+    <script src="app.js?v=99.0"></script>
+
+    <!-- 🧩 模块化外挂插槽 (保留仍在使用的独立功能) -->
+    <script src="addon-paypal.js?v=1.0"></script>
+    <script src="addon-login-system.js?v=1.0"></script>
+    <script src="addon-export-system.js?v=1.0"></script>
+
+    <script>
+        // 🚀 网页加载完成后，强行把左上角的发光魔方变成浏览器标签页的图标
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                // 找到左上角那个 SVG 魔方
+                const logo = document.querySelector('.logo-icon-wrapper svg');
+                if (logo) {
+                    // 克隆它，并转成字符串
+                    const clone = logo.cloneNode(true);
+                    // 设置个合适的尺寸
+                    clone.setAttribute('width', '64');
+                    clone.setAttribute('height', '64');
+
+                    const svgString = new XMLSerializer().serializeToString(clone);
+                    const encodedSvg = encodeURIComponent(svgString).replace(/'/g, '%27').replace(/"/g, '%22');
+
+                    // 动态创建并替换 favicon
+                    let link = document.querySelector("link[rel*='icon']");
+                    if (!link) {
+                        link = document.createElement('link');
+                        link.rel = 'icon';
+                        document.head.appendChild(link);
+                    }
+                    link.href = 'data:image/svg+xml,' + encodedSvg;
+                }
+            }, 100);
+        });
+    </script>
+</body>
+
+</html>
