@@ -4674,23 +4674,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnCloudSave = document.getElementById('btn-cloud-save');
         if (btnCloudSave) {
             btnCloudSave.addEventListener('click', async () => {
-                const d = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
-
-                // 🚨 1. 开启全屏 Loading，禁用按钮
+                // 1. 开启 Loading，禁用按钮
                 showLoader();
                 btnCloudSave.disabled = true;
 
                 // 让出主线程 50 毫秒，让浏览器先画出 Loading 动画
                 await new Promise(resolve => setTimeout(resolve, 50));
 
-                // 🚨 核心保命：设置 15 秒超时
+                // 核心保命：设置 20 秒超时（因为有可能是数据大，不要设太短）
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 15000);
+                const timeoutId = setTimeout(() => controller.abort(), 20000);
 
                 try {
                     commitSelection();
 
-                    // 2. 提取需要保存的数据
                     const projectData = {
                         resX: engine.resX || 32,
                         resY: engine.resY || 32,
@@ -4699,12 +4696,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         frameBuffers: frameBuffers,
                         frameLayers: frameLayers
                     };
-
-                    // 在发请求前，强制提示一下用户：文件很大，请稍等
-                    const checkSize = JSON.stringify(projectData).length;
-                    if (checkSize > 5 * 1024 * 1024) { // 超过 5MB 就警告
-                        showToast('⚠️ 画作非常精细，数据较大，云端打包可能需要 10-20 秒，请勿关闭页面！');
-                    }
 
                     const userId = (window.userState && window.userState.email)
                         ? window.userState.email
@@ -4715,44 +4706,46 @@ document.addEventListener('DOMContentLoaded', () => {
                         })());
 
                     const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
-                    const projectName = prompt(dict.cloud_history_save_prompt || "请为这个云端工程起个名字：", `${dict.cloud_history_default_name || '工程_'}${new Date().toLocaleDateString()}`) || 'Untitled';
+                    const projectName = prompt(dict.cloud_history_save_prompt || "请为这个云端工程起个名字：", `工程_${new Date().toLocaleDateString()}`) || 'Untitled';
 
                     const res = await fetch(`${API_BASE_URL}/api/cloud/save`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ projectData, userId, projectName }), // 🚨 把 projectName 传过去
+                        body: JSON.stringify({ projectData, userId, projectName }),
                         signal: controller.signal
                     });
 
-                    clearTimeout(timeoutId); // 成功了就取消超时
+                    clearTimeout(timeoutId);
+
+                    // 🚨 防崩护盾：先检查状态码
+                    if (!res.ok) {
+                        throw new Error(`服务器返回错误代码: ${res.status}`);
+                    }
+
                     const result = await res.json();
                     hideLoader();
 
                     if (result.success) {
-                        const msg = window.t('cloud_save_success_detail', {
-                            code: result.pinCode,
-                            used: result.usedMB.toFixed(1),
-                            total: result.totalMB
-                        });
-                        alert(msg);
-                        showToast(window.t('cloud_save_success', { code: result.pinCode }));
+                        alert(`✅ 保存成功！\n提取码：${result.pinCode}\n\n您可以直接在“云端读取”中看到它。`);
+                        if (typeof showToast === 'function') showToast(`☁️ 工程【${projectName}】已安全存入云端！`);
                     } else {
-                        alert(window.t('cloud_save_fail_detail', { error: result.error }));
+                        alert(`保存失败：${result.error}`);
                     }
+
                 } catch (err) {
                     clearTimeout(timeoutId);
                     hideLoader();
 
-                    // 🚨 核心修复：把处理 err 的逻辑全塞进 catch 里面！
-                    if (err.name === 'AbortError' || err.message.includes('NetworkError')) {
-                        alert('⚠️ 云端服务器目前请求人数过多（或正在休眠启动中）\n\n别担心，您的画作非常安全！\n请点击顶部“保存工程”将项目下载到本地，或在 1 分钟后重试。');
-                        // 🚨 自动触发本地的保存工程
-                        if (typeof saveProject === 'function') saveProject();
+                    // 🚨 这里修改了报错提示，让你一眼看懂是超时还是网络断了
+                    console.error("保存捕获到的真实错误:", err);
+
+                    if (err.name === 'AbortError') {
+                        alert('⚠️ 保存超时！\n可能服务器正在启动或数据较大，请耐心等待 1 分钟，然后去“云端读取”看看是否已保存成功。');
                     } else {
-                        alert('⚠️ 网络连接失败，请检查网络。');
+                        // 很多时候数据其实已经存进去了，只是回执丢了
+                        alert('⚠️ 请求网络异常，请稍后去“云端读取”确认是否保存成功。\n错误信息: ' + err.message);
                     }
                 } finally {
-                    // 🚨 3. 兜底清理
                     hideLoader();
                     btnCloudSave.disabled = false;
                 }
