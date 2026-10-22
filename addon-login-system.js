@@ -116,7 +116,8 @@
         }
 
         if (typeof window.showToast === 'function') {
-            window.showToast(`🎉 欢迎，${name}！登录成功！`);
+            const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+            window.showToast((dict.auth_welcome_toast || '🎉 欢迎，{name}！登录成功！').replace('{name}', name));
         }
     };
 
@@ -178,7 +179,8 @@
         }
 
         if (typeof window.showToast === 'function') {
-            window.showToast('👋 已成功退出登录');
+            const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+            window.showToast(dict.auth_logout_toast || '👋 已成功退出登录');
         }
     };
 
@@ -205,16 +207,19 @@
                                             profile.picture || ''
                                         );
                                     } else {
-                                        if (typeof window.showToast === 'function') window.showToast('⚠️ 无法获取 Google 信息');
+                                        const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+                                        if (typeof window.showToast === 'function') window.showToast(dict.auth_err_no_info || '⚠️ 无法获取 Google 信息');
                                     }
                                 })
                                 .catch(() => {
-                                    if (typeof window.showToast === 'function') window.showToast('⚠️ 获取信息失败');
+                                    const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+                                    if (typeof window.showToast === 'function') window.showToast(dict.auth_err_fetch_fail || '⚠️ 获取信息失败');
                                 });
                         }
                     },
                     error_callback: function () {
-                        if (typeof window.showToast === 'function') window.showToast('👋 已取消 Google 登录');
+                        const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+                        if (typeof window.showToast === 'function') window.showToast(dict.auth_cancel || '👋 已取消 Google 登录');
                     }
                 });
                 client.requestAccessToken();
@@ -303,7 +308,8 @@
                     }
                 },
                 error_callback: function () {
-                    if (typeof window.showToast === 'function') window.showToast('👋 已取消 Google 登录');
+                    const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+                    if (typeof window.showToast === 'function') window.showToast(dict.auth_cancel || '👋 已取消 Google 登录');
                 }
             });
             client.requestAccessToken();
@@ -386,8 +392,9 @@
         // 4. 点击保存
         btnSave.addEventListener('click', () => {
             const newName = inputNickname.value.trim();
+            const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
             if (!newName) {
-                if (typeof window.showToast === 'function') window.showToast('⚠️ 昵称不能为空！');
+                if (typeof window.showToast === 'function') window.showToast(dict.profile_name_empty || '⚠️ 昵称不能为空！');
                 return;
             }
 
@@ -400,7 +407,7 @@
                 localStorage.setItem('pixelsprite_google_user', JSON.stringify(window.userState));
             } catch (err) {
                 console.warn('保存失败，可能图片过大', err);
-                if (typeof window.showToast === 'function') window.showToast('⚠️ 图片过大，保存失败');
+                if (typeof window.showToast === 'function') window.showToast(dict.profile_img_too_large || '⚠️ 图片过大，保存失败');
             }
 
             // 更新所有相关 UI
@@ -421,7 +428,7 @@
                 if (dropdownAvatarBadge) dropdownAvatarBadge.style.display = 'none';
             }
 
-            if (typeof window.showToast === 'function') window.showToast('✨ 资料修改成功！');
+            if (typeof window.showToast === 'function') window.showToast(dict.profile_save_success || '✨ 资料修改成功！');
             modal.style.display = 'none';
         });
 

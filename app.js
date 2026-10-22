@@ -563,7 +563,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (layer.id) {
                             layerCustomNames[layer.id] = trimmed;
                         }
-                        showToast(`✏️ 图层重命名为【${layer.name}】`);
+                        const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+                        showToast((dict.layer_renamed || '✏️ 图层重命名为 {name}').replace('{name}', layer.name));
                     }
                     renderLayersUI();
                 };
@@ -3934,9 +3935,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const newIdx = layers.length + 1;
                 const resX = engine.resX || 32;
                 const resY = engine.resY || 32;
+                const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
                 layers.push({
                     id: `layer_${Date.now()}`,
-                    name: `图层 ${newIdx}`,
+                    name: `${dict.layer_default_name || '图层'} ${newIdx}`,
                     visible: true,
                     opacity: 1.0,
                     buffer: engine.createBuffer(resX, resY)
@@ -3944,7 +3946,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 activeLayerIndex = layers.length - 1;
                 renderLayersUI();
                 renderMainCanvas();
-                showToast(`🥞 已创建【图层 ${newIdx}】`);
+                showToast(`${dict.layer_created || '🥞 已创建【图层 {index}】'}`.replace('{index}', newIdx));
             });
         }
 
@@ -5262,12 +5264,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (canvasContainerBox) canvasContainerBox.style.cursor = (activeTool === 'move') ? 'move' : '';
         if (pixelCanvas) pixelCanvas.style.cursor = (activeTool === 'move') ? 'move' : '';
 
+        const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
         if (toolName === 'shading') {
-            showToast('☀️ 阴影/高光笔刷：左键加亮高光 (Lighten)，右键加深阴影 (Darken)');
+            showToast(dict.tool_shading_hint || '☀️ 阴影/高光笔刷：左键加亮高光 (Lighten)，右键加深阴影 (Darken)');
         } else if (toolName === 'select') {
-            showToast('✂️ 选区工具：按住左键拖拽即可框选区域，内部拖拽移动，手柄缩放');
+            showToast(dict.tool_select_hint || '✂️ 选区工具：按住左键拖拽即可框选区域，内部拖拽移动，手柄缩放');
         } else {
-            showToast(`🛠️ 已切换工具: ${toolName.toUpperCase()}`);
+            // 🚨 自动去字典里找工具的翻译名字（比如 tool_pencil, tool_eraser）
+            const toolKey = `tool_${toolName}`;
+            const translatedToolName = dict[toolKey] ? dict[toolKey].replace(/\s*\(\d+\)$/, '') : toolName.toUpperCase(); // 去掉后面的 (1)(2) 快捷键提示
+            showToast((dict.tool_switched || '🛠️ 已切换工具: {tool}').replace('{tool}', translatedToolName));
         }
         drawGridOverlay();
     }
