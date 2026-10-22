@@ -6584,6 +6584,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initTourDOM();
         setTimeout(() => updateStep(), 100);
     }
+    window.startCyberTour = startCyberTour;
 
     // 🚨 绑定重播按钮
     setTimeout(() => {
