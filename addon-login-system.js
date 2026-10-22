@@ -76,6 +76,16 @@
         window.forceShow('app');
         window.updateUserAuthUI(); // 这个只更新了顶栏
 
+        // 🚨 核心修复：验证成功后，延迟 1.5 秒再弹教程，给 DOM 渲染的时间
+        if (!localStorage.getItem('pixelsprite_has_seen_guide')) {
+            setTimeout(() => {
+                // 确保 app.js 里的 startCyberTour 已经被定义
+                if (typeof window.startCyberTour === 'function') {
+                    window.startCyberTour(false);
+                }
+            }, 1500);
+        }
+
         // 🚨 新增：触发炫酷的欢迎仪式！
         if (typeof window.showLoginWelcome === 'function') {
             window.showLoginWelcome(name);

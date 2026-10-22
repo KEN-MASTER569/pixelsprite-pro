@@ -6585,29 +6585,6 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => updateStep(), 100);
     }
 
-    // 🚨 修复：只有成功进入主界面（也就是登录大闸消失）后，才自动弹出教程
-    setTimeout(() => {
-        const gate = document.getElementById('mandatory-auth-gate');
-        const app = document.getElementById('app');
-
-        // 判断大闸是否隐藏，且主界面是否可见
-        const isInsideApp = gate && (gate.style.display === 'none' || getComputedStyle(gate).display === 'none');
-
-        // 如果已经进到了软件里，才触发教程
-        if (isInsideApp) {
-            startCyberTour(false);
-        } else {
-            // 如果还在外面，监听一下全局变量，等用户登录成功后再说
-            let checkInterval = setInterval(() => {
-                const nowGate = document.getElementById('mandatory-auth-gate');
-                if (nowGate && (nowGate.style.display === 'none' || getComputedStyle(nowGate).display === 'none')) {
-                    clearInterval(checkInterval);
-                    startCyberTour(false);
-                }
-            }, 500); // 每半秒检查一次，进去了立马弹教程
-        }
-    }, 1000);
-
     // 🚨 绑定重播按钮
     setTimeout(() => {
         const btnReplay = document.getElementById('btn-replay-tour');
