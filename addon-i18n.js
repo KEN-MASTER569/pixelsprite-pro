@@ -1858,14 +1858,14 @@
     }
 
     // 当前语言状态
-    window.currentLang = 'zh';
+    window.currentLang = 'en';
     try {
-        window.currentLang = localStorage.getItem('pixelsprite_lang') || 'zh';
+        window.currentLang = localStorage.getItem('pixelsprite_lang') || 'en';
     } catch (e) { }
 
     // 🌐 切换语言的核心函数
     window.changeAppLanguage = function (lang) {
-        if (!window.I18N_TRANSLATIONS[lang]) lang = 'zh';
+        if (!window.I18N_TRANSLATIONS[lang]) lang = 'en';
         window.currentLang = lang;
         try { localStorage.setItem('pixelsprite_lang', lang); } catch (e) { }
         document.documentElement.lang = lang;

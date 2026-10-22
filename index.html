@@ -7,11 +7,6 @@
     <title>PixelSprite Pro - 专业 2D 像素画与游戏动画创作工坊</title>
     <!-- Google Identity Services SDK -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <!-- PayPal JavaScript SDK -->
-    <script
-        src="https://www.paypal.com/sdk/js?client-id=BAAdKUn9gGkZ8ROhpVh3QfDv2UB78QyaCuQeK15G6jbUHFl2iG96_bWs_qqJJkzs6ze4RUenflw6En18RU&currency=USD"
-        id="paypal-sdk-script" async defer
-        onerror="console.warn('PayPal SDK network load skipped - using fallback payment gateway');"></script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1049,11 +1044,9 @@
                 <div
                     style="display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; max-width: 380px; margin: 20px auto 10px auto; padding: 20px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 12px; box-shadow: inset 0 0 20px rgba(0, 242, 254, 0.05);">
 
-                    <!-- 购买按钮 -->
+                    <!-- Itch.io 购买按钮 -->
                     <a href="https://kenmaster-q2x.itch.io" target="_blank" class="btn"
-                        style="width: 100%; padding: 14px; background: linear-gradient(135deg, #fa5c5c 0%, #ff4757 100%); color: #fff; font-weight: 800; border-radius: 6px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(250, 92, 92, 0.4); transition: all 0.3s;"
-                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(250, 92, 92, 0.6)';"
-                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(250, 92, 92, 0.4)';">
+                        style="width: 100%; padding: 14px; background: linear-gradient(135deg, #fa5c5c 0%, #ff4757 100%); color: #fff; font-weight: 800; border-radius: 6px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(250, 92, 92, 0.4);">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="#ffffff">
                             <path
                                 d="M2 5 a2 2 0 0 1 2 -2 h16 a2 2 0 0 1 2 2 v3 a2 2 0 0 1 -4 0 a2 2 0 0 1 -4 0 a2 2 0 0 1 -4 0 a2 2 0 0 1 -4 0 a2 2 0 0 1 -4 0 z" />
@@ -1065,7 +1058,7 @@
                                 fill="#fa5c5c" />
                             <path d="M12 12 l-3 3.5 h2 v2.5 h2 v-2.5 h2 z" fill="#ffffff" />
                         </svg>
-                        <span data-i18n="itch_buy_btn">Buy PRO on Itch.io ($19.99)</span>
+                        <span>Buy PRO on Itch.io ($19.99)</span>
                     </a>
 
                     <!-- 分割线 -->
@@ -1083,7 +1076,8 @@
                         </p>
                         <div style="display: flex; gap: 8px; width: 100%;">
                             <input type="text" id="itch-activation-input"
-                                data-i18n-placeholder="itch_activate_placeholder" placeholder="Enter PRO-XXXX-XXXX"
+                                data-i18n-placeholder="itch_activate_placeholder"
+                                placeholder="Enter Lemon Squeezy License Key"
                                 style="flex: 1; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 10px 12px; border-radius: 6px; font-family: monospace; font-size: 13px; outline: none; transition: border 0.2s;"
                                 onfocus="this.style.borderColor='#00f2fe'"
                                 onblur="this.style.borderColor='rgba(255,255,255,0.2)'">

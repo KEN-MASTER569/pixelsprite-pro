@@ -6439,7 +6439,10 @@ document.addEventListener('DOMContentLoaded', () => {
             overlay.id = 'cyber-tour-overlay';
             overlay.style.position = 'fixed';
             overlay.style.inset = '0';
-            overlay.style.pointerEvents = 'none'; // 允许点击底下的东西
+            // 🚨 1. 全屏半透明黑底（去掉了 blur，画面绝对清晰）
+            overlay.style.background = 'rgba(0, 0, 0, 0.5)';
+            // 🚨 2. 为了让底层元素不被点击拦截，依然是 none，真正的拦截交给聚光灯
+            overlay.style.pointerEvents = 'none';
             overlay.style.zIndex = '999998';
 
             // 激光引导线 (SVG)
@@ -6454,6 +6457,13 @@ document.addEventListener('DOMContentLoaded', () => {
             // 聚光灯
             spotlight = document.createElement('div');
             spotlight.className = 'cyber-spotlight';
+            // 🚨 3. 核心魔法：利用 box-shadow 形成“挖空”效果
+            // 我们用巨大的阴影把四周填满黑色，只有中间是透明的
+            spotlight.style.boxShadow = '0 0 0 9999px rgba(0, 0, 0, 0.5)'; // 🚨 同样改成 0.4
+            // 配合半透明的发光线
+            spotlight.style.border = '2px solid #00f2fe';
+            // 拦截用户在聚光灯区域的点击（可选，防止乱点）
+            spotlight.style.pointerEvents = 'auto';
 
             // 机器人对话框
             bubble = document.createElement('div');
@@ -6628,36 +6638,126 @@ document.addEventListener('DOMContentLoaded', () => {
         return { isPromo, discount, finalPrice, originalPrice };
     };
 
-    // 🚨 应用折扣到界面
+    // ============================================================
+    // 🎯 全球统一月度动态促销 (每月前 10 天，5-9 折随机) - Lemon Squeezy 版
+    // ============================================================
+    window.getDynamicPrice = function () {
+        const now = new Date();
+        const day = now.getDate();
+        const month = now.getMonth() + 1;
+        const year = now.getFullYear();
+
+        const originalPrice = 19.99;
+        let finalPrice = originalPrice;
+        let discount = 10;
+        let isPromo = false;
+
+        // 首发特别促销期（按你实际情况改年份/月份/日期）
+        if (year === 2026 && month === 10 && day >= 24 && day <= 31) {
+            isPromo = true;
+            discount = 5;
+            finalPrice = 9.99;
+        }
+        // 常规促销：每月 1-10 号，5-9 折随机（按年月做种子，同一个月内所有人看到同一个折扣）
+        else if (day >= 1 && day <= 10) {
+            isPromo = true;
+            const seed = (year * month) % 5;
+            discount = seed + 5;
+            finalPrice = Number((originalPrice * (discount / 10)).toFixed(2));
+        }
+
+        return { isPromo, discount, finalPrice, originalPrice };
+    };
+
+    // 🚨 折扣力度 → Lemon Squeezy 折扣码 的映射
+    // 你需要在 LS 后台 Discounts 里预建这几个码，有效期覆盖整个促销期
+    const LS_DISCOUNT_CODE_MAP = {
+        5: 'PIXEL50',   // 5 折
+        6: 'PIXEL40',   // 6 折
+        7: 'PIXEL30',   // 7 折
+        8: 'PIXEL20',   // 8 折
+        9: 'PIXEL10'    // 9 折
+    };
+
+    // 🚨 你的 Lemon Squeezy 结账基础链接（不带 ?discount=）
+    const LS_CHECKOUT_BASE_URL = 'https://pixelsprite-pro.lemonsqueezy.com/checkout/buy/5eb10f41-09fe-4be9-bbbf-01ce5b909f26?embed=1';
+
+    // 扫描全页文本节点，把 $19.99 替换成折后价（防止 i18n 静态翻译里残留原价）
+    function replacePriceInTextNodes(newPrice) {
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        let node;
+        while ((node = walker.nextNode())) {
+            // 跳过 script/style 里的文本
+            if (node.parentNode && /^(SCRIPT|STYLE)$/.test(node.parentNode.tagName)) continue;
+            if (node.nodeValue && node.nodeValue.includes('$19.99')) {
+                node.nodeValue = node.nodeValue.replace(/\$19\.99/g, `$${newPrice}`);
+            }
+        }
+    }
+
     function applyGlobalPromotion() {
         const promo = window.getDynamicPrice();
-        if (!promo.isPromo) return;
+        const displayPrice = promo.finalPrice;
 
-        // 1. 顶部 PRO 按钮
+        // ---------- 1. 顶栏 PRO 按钮 ----------
         const btnHeaderBuyPro = document.getElementById('btn-header-buy-pro');
         if (btnHeaderBuyPro) {
-            btnHeaderBuyPro.innerHTML = `
-                👑 <span style="text-decoration: line-through; opacity: 0.6; font-size: 11px; margin-right: 4px;">$${promo.originalPrice}</span> 
+            if (promo.isPromo) {
+                btnHeaderBuyPro.innerHTML = `
+                👑 <span style="text-decoration: line-through; opacity: 0.6; font-size: 11px; margin-right: 4px;">$${promo.originalPrice}</span>
                 <span style="color: #ff4757; font-weight: 900;">升级 PRO ($${promo.finalPrice})</span>
                 <span style="position: absolute; top: -8px; right: -8px; background: #ff4757; color: #fff; font-size: 9px; padding: 2px 4px; border-radius: 4px; border: 1px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.3); animation: pulseDot 1s infinite alternate;">${promo.discount}折</span>
             `;
-            // 🚨 必须加上这个，否则角标会被按钮原有的 overflow:hidden 切掉
-            btnHeaderBuyPro.style.overflow = 'visible';
-            btnHeaderBuyPro.style.position = 'relative';
+                btnHeaderBuyPro.style.overflow = 'visible';
+                btnHeaderBuyPro.style.position = 'relative';
+                btnHeaderBuyPro.title = `通过 Lemon Squeezy 购买解锁 PRO 终身尊享版 ($${promo.finalPrice} USD，限时 ${promo.discount} 折)`;
+            } else {
+                btnHeaderBuyPro.title = `通过 Lemon Squeezy 购买解锁 PRO 终身尊享版 ($19.99 USD)`;
+            }
         }
 
-        // 2. 下拉菜单里的 PRO 按钮（如果存在）
+        // ---------- 2. 下拉菜单里的 PRO 按钮 ----------
         const btnDropdownPro = document.getElementById('btn-dropdown-pro-upgrade');
         if (btnDropdownPro) {
-            btnDropdownPro.innerHTML = `<span>👑 解锁 PRO 永久尊享版 ($${promo.finalPrice})</span><span class="btn-shine-sparkle">✨</span>`;
+            btnDropdownPro.innerHTML = `<span>👑 解锁 PRO 永久尊享版 ($${displayPrice})</span><span class="btn-shine-sparkle">✨</span>`;
         }
 
-        // 3. 保存到全局，给 PayPal 调用
-        window.currentCheckoutPrice = promo.finalPrice.toString();
+        // ---------- 3. Lemon Squeezy 弹窗购买按钮 ----------
+        const lsBuyBtn = document.getElementById('ls-buy-btn');
+        if (lsBuyBtn) {
+            const code = promo.isPromo ? (LS_DISCOUNT_CODE_MAP[promo.discount] || '') : '';
+            lsBuyBtn.href = code ? `${LS_CHECKOUT_BASE_URL}?discount=${code}` : LS_CHECKOUT_BASE_URL;
+
+            const btnText = document.getElementById('ls-buy-btn-text');
+            if (btnText) {
+                btnText.textContent = promo.isPromo
+                    ? `Buy PRO on Lemon Squeezy ($${promo.finalPrice} · ${promo.discount}折)`
+                    : `Buy PRO on Lemon Squeezy ($19.99)`;
+            }
+        }
+
+        // ---------- 4. 扫全页文本节点，替换残留的 $19.99 ----------
+        if (promo.isPromo) {
+            replacePriceInTextNodes(promo.finalPrice);
+        }
+
+        // ---------- 5. 同步到全局，供其他地方读取 ----------
+        window.currentCheckoutPrice = displayPrice.toString();
+        window.currentPromo = promo;
     }
 
-    // 页面加载后自动执行打折
+    // 页面加载后自动执行打折（保留你原来的 1 秒延迟）
     setTimeout(applyGlobalPromotion, 1000);
+
+    // 🚨 语言切换后也重新跑一次，防止 i18n 把价格文字重置回 $19.99
+    const _origChangeAppLanguage = window.changeAppLanguage;
+    if (typeof _origChangeAppLanguage === 'function') {
+        window.changeAppLanguage = function (lang) {
+            _origChangeAppLanguage(lang);
+            // 等 i18n 把 DOM 刷完再改价格
+            setTimeout(applyGlobalPromotion, 50);
+        };
+    }
 
     // ============================================================
     // 🚀 社区与公告控制中心 (集成到 Logo)
@@ -6816,64 +6916,119 @@ window.showLoginWelcome = function (userName) {
     }, 3500); // 整个动画持续 3.5 秒
 };
 
+// ============================================================
+// 🔑 真正的 Itch.io 激活逻辑 (连接你的本地/云端后端)
+// ============================================================
 function initItchActivation() {
     const btnActivate = document.getElementById('btn-activate-itch');
     const inputCode = document.getElementById('itch-activation-input');
+    if (!btnActivate || !inputCode) return;
 
-    if (btnActivate && inputCode) {
-        btnActivate.addEventListener('click', async () => { // 🚨 变成 async
-            const code = inputCode.value.trim().toUpperCase();
-            if (!code) {
-                if (typeof showToast === 'function') showToast(window.t('itch_activate_empty') || '⚠️ 请输入激活码');
-                return;
-            }
+    btnActivate.onclick = async () => {
+        const licenseKey = inputCode.value.trim();
+        if (!licenseKey) {
+            if (typeof showToast === 'function') showToast('⚠️ 请输入 License Key');
+            return;
+        }
 
-            // 🚨 改变按钮状态，提示正在验证
-            const originalText = btnActivate.innerHTML;
-            btnActivate.innerHTML = '⏳ ...';
-            btnActivate.disabled = true;
+        const originalText = btnActivate.innerHTML;
+        btnActivate.innerHTML = '⏳ 验证中...';
+        btnActivate.disabled = true;
 
-            try {
-                // 🚨 发送到你的后端去验证
-                const response = await fetch('https://pixelsprite-backend.onrender.com/api/verify-license', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ licenseKey: code })
-                });
+        try {
+            // 🚨 这里换成你后端的真实地址，如果你本地测试，就是 localhost:3000
+            // 如果你部署到了 Render，就换成 https://pixelsprite-backend.onrender.com
+            const BACKEND_URL = 'https://pixelsprite-backend.onrender.com';
 
-                const result = await response.json();
+            const response = await fetch(`${BACKEND_URL}/api/verify-license`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ licenseKey })
+            });
 
-                if (result.success) {
-                    // 验证通过，解锁 PRO
-                    if (!window.proState) window.proState = {};
-                    window.proState.isLifetimePro = true;
-                    window.proState.trialStartTime = Date.now();
+            const result = await response.json();
 
-                    try {
-                        localStorage.setItem('pixelsprite_pro_state_v3', JSON.stringify(window.proState));
-                        localStorage.setItem('pixelsprite_license_key', code);
-                    } catch (e) { }
+            if (result.success) {
+                if (!window.proState) window.proState = {};
+                window.proState.isLifetimePro = true;
+                window.proState.trialStartTime = Date.now();
 
-                    if (typeof updateProStatusAndUI === 'function') updateProStatusAndUI();
-                    if (typeof window.fireConfetti === 'function') window.fireConfetti();
-                    if (typeof closeProModal === 'function') closeProModal();
+                try {
+                    localStorage.setItem('pixelsprite_pro_state_v3', JSON.stringify(window.proState));
+                    localStorage.setItem('pixelsprite_license_key', licenseKey);
+                } catch (e) { }
 
-                    if (typeof showToast === 'function') showToast(window.t('itch_activate_success') || '🎉 恭喜！PRO 终身尊享版已激活！');
-                } else {
-                    // 验证失败（无效或已被使用）
-                    if (typeof showToast === 'function') showToast('❌ ' + (result.error || '激活失败'));
-                    // 恢复按钮
-                    btnActivate.innerHTML = originalText;
-                    btnActivate.disabled = false;
-                }
-            } catch (err) {
-                console.error(err);
-                if (typeof showToast === 'function') showToast('⚠️ 网络连接失败，请检查网络');
+                if (typeof updateProStatusAndUI === 'function') updateProStatusAndUI();
+                if (typeof window.fireConfetti === 'function') window.fireConfetti();
+                if (typeof closeProModal === 'function') closeProModal();
+                if (typeof showToast === 'function') showToast('🎉 恭喜！PRO 终身尊享版已激活！');
+            } else {
+                const errorMsg = result.error || '激活失败，请检查 License Key';
+                if (typeof showToast === 'function') showToast('❌ ' + errorMsg);
                 btnActivate.innerHTML = originalText;
                 btnActivate.disabled = false;
             }
-        });
-    }
+        } catch (err) {
+            console.error('后端验证请求失败:', err);
+            if (typeof showToast === 'function') showToast('⚠️ 无法连接到后端服务器，请检查后端是否启动');
+            btnActivate.innerHTML = originalText;
+            btnActivate.disabled = false;
+        }
+    };
 }
 
+// 延迟一秒加载
 setTimeout(initItchActivation, 1000);
+
+// ============================================================
+// 🎯 全球统一月度动态促销 (每月前 10 天，5-9 折随机)
+// ============================================================
+window.getDynamicPrice = function () {
+    const now = new Date();
+    const day = now.getDate();
+    const month = now.getMonth() + 1;
+    const year = now.getFullYear();
+
+    const originalPrice = 19.99;
+    let finalPrice = originalPrice;
+    let discount = 10;
+    let isPromo = false;
+
+    // 首发特别促销期（按实际情况改日期）
+    if (year === 2026 && month === 10 && day >= 24 && day <= 31) {
+        isPromo = true;
+        discount = 5;
+        finalPrice = 9.99;
+    }
+    else if (day >= 1 && day <= 10) {
+        isPromo = true;
+        const seed = (year * month) % 5;
+        discount = seed + 5;
+        finalPrice = Number((originalPrice * (discount / 10)).toFixed(2));
+    }
+
+    return { isPromo, discount, finalPrice, originalPrice };
+};
+
+function applyGlobalPromotion() {
+    const promo = window.getDynamicPrice();
+    if (!promo.isPromo) return;
+
+    const btnHeaderBuyPro = document.getElementById('btn-header-buy-pro');
+    if (btnHeaderBuyPro) {
+        btnHeaderBuyPro.innerHTML = `
+            👑 <span style="text-decoration: line-through; opacity: 0.6; font-size: 11px; margin-right: 4px;">$${promo.originalPrice}</span> 
+            <span style="color: #ff4757; font-weight: 900;">升级 PRO ($${promo.finalPrice})</span>
+            <span style="position: absolute; top: -8px; right: -8px; background: #ff4757; color: #fff; font-size: 9px; padding: 2px 4px; border-radius: 4px; border: 1px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.3); animation: pulseDot 1s infinite alternate;">${promo.discount}折</span>
+        `;
+        btnHeaderBuyPro.style.overflow = 'visible';
+        btnHeaderBuyPro.style.position = 'relative';
+    }
+
+    window.currentCheckoutPrice = promo.finalPrice.toString();
+}
+
+// 页面加载后自动执行打折
+setTimeout(applyGlobalPromotion, 1000);

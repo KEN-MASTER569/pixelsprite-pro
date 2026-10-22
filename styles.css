@@ -3949,14 +3949,10 @@ body .timeline-bar {
 /* 1. 聚光灯区域：加上极高对比度的发光和内阴影 */
 .cyber-spotlight {
     position: absolute;
-    box-shadow: 0 0 0 4px #00f2fe,
-        0 0 40px rgba(0, 242, 254, 0.6),
-        inset 0 0 20px rgba(0, 242, 254, 0.3) !important;
     border-radius: 8px;
     transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    /* Q弹的位移效果 */
     pointer-events: none;
-    background: rgba(0, 242, 254, 0.05);
+    /* 这里不要写 box-shadow 了，因为我们已经在 JS 里动态写了 */
     z-index: 999999;
 }
 
