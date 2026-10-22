@@ -4709,7 +4709,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             return id;
                         })());
 
-                    const projectName = prompt("请为这个云端工程起个名字：", `工程_${new Date().toLocaleDateString()}`) || '未命名工程';
+                    const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+                    const projectName = prompt(dict.cloud_history_save_prompt || "请为这个云端工程起个名字：", `${dict.cloud_history_default_name || '工程_'}${new Date().toLocaleDateString()}`) || 'Untitled';
 
                     const res = await fetch(`${API_BASE_URL}/api/cloud/save`, {
                         method: 'POST',
@@ -4753,25 +4754,31 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // ☁️ 云端读取（智能版：自动判断是否登录，拉取历史列表）
+        // ☁️ 云端读取（智能版：支持多语言 + 自动判断登录）
         const btnCloudLoad = document.getElementById('btn-cloud-load');
         if (btnCloudLoad) {
             btnCloudLoad.addEventListener('click', async () => {
-                const d = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+                // 🚨 获取当前语言字典
+                const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
 
-                // 🚨 核心判断：如果用户登录了 Google 账号，直接弹档案库
+                // 如果用户登录了 Google 账号，直接弹档案库
                 if (window.userState && window.userState.isLoggedIn && window.userState.email) {
                     cloudHistoryModal.style.display = 'flex';
-                    cloudHistoryList.innerHTML = '<div style="color:#00f2fe; width:100%; text-align:center; padding: 20px;">⏳ 正在获取您的云端档案...</div>';
+                    cloudHistoryList.innerHTML = `<div style="color:#00f2fe; width:100%; text-align:center; padding: 20px;">${dict.cloud_history_loading}</div>`;
                     cloudHistoryEmpty.style.display = 'none';
+
+                    // 动态替换弹窗标题和按钮文字
+                    document.querySelector('#cloud-history-modal h3').innerHTML = dict.cloud_history_title;
+                    document.querySelector('#btn-close-history').innerText = dict.cloud_history_close;
+                    document.querySelector('#cloud-history-empty p').innerText = dict.cloud_history_empty;
+                    document.querySelector('#btn-open-old-load').innerText = dict.cloud_history_input_pin;
+                    document.querySelector('#cloud-history-modal .modal-footer div').innerHTML = `${dict.cloud_history_old_pin} <button id="btn-open-old-load" style="background: none; border: none; color: #00f2fe; cursor: pointer; text-decoration: underline;">${dict.cloud_history_input_pin}</button>`;
 
                     try {
                         const res = await fetch(`${API_BASE_URL}/api/cloud/list/${encodeURIComponent(window.userState.email)}`);
-                        if (!res.ok) {
-                            throw new Error("后端接口返回错误，可能是 Render 还没更新，或者路由不对");
-                        }
+                        if (!res.ok) throw new Error("Network response was not ok");
                         const result = await res.json();
-                        
+
                         cloudHistoryList.innerHTML = '';
                         if (result.success && result.projects && result.projects.length > 0) {
                             result.projects.forEach(proj => {
@@ -4782,28 +4789,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
                                 card.innerHTML = `
                                     <div style="font-size: 32px; margin-bottom: 8px;">🖼️</div>
-                                    <div style="font-size: 13px; font-weight: bold; color: #fff; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${proj.name || '未命名工程'}</div>
+                                    <div style="font-size: 13px; font-weight: bold; color: #fff; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${proj.name || dict.cloud_history_default_name}</div>
                                     <div style="font-size: 10px; color: #8a99ad;">${new Date(proj.timestamp).toLocaleString()}</div>
-                                    <div style="font-size: 11px; color: #00f2fe; margin-top: 8px; font-weight: bold;">点击载入</div>
+                                    <div style="font-size: 11px; color: #00f2fe; margin-top: 8px; font-weight: bold;">${dict.cloud_history_load}</div>
                                 `;
 
-                                // 点击卡片，直接拉取工程
                                 card.addEventListener('click', async () => {
-                                    card.innerHTML = '<div style="color:#00f2fe; padding: 20px 0;">⏳ 载入中...</div>';
+                                    card.innerHTML = `<div style="color:#00f2fe; padding: 20px 0;">⏳ ...</div>`;
                                     try {
                                         const loadRes = await fetch(`${API_BASE_URL}/api/cloud/load/${proj.pinCode}`);
                                         const loadData = await loadRes.json();
                                         if (loadData.success && loadData.data) {
                                             restoreProjectData(loadData.data);
                                             cloudHistoryModal.style.display = 'none';
-                                            if (typeof showToast === 'function') showToast('✨ 云端画作恢复成功！');
+                                            if (typeof showToast === 'function') showToast(dict.cloud_load_success || '✨ 云端画作恢复成功！');
                                         } else {
-                                            alert('加载失败：' + loadData.error);
-                                            card.innerHTML = '<div style="color:#ff4757; padding: 20px 0;">加载失败</div>';
+                                            alert(dict.cloud_history_load_fail + ': ' + loadData.error);
+                                            card.innerHTML = `<div style="color:#ff4757; padding: 20px 0;">${dict.cloud_history_load_fail}</div>`;
                                         }
                                     } catch (e) {
-                                        alert('网络错误，加载失败');
-                                        card.innerHTML = '<div style="color:#ff4757; padding: 20px 0;">网络错误</div>';
+                                        alert(dict.cloud_history_net_error);
+                                        card.innerHTML = `<div style="color:#ff4757; padding: 20px 0;">${dict.cloud_history_net_error}</div>`;
                                     }
                                 });
 
@@ -4814,15 +4820,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     } catch (err) {
                         console.error(err);
-                        cloudHistoryList.innerHTML = '<div style="color:#ff4757; width:100%; text-align:center; padding: 20px;">❌ 获取列表失败</div>';
+                        cloudHistoryList.innerHTML = `<div style="color:#ff4757; width:100%; text-align:center; padding: 20px;">${dict.cloud_history_net_error}</div>`;
                     }
-                    return; // 结束，不往下走
+                    return;
                 }
 
                 // ==========================================
                 // 如果没登录，走传统的提取码逻辑
                 // ==========================================
-                const pinCode = prompt(d.cloud_load_prompt || '请输入提取码：');
+                const pinCode = prompt(dict.cloud_load_prompt || '请输入提取码：');
                 if (!pinCode) return;
 
                 showLoader();
@@ -4836,13 +4842,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     if (result.success && result.data) {
                         restoreProjectData(result.data);
-                        showToast(d.cloud_load_success || '✨ 云端画作恢复成功！');
+                        showToast(dict.cloud_load_success || '✨ 云端画作恢复成功！');
                     } else {
-                        alert(d.cloud_load_fail.replace('{error}', result.error));
+                        alert(dict.cloud_load_fail.replace('{error}', result.error));
                     }
                 } catch (err) {
                     hideLoader();
-                    alert(d.cloud_net_error || '⚠️ 网络连接失败');
+                    alert(dict.cloud_net_error || '⚠️ 网络连接失败');
                 } finally {
                     hideLoader();
                     btnCloudLoad.disabled = false;
