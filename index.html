@@ -1045,7 +1045,7 @@
                     style="display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; max-width: 380px; margin: 20px auto 10px auto; padding: 20px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 12px; box-shadow: inset 0 0 20px rgba(0, 242, 254, 0.05);">
 
                     <!-- Itch.io 购买按钮 -->
-                    <a href="https://kenmaster-q2x.itch.io" target="_blank" class="btn"
+                    <a href="https://kenmaster-q2x.itch.io/pixelsprite-pro" target="_blank" class="btn"
                         style="width: 100%; padding: 14px; background: linear-gradient(135deg, #fa5c5c 0%, #ff4757 100%); color: #fff; font-weight: 800; border-radius: 6px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(250, 92, 92, 0.4);">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="#ffffff">
                             <path
@@ -1058,7 +1058,7 @@
                                 fill="#fa5c5c" />
                             <path d="M12 12 l-3 3.5 h2 v2.5 h2 v-2.5 h2 z" fill="#ffffff" />
                         </svg>
-                        <span>Buy PRO on Itch.io ($19.99)</span>
+                        <span data-i18n="itch_buy_btn">Buy PRO on Itch.io ($19.99)</span>
                     </a>
 
                     <!-- 分割线 -->
@@ -1072,12 +1072,11 @@
                     <div style="width: 100%; display: flex; flex-direction: column; gap: 8px;">
                         <p data-i18n="itch_activate_title"
                             style="color: #00f2fe; font-size: 12px; font-weight: 600; margin: 0; text-align: center;">
-                            Enter your license key below to activate
+                            请在下方粘贴 Itch.io 购买邮件中的完整下载链接或激活码
                         </p>
                         <div style="display: flex; gap: 8px; width: 100%;">
                             <input type="text" id="itch-activation-input"
-                                data-i18n-placeholder="itch_activate_placeholder"
-                                placeholder="Enter Lemon Squeezy License Key"
+                                data-i18n-placeholder="itch_activate_placeholder" placeholder="请粘贴 Itch.io 发送给您的完整下载链接"
                                 style="flex: 1; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 10px 12px; border-radius: 6px; font-family: monospace; font-size: 13px; outline: none; transition: border 0.2s;"
                                 onfocus="this.style.borderColor='#00f2fe'"
                                 onblur="this.style.borderColor='rgba(255,255,255,0.2)'">
@@ -1227,37 +1226,33 @@
         </div>
     </div>
 
-    <!-- 导出预览弹窗 Export Preview Modal -->
-    <div id="export-modal" class="modal-backdrop" style="display: none;">
-        <div class="modal-card">
+    <!-- ☁️ 云端档案历史记录弹窗 -->
+    <div id="cloud-history-modal" class="modal-backdrop" style="display: none; z-index: 100000;">
+        <div class="modal-card"
+            style="width: 600px; max-width: 95vw; background: rgba(10, 15, 25, 0.95); border: 1px solid rgba(0, 242, 254, 0.4);">
             <div class="modal-header">
-                <h3 id="modal-title" data-i18n="export_modal_title">✨ 资产导出成功</h3>
-                <button id="modal-close" class="modal-close-btn">&times;</button>
+                <h3 style="color: var(--accent-cyan);">☁️ 我的云端工程库</h3>
+                <button id="cloud-history-close" class="modal-close-btn">&times;</button>
             </div>
-            <div class="modal-body">
-                <div class="modal-image-box">
-                    <img id="modal-preview-img" src="" alt="Export Preview">
+            <div class="modal-body" style="max-height: 60vh; overflow-y: auto; padding-right: 5px;">
+                <div id="cloud-history-list"
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; width: 100%;">
+                    <!-- 动态渲染工程卡片 -->
                 </div>
-                <div class="modal-info">
-                    <span id="modal-badge" class="badge">PNG | 512x512</span>
-
-                    <div class="path-selector-box">
-                        <label class="path-label" data-i18n="label_path">📂 保存文件名与路径选择:</label>
-                        <div class="path-input-group">
-                            <input type="text" id="export-filename-input" class="select-input path-field"
-                                placeholder="project_32x32.png">
-                            <button id="btn-custom-path-save" class="btn btn-secondary btn-path-picker"
-                                data-i18n="btn_browse_path" title="选择 Windows 本地保存路径">📂 浏览保存路径</button>
-                        </div>
-                    </div>
-
-                    <p id="modal-desc" data-i18n="export_desc">可随时点击“浏览保存路径”选择本地保存目录！</p>
+                <div id="cloud-history-empty"
+                    style="display: none; text-align: center; color: var(--text-muted); padding: 40px 0;">
+                    <span style="font-size: 40px; opacity: 0.5;">📭</span>
+                    <p style="margin-top: 10px;">您还没有保存过任何云端工程哦~</p>
                 </div>
             </div>
-            <div class="modal-footer">
-                <a id="modal-download-link" href="#" download="" class="btn btn-primary" data-i18n="btn_quick_download"
-                    target="_blank">⬇️ 快速下载</a>
-                <button id="btn-modal-close" class="btn btn-secondary" data-i18n="btn_close">关闭</button>
+            <div class="modal-footer"
+                style="justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+                <div style="font-size: 12px; color: var(--text-muted);">
+                    还在用旧密码？
+                    <button id="btn-open-old-load"
+                        style="background: none; border: none; color: #00f2fe; cursor: pointer; text-decoration: underline;">输入提取码读取</button>
+                </div>
+                <button id="btn-close-history" class="btn btn-secondary">关闭</button>
             </div>
         </div>
     </div>

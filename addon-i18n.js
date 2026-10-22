@@ -368,12 +368,12 @@
             welcome_subtitle: "认证成功，正在为您装载画布...",
 
             itch_buy_btn: "🎮 前往 Itch.io 购买 PRO ($19.99)",
-            itch_activate_title: "购买后，在下方输入兑换码激活",
-            itch_activate_placeholder: "输入 PRO-XXXX-XXXX",
-            itch_activate_btn: "激活",
             itch_activate_success: "🎉 恭喜！PRO 终身尊享版已激活！",
             itch_activate_fail: "❌ 无效的激活码，请检查格式或联系客服。",
             itch_activate_empty: "⚠️ 请输入激活码",
+            itch_activate_title: '请在下方粘贴 Itch.io 购买邮件中的完整下载链接或激活码',
+            itch_activate_placeholder: '请粘贴 Itch.io 发送给您的完整下载链接',
+            itch_activate_btn: '立即激活',
         },
         en: {
             lang_name: 'English',
@@ -738,12 +738,12 @@
             welcome_subtitle: "Auth successful. Loading your canvas...",
 
             itch_buy_btn: "🎮 Buy PRO on Itch.io ($19.99)",
-            itch_activate_title: "Enter your license key below to activate",
-            itch_activate_placeholder: "Enter PRO-XXXX-XXXX",
-            itch_activate_btn: "Activate",
             itch_activate_success: "🎉 Congratulations! PRO Lifetime activated!",
             itch_activate_fail: "❌ Invalid license key. Please check the format.",
             itch_activate_empty: "⚠️ Please enter a license key",
+            itch_activate_title: 'Paste your Itch.io download link or license key below',
+            itch_activate_placeholder: 'Paste full Itch.io download link here',
+            itch_activate_btn: 'Activate',
         },
         ja: {
             lang_name: '日本語',
@@ -1108,12 +1108,12 @@
             welcome_subtitle: "認証に成功しました。キャンバスを準備しています...",
 
             itch_buy_btn: "🎮 Itch.io で PRO を購入 ($19.99)",
-            itch_activate_title: "購入後、下にライセンスキーを入力してください",
-            itch_activate_placeholder: "PRO-XXXX-XXXX を入力",
-            itch_activate_btn: "認証",
             itch_activate_success: "🎉 おめでとうございます！PRO 永久版が有効化されました！",
             itch_activate_fail: "❌ 無効なライセンスキーです。",
             itch_activate_empty: "⚠️ ライセンスキーを入力してください",
+            itch_activate_title: 'Itch.ioの購入メールに記載されたダウンロードリンクまたはライセンスキーを貼り付けてください',
+            itch_activate_placeholder: 'Itch.ioの完全なダウンロードリンクを貼り付けてください',
+            itch_activate_btn: 'アクティベート',
         },
         'zh-TW': {
             lang_name: '繁體中文',
@@ -1478,12 +1478,12 @@
             welcome_subtitle: "認證成功，正在為您裝載畫布...",
 
             itch_buy_btn: "🎮 前往 Itch.io 購買 PRO ($19.99)",
-            itch_activate_title: "購買後，在下方輸入兌換碼啟用",
-            itch_activate_placeholder: "輸入 PRO-XXXX-XXXX",
-            itch_activate_btn: "啟用",
             itch_activate_success: "🎉 恭喜！PRO 終身尊享版已啟用！",
             itch_activate_fail: "❌ 無效的啟用碼，請檢查格式。",
             itch_activate_empty: "⚠️ 請輸入啟用碼",
+            itch_activate_title: '請在下方貼上 Itch.io 購買郵件中的完整下載連結或啟用碼',
+            itch_activate_placeholder: '請貼上 Itch.io 發送給您的完整下載連結',
+            itch_activate_btn: '立即啟用',
         },
         es: {
             lang_name: 'Español',
@@ -1849,11 +1849,12 @@
 
             itch_buy_btn: "🎮 Comprar PRO en Itch.io ($19.99)",
             itch_activate_title: "Ingresa tu clave de licencia abajo para activar",
-            itch_activate_placeholder: "Ingresa PRO-XXXX-XXXX",
-            itch_activate_btn: "Activar",
             itch_activate_success: "🎉 ¡Felicidades! ¡PRO de por vida activado!",
             itch_activate_fail: "❌ Clave de licencia inválida.",
             itch_activate_empty: "⚠️ Por favor ingresa una clave",
+            itch_activate_title: 'Pega tu enlace de descarga de Itch.io o clave de licencia a continuación',
+            itch_activate_placeholder: 'Pega el enlace de descarga completo de Itch.io aquí',
+            itch_activate_btn: 'Activar',
         }
     }
 

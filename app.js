@@ -276,6 +276,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // 节流函数，限制高频触发
     let lastGridDraw = 0;
 
+    const cloudHistoryModal = document.getElementById('cloud-history-modal');
+    const cloudHistoryClose = document.getElementById('cloud-history-close');
+    const btnCloseHistory = document.getElementById('btn-close-history');
+    const cloudHistoryList = document.getElementById('cloud-history-list');
+    const cloudHistoryEmpty = document.getElementById('cloud-history-empty');
+    const btnOpenOldLoad = document.getElementById('btn-open-old-load');
+
     const ZOOM_LEVELS = [
         { label: '2x', scale: 0.125 },
         { label: '4x', scale: 0.25 },
@@ -4702,11 +4709,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             return id;
                         })());
 
+                    const projectName = prompt("请为这个云端工程起个名字：", `工程_${new Date().toLocaleDateString()}`) || '未命名工程';
+
                     const res = await fetch(`${API_BASE_URL}/api/cloud/save`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ projectData, userId }),
-                        signal: controller.signal // 🚨 把拦截器塞进去
+                        body: JSON.stringify({ projectData, userId, projectName }), // 🚨 把 projectName 传过去
+                        signal: controller.signal
                     });
 
                     clearTimeout(timeoutId); // 成功了就取消超时
@@ -4744,61 +4753,124 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // 📥 云端读取
+        // ☁️ 云端读取（智能版：自动判断是否登录，拉取历史列表）
         const btnCloudLoad = document.getElementById('btn-cloud-load');
         if (btnCloudLoad) {
             btnCloudLoad.addEventListener('click', async () => {
                 const d = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+
+                // 🚨 核心判断：如果用户登录了 Google 账号，直接弹档案库
+                if (window.userState && window.userState.isLoggedIn && window.userState.email) {
+                    cloudHistoryModal.style.display = 'flex';
+                    cloudHistoryList.innerHTML = '<div style="color:#00f2fe; width:100%; text-align:center; padding: 20px;">⏳ 正在获取您的云端档案...</div>';
+                    cloudHistoryEmpty.style.display = 'none';
+
+                    try {
+                        const res = await fetch(`${API_BASE_URL}/api/cloud/list/${encodeURIComponent(window.userState.email)}`);
+                        if (!res.ok) {
+                            throw new Error("后端接口返回错误，可能是 Render 还没更新，或者路由不对");
+                        }
+                        const result = await res.json();
+                        
+                        cloudHistoryList.innerHTML = '';
+                        if (result.success && result.projects && result.projects.length > 0) {
+                            result.projects.forEach(proj => {
+                                const card = document.createElement('div');
+                                card.style.cssText = `background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s; text-align: center;`;
+                                card.onmouseover = () => { card.style.borderColor = '#00f2fe'; card.style.transform = 'translateY(-2px)'; };
+                                card.onmouseout = () => { card.style.borderColor = 'rgba(255,255,255,0.1)'; card.style.transform = 'translateY(0)'; };
+
+                                card.innerHTML = `
+                                    <div style="font-size: 32px; margin-bottom: 8px;">🖼️</div>
+                                    <div style="font-size: 13px; font-weight: bold; color: #fff; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${proj.name || '未命名工程'}</div>
+                                    <div style="font-size: 10px; color: #8a99ad;">${new Date(proj.timestamp).toLocaleString()}</div>
+                                    <div style="font-size: 11px; color: #00f2fe; margin-top: 8px; font-weight: bold;">点击载入</div>
+                                `;
+
+                                // 点击卡片，直接拉取工程
+                                card.addEventListener('click', async () => {
+                                    card.innerHTML = '<div style="color:#00f2fe; padding: 20px 0;">⏳ 载入中...</div>';
+                                    try {
+                                        const loadRes = await fetch(`${API_BASE_URL}/api/cloud/load/${proj.pinCode}`);
+                                        const loadData = await loadRes.json();
+                                        if (loadData.success && loadData.data) {
+                                            restoreProjectData(loadData.data);
+                                            cloudHistoryModal.style.display = 'none';
+                                            if (typeof showToast === 'function') showToast('✨ 云端画作恢复成功！');
+                                        } else {
+                                            alert('加载失败：' + loadData.error);
+                                            card.innerHTML = '<div style="color:#ff4757; padding: 20px 0;">加载失败</div>';
+                                        }
+                                    } catch (e) {
+                                        alert('网络错误，加载失败');
+                                        card.innerHTML = '<div style="color:#ff4757; padding: 20px 0;">网络错误</div>';
+                                    }
+                                });
+
+                                cloudHistoryList.appendChild(card);
+                            });
+                        } else {
+                            cloudHistoryEmpty.style.display = 'block';
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        cloudHistoryList.innerHTML = '<div style="color:#ff4757; width:100%; text-align:center; padding: 20px;">❌ 获取列表失败</div>';
+                    }
+                    return; // 结束，不往下走
+                }
+
+                // ==========================================
+                // 如果没登录，走传统的提取码逻辑
+                // ==========================================
                 const pinCode = prompt(d.cloud_load_prompt || '请输入提取码：');
                 if (!pinCode) return;
 
-                // 🚨 1. 开启全屏 Loading
                 showLoader();
                 btnCloudLoad.disabled = true;
 
                 try {
-                    // 让浏览器先渲染 Loading
                     await new Promise(resolve => setTimeout(resolve, 50));
-
                     const res = await fetch(`${API_BASE_URL}/api/cloud/load/${pinCode.toUpperCase()}`)
                     const result = await res.json();
-
-                    // 🚨 关掉 Loading
                     hideLoader();
 
                     if (result.success && result.data) {
-                        // 🚨 恢复工程的核心逻辑
-                        const data = result.data;
-                        engine.resX = data.resX;
-                        engine.resY = data.resY;
-                        engine.resolution = Math.max(data.resX, data.resY);
-
-                        if (resCustomX) resCustomX.value = data.resX;
-                        if (resCustomY) resCustomY.value = data.resY;
-
-                        fps = data.fps || 12;
-                        currentFrame = data.currentFrame || 0;
-
-                        // 深度恢复
-                        frameBuffers = data.frameBuffers.map(buf => cloneBuffer(buf));
-                        frameLayers = cloneLayersStack(data.frameLayers);
-
-                        initFrameLayers(currentFrame);
-                        updateCanvasDOMDimensions(data.resX, data.resY);
-                        syncCurrentFrameBuffer();
-                        renderAll();
-
+                        restoreProjectData(result.data);
                         showToast(d.cloud_load_success || '✨ 云端画作恢复成功！');
                     } else {
                         alert(d.cloud_load_fail.replace('{error}', result.error));
                     }
                 } catch (err) {
-                    hideLoader(); // 报错也要关
+                    hideLoader();
                     alert(d.cloud_net_error || '⚠️ 网络连接失败');
                 } finally {
-                    // 🚨 兜底清理
                     hideLoader();
                     btnCloudLoad.disabled = false;
+                }
+            });
+        }
+
+        // 绑定关闭档案库弹窗
+        [cloudHistoryClose, btnCloseHistory].forEach(btn => {
+            if (btn) btn.addEventListener('click', () => { cloudHistoryModal.style.display = 'none'; });
+        });
+
+        // 如果没有登录，但想用旧码，点击切换
+        if (btnOpenOldLoad) {
+            btnOpenOldLoad.addEventListener('click', () => {
+                cloudHistoryModal.style.display = 'none';
+                const pinCode = prompt(window.I18N_TRANSLATIONS[window.currentLang]?.cloud_load_prompt || '请输入提取码：');
+                if (pinCode) {
+                    fetch(`${API_BASE_URL}/api/cloud/load/${pinCode.toUpperCase()}`)
+                        .then(res => res.json())
+                        .then(result => {
+                            if (result.success && result.data) {
+                                restoreProjectData(result.data);
+                                showToast('✨ 云端画作恢复成功！');
+                            } else {
+                                alert(result.error || '加载失败');
+                            }
+                        }).catch(() => alert('网络错误'));
                 }
             });
         }
@@ -5475,6 +5547,25 @@ document.addEventListener('DOMContentLoaded', () => {
         if (status === 'cancel') return; // 👈 用户取消
 
         showExportModal(dataUrl, filename, 'JSON 工程文件', '💾 像素工程文件保存成功！');
+    }
+
+    function restoreProjectData(data) {
+        engine.resX = data.resX;
+        engine.resY = data.resY;
+        engine.resolution = Math.max(data.resX, data.resY);
+        if (resCustomX) resCustomX.value = data.resX;
+        if (resCustomY) resCustomY.value = data.resY;
+
+        fps = data.fps || 12;
+        currentFrame = data.currentFrame || 0;
+
+        frameBuffers = data.frameBuffers.map(buf => cloneBuffer(buf));
+        frameLayers = cloneLayersStack(data.frameLayers);
+
+        initFrameLayers(currentFrame);
+        updateCanvasDOMDimensions(data.resX, data.resY);
+        syncCurrentFrameBuffer();
+        renderAll();
     }
 
     function detectPixelArtNativeScale(imgData, w, h) {
@@ -6924,20 +7015,22 @@ function initItchActivation() {
     const inputCode = document.getElementById('itch-activation-input');
     if (!btnActivate || !inputCode) return;
 
+    // 先把旧的事件监听全部清空，防止叠加
+    btnActivate.onclick = null;
+
     btnActivate.onclick = async () => {
         const licenseKey = inputCode.value.trim();
         if (!licenseKey) {
-            if (typeof showToast === 'function') showToast('⚠️ 请输入 License Key');
+            if (typeof showToast === 'function') showToast('⚠️ 请输入激活码或完整链接');
             return;
         }
 
         const originalText = btnActivate.innerHTML;
-        btnActivate.innerHTML = '⏳ 验证中...';
+        btnActivate.innerHTML = '⏳ ...';
         btnActivate.disabled = true;
 
         try {
-            // 🚨 这里换成你后端的真实地址，如果你本地测试，就是 localhost:3000
-            // 如果你部署到了 Render，就换成 https://pixelsprite-backend.onrender.com
+            // 🚨 确保这里是你部署的 Render 地址！
             const BACKEND_URL = 'https://pixelsprite-backend.onrender.com';
 
             const response = await fetch(`${BACKEND_URL}/api/verify-license`, {
@@ -6953,33 +7046,29 @@ function initItchActivation() {
             if (result.success) {
                 if (!window.proState) window.proState = {};
                 window.proState.isLifetimePro = true;
-                window.proState.trialStartTime = Date.now();
 
-                try {
-                    localStorage.setItem('pixelsprite_pro_state_v3', JSON.stringify(window.proState));
-                    localStorage.setItem('pixelsprite_license_key', licenseKey);
-                } catch (e) { }
+                // 存储状态
+                localStorage.setItem('pixelsprite_pro_state_v3', JSON.stringify(window.proState));
 
                 if (typeof updateProStatusAndUI === 'function') updateProStatusAndUI();
                 if (typeof window.fireConfetti === 'function') window.fireConfetti();
                 if (typeof closeProModal === 'function') closeProModal();
                 if (typeof showToast === 'function') showToast('🎉 恭喜！PRO 终身尊享版已激活！');
             } else {
-                const errorMsg = result.error || '激活失败，请检查 License Key';
-                if (typeof showToast === 'function') showToast('❌ ' + errorMsg);
+                if (typeof showToast === 'function') showToast('❌ ' + (result.error || '激活码无效'));
                 btnActivate.innerHTML = originalText;
                 btnActivate.disabled = false;
             }
         } catch (err) {
             console.error('后端验证请求失败:', err);
-            if (typeof showToast === 'function') showToast('⚠️ 无法连接到后端服务器，请检查后端是否启动');
+            if (typeof showToast === 'function') showToast('⚠️ 网络连接失败，请稍后重试');
             btnActivate.innerHTML = originalText;
             btnActivate.disabled = false;
         }
     };
 }
 
-// 延迟一秒加载
+// 延迟一秒加载，确保 DOM 准备好了
 setTimeout(initItchActivation, 1000);
 
 // ============================================================
