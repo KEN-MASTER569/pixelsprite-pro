@@ -4674,14 +4674,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnCloudSave = document.getElementById('btn-cloud-save');
         if (btnCloudSave) {
             btnCloudSave.addEventListener('click', async () => {
-                // 1. 开启 Loading，禁用按钮
+                const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+
                 showLoader();
                 btnCloudSave.disabled = true;
-
-                // 让出主线程 50 毫秒，让浏览器先画出 Loading 动画
                 await new Promise(resolve => setTimeout(resolve, 50));
 
-                // 核心保命：设置 20 秒超时（因为有可能是数据大，不要设太短）
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 20000);
 
@@ -4705,7 +4703,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             return id;
                         })());
 
-                    const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
                     const projectName = prompt(dict.cloud_history_save_prompt || "请为这个云端工程起个名字：", `工程_${new Date().toLocaleDateString()}`) || 'Untitled';
 
                     const res = await fetch(`${API_BASE_URL}/api/cloud/save`, {
@@ -4717,19 +4714,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     clearTimeout(timeoutId);
 
-                    // 🚨 防崩护盾：先检查状态码
                     if (!res.ok) {
-                        throw new Error(`服务器返回错误代码: ${res.status}`);
+                        throw new Error(`HTTP error! status: ${res.status}`);
                     }
 
                     const result = await res.json();
                     hideLoader();
 
                     if (result.success) {
-                        alert(`✅ 保存成功！\n提取码：${result.pinCode}\n\n您可以直接在“云端读取”中看到它。`);
-                        if (typeof showToast === 'function') showToast(`☁️ 工程【${projectName}】已安全存入云端！`);
+                        // 多语言成功提示
+                        const msg = dict.cloud_save_success_alert.replace('{code}', result.pinCode);
+                        alert(msg);
+                        if (typeof showToast === 'function') {
+                            showToast(dict.cloud_save_success_toast.replace('{name}', projectName));
+                        }
                     } else {
-                        alert(`保存失败：${result.error}`);
+                        alert(dict.cloud_save_failed + '\n' + (result.error || ''));
                     }
 
                 } catch (err) {
@@ -4738,25 +4738,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     console.error("保存捕获到的真实错误:", err);
 
-                    // 🚨 终极智能判断：如果报错，立刻自动去云端查一下到底存没存进去
+                    // 终极智能判断
                     try {
                         const checkRes = await fetch(`${API_BASE_URL}/api/cloud/list/${encodeURIComponent(userId)}`);
                         const checkData = await checkRes.json();
 
-                        // 检查刚才保存的工程名是否已经出现在列表里了
                         const isSaved = checkData.projects && checkData.projects.some(p => p.name === projectName);
 
                         if (isSaved) {
-                            // 偷偷存好了，不让用户惊慌
-                            if (typeof showToast === 'function') showToast(`☁️ 工程【${projectName}】已安全存入云端！`);
-                            alert(`✅ 保存成功！\n(由于网络波动，响应稍慢，但数据已安全保存)`);
+                            if (typeof showToast === 'function') {
+                                showToast(dict.cloud_save_success_toast.replace('{name}', projectName));
+                            }
+                            alert(dict.cloud_save_timeout_success); // 多语言“网络波动但已保存”
                         } else {
-                            // 确实没存进去
-                            alert('⚠️ 保存失败，请检查网络后重试。');
+                            alert(dict.cloud_save_failed); // 确实没存进去
                         }
                     } catch (e) {
-                        // 连查都查不到，说明彻底断网了
-                        alert('⚠️ 网络连接断开，无法确认保存状态，请稍后去“云端读取”查看。');
+                        alert(dict.cloud_save_offline); // 彻底断网
                     }
                 } finally {
                     hideLoader();
