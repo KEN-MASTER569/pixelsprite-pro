@@ -4736,14 +4736,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     clearTimeout(timeoutId);
                     hideLoader();
 
-                    // 🚨 这里修改了报错提示，让你一眼看懂是超时还是网络断了
                     console.error("保存捕获到的真实错误:", err);
 
-                    if (err.name === 'AbortError') {
-                        alert('⚠️ 保存超时！\n可能服务器正在启动或数据较大，请耐心等待 1 分钟，然后去“云端读取”看看是否已保存成功。');
-                    } else {
-                        // 很多时候数据其实已经存进去了，只是回执丢了
-                        alert('⚠️ 请求网络异常，请稍后去“云端读取”确认是否保存成功。\n错误信息: ' + err.message);
+                    // 🚨 终极智能判断：如果报错，立刻自动去云端查一下到底存没存进去
+                    try {
+                        const checkRes = await fetch(`${API_BASE_URL}/api/cloud/list/${encodeURIComponent(userId)}`);
+                        const checkData = await checkRes.json();
+
+                        // 检查刚才保存的工程名是否已经出现在列表里了
+                        const isSaved = checkData.projects && checkData.projects.some(p => p.name === projectName);
+
+                        if (isSaved) {
+                            // 偷偷存好了，不让用户惊慌
+                            if (typeof showToast === 'function') showToast(`☁️ 工程【${projectName}】已安全存入云端！`);
+                            alert(`✅ 保存成功！\n(由于网络波动，响应稍慢，但数据已安全保存)`);
+                        } else {
+                            // 确实没存进去
+                            alert('⚠️ 保存失败，请检查网络后重试。');
+                        }
+                    } catch (e) {
+                        // 连查都查不到，说明彻底断网了
+                        alert('⚠️ 网络连接断开，无法确认保存状态，请稍后去“云端读取”查看。');
                     }
                 } finally {
                     hideLoader();
