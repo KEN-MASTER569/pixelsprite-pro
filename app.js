@@ -4759,51 +4759,114 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // ☁️ 云端读取（智能版：支持多语言 + 自动判断登录）
+        // ☁️ 云端读取（智能版：支持多语言 + 自动判断登录 + 列表删除）
         const btnCloudLoad = document.getElementById('btn-cloud-load');
         if (btnCloudLoad) {
             btnCloudLoad.addEventListener('click', async () => {
-                // 🚨 获取当前语言字典
                 const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
 
                 // 如果用户登录了 Google 账号，直接弹档案库
                 if (window.userState && window.userState.isLoggedIn && window.userState.email) {
-                    document.getElementById('cloud-history-modal').style.display = 'flex';
-                    cloudHistoryList.innerHTML = `<div style="color:#00f2fe; width:100%; text-align:center; padding: 20px;">${dict.cloud_history_loading}</div>`;
+                    const modal = document.getElementById('cloud-history-modal');
+                    modal.style.display = 'flex';
+                    cloudHistoryList.innerHTML = `<div style="color:#00f2fe; width:100%; text-align:center; padding: 20px;">${dict.cloud_history_loading || '⏳ 正在获取您的云端档案...'}</div>`;
                     cloudHistoryEmpty.style.display = 'none';
 
                     // 动态替换弹窗标题和按钮文字
-                    document.querySelector('#cloud-history-modal h3').innerHTML = dict.cloud_history_title;
-                    document.querySelector('#btn-close-history').innerText = dict.cloud_history_close;
-                    document.querySelector('#cloud-history-empty p').innerText = dict.cloud_history_empty;
-                    document.querySelector('#btn-open-old-load').innerText = dict.cloud_history_input_pin;
-                    document.querySelector('#cloud-history-modal .modal-footer div').innerHTML = `${dict.cloud_history_old_pin} <button id="btn-open-old-load" style="background: none; border: none; color: #00f2fe; cursor: pointer; text-decoration: underline;">${dict.cloud_history_input_pin}</button>`;
+                    document.querySelector('#cloud-history-modal h3').innerHTML = dict.cloud_history_title || '☁️ 我的云端工程库';
+                    document.querySelector('#btn-close-history').innerText = dict.cloud_history_close || '关闭';
+                    document.querySelector('#cloud-history-empty p').innerText = dict.cloud_history_empty || '您还没有保存过任何云端工程哦~';
 
                     try {
+                        // 1. 拉取工程列表
                         const res = await fetch(`${API_BASE_URL}/api/cloud/list/${encodeURIComponent(window.userState.email)}`);
-                        if (!res.ok) {
-                            // 如果后端返回 404 或 500，我们把它抓出来
-                            const text = await res.text();
-                            console.error("后端返回了错误:", res.status, text);
-                            throw new Error(`服务器返回了 ${res.status}`);
-                        }
+                        if (!res.ok) throw new Error('网络请求失败');
                         const result = await res.json();
+
+                        // 2. 拉取容量
+                        let usedMB = 0, totalMB = 512;
+                        try {
+                            const usageRes = await fetch(`${API_BASE_URL}/api/cloud/usage/${encodeURIComponent(window.userState.email)}`);
+                            if (usageRes.ok) {
+                                const usageData = await usageRes.json();
+                                if (usageData.success) {
+                                    usedMB = usageData.usedMB || 0;
+                                    totalMB = usageData.totalMB || 512;
+                                }
+                            }
+                        } catch (e) { console.warn('获取容量失败', e); }
+
+                        // 更新底部容量显示
+                        const footerDiv = document.querySelector('#cloud-history-modal .modal-footer div');
+                        if (footerDiv) {
+                            footerDiv.innerHTML = `
+                                <span style="color:#00f2fe; font-weight:bold; margin-right: 15px;">💾 ${dict.cloud_storage_used || '已用容量'}: ${usedMB.toFixed(1)} MB / ${totalMB} MB</span>
+                                ${dict.cloud_history_old_pin || '还在用旧密码？'} 
+                                <button id="btn-open-old-load" style="background: none; border: none; color: #00f2fe; cursor: pointer; text-decoration: underline;">
+                                    ${dict.cloud_history_input_pin || '输入提取码读取'}
+                                </button>
+                            `;
+                        }
 
                         cloudHistoryList.innerHTML = '';
                         if (result.success && result.projects && result.projects.length > 0) {
                             result.projects.forEach(proj => {
                                 const card = document.createElement('div');
-                                card.style.cssText = `background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s; text-align: center;`;
+                                card.style.cssText = `position: relative; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s; text-align: center;`;
                                 card.onmouseover = () => { card.style.borderColor = '#00f2fe'; card.style.transform = 'translateY(-2px)'; };
                                 card.onmouseout = () => { card.style.borderColor = 'rgba(255,255,255,0.1)'; card.style.transform = 'translateY(0)'; };
 
                                 card.innerHTML = `
+                                    <button class="delete-cloud-btn" title="删除此工程" style="position: absolute; top: 6px; right: 6px; background: rgba(255, 71, 87, 0.2); border: none; border-radius: 50%; width: 24px; height: 24px; color: #ff4757; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: 0.2s; z-index: 10;">🗑️</button>
                                     <div style="font-size: 32px; margin-bottom: 8px;">🖼️</div>
-                                    <div style="font-size: 13px; font-weight: bold; color: #fff; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${proj.name || dict.cloud_history_default_name}</div>
+                                    <div style="font-size: 13px; font-weight: bold; color: #fff; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${proj.name || dict.cloud_history_default_name || '未命名'}</div>
                                     <div style="font-size: 10px; color: #8a99ad;">${new Date(proj.timestamp).toLocaleString()}</div>
-                                    <div style="font-size: 11px; color: #00f2fe; margin-top: 8px; font-weight: bold;">${dict.cloud_history_load}</div>
+                                    <div style="font-size: 11px; color: #00f2fe; margin-top: 8px; font-weight: bold;">${dict.cloud_history_load || '点击载入'}</div>
                                 `;
 
+                                // 绑定删除事件
+                                const deleteBtn = card.querySelector('.delete-cloud-btn');
+                                deleteBtn.onmouseover = () => { deleteBtn.style.background = '#ff4757'; deleteBtn.style.color = '#fff'; };
+                                deleteBtn.onmouseout = () => { deleteBtn.style.background = 'rgba(255, 71, 87, 0.2)'; deleteBtn.style.color = '#ff4757'; };
+
+                                deleteBtn.onclick = async (e) => {
+                                    e.stopPropagation();
+                                    const confirmMsg = dict.confirm_delete_project || '确定要彻底删除这个云端工程吗？此操作不可恢复！';
+                                    if (!confirm(confirmMsg)) return;
+
+                                    try {
+                                        deleteBtn.innerHTML = '⏳';
+                                        deleteBtn.disabled = true;
+                                        const delRes = await fetch(`${API_BASE_URL}/api/cloud/delete/${proj.pinCode}`, {
+                                            method: 'DELETE',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ userId: window.userState.email })
+                                        });
+                                        const delData = await delRes.json();
+
+                                        if (delData.success) {
+                                            card.style.transform = 'scale(0.8)';
+                                            card.style.opacity = '0';
+                                            setTimeout(() => {
+                                                card.remove();
+                                                if (cloudHistoryList.children.length === 0) {
+                                                    cloudHistoryEmpty.style.display = 'block';
+                                                }
+                                            }, 200);
+                                            if (typeof showToast === 'function') showToast(dict.cloud_delete_success || '🗑️ 工程已删除');
+                                        } else {
+                                            alert((dict.cloud_delete_fail || '删除失败') + ': ' + delData.error);
+                                            deleteBtn.innerHTML = '🗑️';
+                                            deleteBtn.disabled = false;
+                                        }
+                                    } catch (err) {
+                                        alert(dict.cloud_history_net_error || '网络连接失败');
+                                        deleteBtn.innerHTML = '🗑️';
+                                        deleteBtn.disabled = false;
+                                    }
+                                };
+
+                                // 卡片点击加载
                                 card.addEventListener('click', async () => {
                                     card.innerHTML = `<div style="color:#00f2fe; padding: 20px 0;">⏳ ...</div>`;
                                     try {
@@ -4811,15 +4874,15 @@ document.addEventListener('DOMContentLoaded', () => {
                                         const loadData = await loadRes.json();
                                         if (loadData.success && loadData.data) {
                                             restoreProjectData(loadData.data);
-                                            document.getElementById('cloud-history-modal').style.display = 'none';
+                                            modal.style.display = 'none';
                                             if (typeof showToast === 'function') showToast(dict.cloud_load_success || '✨ 云端画作恢复成功！');
                                         } else {
-                                            alert(dict.cloud_history_load_fail + ': ' + loadData.error);
-                                            card.innerHTML = `<div style="color:#ff4757; padding: 20px 0;">${dict.cloud_history_load_fail}</div>`;
+                                            alert((dict.cloud_history_load_fail || '加载失败') + ': ' + loadData.error);
+                                            card.innerHTML = `<div style="color:#ff4757; padding: 20px 0;">${dict.cloud_history_load_fail || '失败'}</div>`;
                                         }
                                     } catch (e) {
-                                        alert(dict.cloud_history_net_error);
-                                        card.innerHTML = `<div style="color:#ff4757; padding: 20px 0;">${dict.cloud_history_net_error}</div>`;
+                                        alert(dict.cloud_history_net_error || '网络错误');
+                                        card.innerHTML = `<div style="color:#ff4757; padding: 20px 0;">${dict.cloud_history_net_error || '网络错误'}</div>`;
                                     }
                                 });
 
@@ -4830,7 +4893,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     } catch (err) {
                         console.error(err);
-                        cloudHistoryList.innerHTML = `<div style="color:#ff4757; width:100%; text-align:center; padding: 20px;">${dict.cloud_history_net_error}</div>`;
+                        cloudHistoryList.innerHTML = `<div style="color:#ff4757; width:100%; text-align:center; padding: 20px;">${dict.cloud_history_net_error || '网络请求失败'}</div>`;
                     }
                     return;
                 }
@@ -7151,186 +7214,3 @@ function applyGlobalPromotion() {
 
 // 页面加载后自动执行打折
 setTimeout(applyGlobalPromotion, 1000);
-
-// ============================================================
-// 🌐 云端档案弹窗多语言增强版 (强制替换)
-// ============================================================
-const originalBtnCloudLoad = document.getElementById('btn-cloud-load');
-if (originalBtnCloudLoad) {
-    // 移除旧的事件监听
-    const newBtnCloudLoad = originalBtnCloudLoad.cloneNode(true);
-    originalBtnCloudLoad.parentNode.replaceChild(newBtnCloudLoad, originalBtnCloudLoad);
-
-    newBtnCloudLoad.addEventListener('click', async () => {
-        // 获取语言字典，如果没有加词条，就用默认兜底
-        const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
-
-        // --- 强制设置弹窗里的所有静态文本 ---
-        document.querySelector('#cloud-history-modal h3').innerText = dict.cloud_history_title || '☁️ 我的云端工程库';
-        document.querySelector('#btn-close-history').innerText = dict.cloud_history_close || '关闭';
-        document.querySelector('#cloud-history-empty p').innerText = dict.cloud_history_empty || '您还没有保存过任何云端工程哦~';
-
-        const footerDiv = document.querySelector('#cloud-history-modal .modal-footer div');
-        if (footerDiv) {
-            footerDiv.innerHTML = `
-                ${dict.cloud_history_old_pin || '还在用旧密码？'} 
-                <button id="btn-open-old-load" style="background: none; border: none; color: #00f2fe; cursor: pointer; text-decoration: underline;">
-                    ${dict.cloud_history_input_pin || '输入提取码读取'}
-                </button>
-            `;
-            // 重新绑定旧密码按钮事件
-            document.getElementById('btn-open-old-load').onclick = () => {
-                document.getElementById('cloud-history-modal').style.display = 'none';
-                const promptMsg = dict.cloud_load_prompt || '请输入提取码：';
-                const pinCode = prompt(promptMsg);
-                if (pinCode) {
-                    fetch(`${API_BASE_URL}/api/cloud/load/${pinCode.toUpperCase()}`)
-                        .then(res => res.json())
-                        .then(result => {
-                            if (result.success && result.data) {
-                                // 调用你全局的恢复函数（假设你在闭包里定义了，这里可能获取不到，如果报错，就换成你以前的恢复逻辑）
-                                location.reload(); // 最简单粗暴，刷新页面重新拉取
-                            } else {
-                                alert(result.error || '加载失败');
-                            }
-                        }).catch(() => alert('网络错误'));
-                }
-            };
-        }
-
-        // 如果没登录，直接走旧版提取码
-        if (!window.userState || !window.userState.isLoggedIn || !window.userState.email) {
-            const pinCode = prompt(dict.cloud_load_prompt || '请输入提取码：');
-            if (!pinCode) return;
-
-            // 这里为了简单，直接重新加载页面的逻辑（或者你自己接原来的加载逻辑）
-            alert("未登录状态，将使用提取码读取。");
-            return;
-        }
-
-        // --- 如果登录了，展示档案库 ---
-        document.getElementById('cloud-history-modal').style.display = 'flex';
-        cloudHistoryList.innerHTML = `<div style="color:#00f2fe; width:100%; text-align:center; padding: 20px;">${dict.cloud_history_loading || '⏳ 正在获取您的云端档案...'}</div>`;
-        cloudHistoryEmpty.style.display = 'none';
-
-        try {
-            // 1. 拉取工程列表
-            const res = await fetch(`${API_BASE_URL}/api/cloud/list/${encodeURIComponent(window.userState.email)}`);
-            const result = await res.json();
-
-            // 2. 拉取用户已用容量
-            let usedMB = 0, totalMB = 512;
-            try {
-                const usageRes = await fetch(`${API_BASE_URL}/api/cloud/usage/${encodeURIComponent(window.userState.email)}`);
-                if (usageRes.ok) { // 🚨 加这个判断，只有 200 才去解析 JSON
-                    const usageData = await usageRes.json();
-                    if (usageData.success) {
-                        usedMB = usageData.usedMB || 0;
-                        totalMB = usageData.totalMB || 512;
-                    }
-                }
-            } catch (e) { console.warn('获取容量失败', e); }
-
-            // 更新底部提示文字（加容量显示）
-            const footerDiv = document.querySelector('#cloud-history-modal .modal-footer div');
-            if (footerDiv) {
-                footerDiv.innerHTML = `
-                    <span style="color:#00f2fe; font-weight:bold; margin-right: 15px;">💾 ${dict.cloud_storage_used || '已用容量'}: ${usedMB.toFixed(1)} MB / ${totalMB} MB</span>
-                    ${dict.cloud_history_old_pin || '还在用旧密码？'} 
-                    <button id="btn-open-old-load" style="background: none; border: none; color: #00f2fe; cursor: pointer; text-decoration: underline;">
-                        ${dict.cloud_history_input_pin || '输入提取码读取'}
-                    </button>
-                `;
-            }
-
-            cloudHistoryList.innerHTML = '';
-            if (result.success && result.projects && result.projects.length > 0) {
-                result.projects.forEach(proj => {
-                    const card = document.createElement('div');
-                    card.style.cssText = `position: relative; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s; text-align: center;`;
-                    card.onmouseover = () => { card.style.borderColor = '#00f2fe'; card.style.transform = 'translateY(-2px)'; };
-                    card.onmouseout = () => { card.style.borderColor = 'rgba(255,255,255,0.1)'; card.style.transform = 'translateY(0)'; };
-
-                    card.innerHTML = `
-                        <!-- 🗑️ 右上角悬浮删除按钮 -->
-                        <button class="delete-cloud-btn" title="删除此工程" style="position: absolute; top: 6px; right: 6px; background: rgba(255, 71, 87, 0.2); border: none; border-radius: 50%; width: 24px; height: 24px; color: #ff4757; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: 0.2s; z-index: 10;">🗑️</button>
-                        
-                        <div style="font-size: 32px; margin-bottom: 8px;">🖼️</div>
-                        <div style="font-size: 13px; font-weight: bold; color: #fff; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${proj.name || dict.cloud_history_default_name || '未命名'}</div>
-                        <div style="font-size: 10px; color: #8a99ad;">${new Date(proj.timestamp).toLocaleString()}</div>
-                        <div style="font-size: 11px; color: #00f2fe; margin-top: 8px; font-weight: bold;">${dict.cloud_history_load || '点击载入'}</div>
-                    `;
-
-                    // 🚨 绑定删除按钮的点击事件
-                    const deleteBtn = card.querySelector('.delete-cloud-btn');
-                    deleteBtn.onmouseover = () => { deleteBtn.style.background = '#ff4757'; deleteBtn.style.color = '#fff'; };
-                    deleteBtn.onmouseout = () => { deleteBtn.style.background = 'rgba(255, 71, 87, 0.2)'; deleteBtn.style.color = '#ff4757'; };
-
-                    deleteBtn.onclick = async (e) => {
-                        e.stopPropagation(); // 🚨 极其重要：阻止事件冒泡，防止点击删除时触发了卡片的“点击载入”
-                        const confirmMsg = dict.confirm_delete_project || '确定要彻底删除这个云端工程吗？此操作不可恢复！';
-                        if (!confirm(confirmMsg)) return;
-
-                        try {
-                            deleteBtn.innerHTML = '⏳';
-                            deleteBtn.disabled = true;
-                            const delRes = await fetch(`${API_BASE_URL}/api/cloud/delete/${proj.pinCode}`, {
-                                method: 'DELETE',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ userId: window.userState.email })
-                            });
-                            const delData = await delRes.json();
-
-                            if (delData.success) {
-                                card.style.transform = 'scale(0.8)';
-                                card.style.opacity = '0';
-                                setTimeout(() => {
-                                    card.remove();
-                                    if (cloudHistoryList.children.length === 0) {
-                                        cloudHistoryEmpty.style.display = 'block';
-                                    }
-                                }, 200);
-                                if (typeof showToast === 'function') showToast(dict.cloud_delete_success || '🗑️ 工程已删除');
-                            } else {
-                                alert((dict.cloud_delete_fail || '删除失败') + ': ' + delData.error);
-                                deleteBtn.innerHTML = '🗑️';
-                                deleteBtn.disabled = false;
-                            }
-                        } catch (err) {
-                            alert(dict.cloud_history_net_error || '网络连接失败');
-                            deleteBtn.innerHTML = '🗑️';
-                            deleteBtn.disabled = false;
-                        }
-                    };
-
-                    // 🚨 卡片点击加载逻辑
-                    card.addEventListener('click', async () => {
-                        card.innerHTML = `<div style="color:#00f2fe; padding: 20px 0;">⏳ ...</div>`;
-                        try {
-                            const loadRes = await fetch(`${API_BASE_URL}/api/cloud/load/${proj.pinCode}`);
-                            const loadData = await loadRes.json();
-                            if (loadData.success && loadData.data) {
-                                restoreProjectData(loadData.data);
-                                cloudHistoryModal.style.display = 'none';
-                                if (typeof showToast === 'function') showToast(dict.cloud_load_success || '✨ 云端画作恢复成功！');
-                            } else {
-                                alert((dict.cloud_history_load_fail || '加载失败') + ': ' + loadData.error);
-                                card.innerHTML = `<div style="color:#ff4757; padding: 20px 0;">${dict.cloud_history_load_fail || '失败'}</div>`;
-                            }
-                        } catch (e) {
-                            alert(dict.cloud_history_net_error || '网络错误');
-                            card.innerHTML = `<div style="color:#ff4757; padding: 20px 0;">${dict.cloud_history_net_error || '网络错误'}</div>`;
-                        }
-                    });
-
-                    cloudHistoryList.appendChild(card);
-                });
-            } else {
-                cloudHistoryEmpty.style.display = 'block';
-            }
-        } catch (err) {
-            console.error(err);
-            cloudHistoryList.innerHTML = `<div style="color:#ff4757; width:100%; text-align:center; padding: 20px;">${dict.cloud_history_net_error || '网络请求失败'}</div>`;
-        }
-    });
-}
