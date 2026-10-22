@@ -4763,7 +4763,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // 如果用户登录了 Google 账号，直接弹档案库
                 if (window.userState && window.userState.isLoggedIn && window.userState.email) {
-                    cloudHistoryModal.style.display = 'flex';
+                    document.getElementById('cloud-history-modal').style.display = 'flex';
                     cloudHistoryList.innerHTML = `<div style="color:#00f2fe; width:100%; text-align:center; padding: 20px;">${dict.cloud_history_loading}</div>`;
                     cloudHistoryEmpty.style.display = 'none';
 
@@ -4801,7 +4801,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                         const loadData = await loadRes.json();
                                         if (loadData.success && loadData.data) {
                                             restoreProjectData(loadData.data);
-                                            cloudHistoryModal.style.display = 'none';
+                                            document.getElementById('cloud-history-modal').style.display = 'none';
                                             if (typeof showToast === 'function') showToast(dict.cloud_load_success || '✨ 云端画作恢复成功！');
                                         } else {
                                             alert(dict.cloud_history_load_fail + ': ' + loadData.error);
@@ -4858,13 +4858,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 绑定关闭档案库弹窗
         [cloudHistoryClose, btnCloseHistory].forEach(btn => {
-            if (btn) btn.addEventListener('click', () => { cloudHistoryModal.style.display = 'none'; });
+            if (btn) btn.addEventListener('click', () => { document.getElementById('cloud-history-modal').style.display = 'none'; });
         });
 
         // 如果没有登录，但想用旧码，点击切换
         if (btnOpenOldLoad) {
             btnOpenOldLoad.addEventListener('click', () => {
-                cloudHistoryModal.style.display = 'none';
+                document.getElementById('cloud-history-modal').style.display = 'none';
                 const pinCode = prompt(window.I18N_TRANSLATIONS[window.currentLang]?.cloud_load_prompt || '请输入提取码：');
                 if (pinCode) {
                     fetch(`${API_BASE_URL}/api/cloud/load/${pinCode.toUpperCase()}`)
@@ -7156,7 +7156,7 @@ if (originalBtnCloudLoad) {
             `;
             // 重新绑定旧密码按钮事件
             document.getElementById('btn-open-old-load').onclick = () => {
-                cloudHistoryModal.style.display = 'none';
+                document.getElementById('cloud-history-modal').style.display = 'none';
                 const promptMsg = dict.cloud_load_prompt || '请输入提取码：';
                 const pinCode = prompt(promptMsg);
                 if (pinCode) {
@@ -7185,7 +7185,7 @@ if (originalBtnCloudLoad) {
         }
 
         // --- 如果登录了，展示档案库 ---
-        cloudHistoryModal.style.display = 'flex';
+        document.getElementById('cloud-history-modal').style.display = 'flex';
         cloudHistoryList.innerHTML = `<div style="color:#00f2fe; width:100%; text-align:center; padding: 20px;">${dict.cloud_history_loading || '⏳ 正在获取您的云端档案...'}</div>`;
         cloudHistoryEmpty.style.display = 'none';
 
