@@ -386,6 +386,9 @@
             cloud_history_close: '关闭',
             cloud_history_save_prompt: '请为这个云端工程起个名字：',
             cloud_history_default_name: '工程_',
+            confirm_delete_project: '确定要彻底删除这个云端工程吗？此操作不可恢复！',
+            cloud_delete_success: '🗑️ 工程已成功删除',
+            cloud_delete_fail: '删除失败',
         },
         en: {
             lang_name: 'English',
@@ -768,6 +771,9 @@
             cloud_history_close: 'Close',
             cloud_history_save_prompt: 'Name your cloud project:',
             cloud_history_default_name: 'Project_',
+            confirm_delete_project: 'Are you sure you want to permanently delete this cloud project? This cannot be undone!',
+            cloud_delete_success: '🗑️ Project deleted successfully',
+            cloud_delete_fail: 'Failed to delete',
         },
         ja: {
             lang_name: '日本語',
@@ -1150,6 +1156,9 @@
             cloud_history_close: '閉じる',
             cloud_history_save_prompt: 'クラウドプロジェクトに名前を付けてください：',
             cloud_history_default_name: 'プロジェクト_',
+            confirm_delete_project: 'このクラウドプロジェクトを完全に削除してもよろしいですか？この操作は元に戻せません！',
+            cloud_delete_success: '🗑️ プロジェクトが正常に削除されました',
+            cloud_delete_fail: '削除に失敗しました',
         },
         'zh-TW': {
             lang_name: '繁體中文',
@@ -1532,6 +1541,9 @@
             cloud_history_close: '關閉',
             cloud_history_save_prompt: '請為這個雲端工程起個名字：',
             cloud_history_default_name: '工程_',
+            confirm_delete_project: '確定要徹底刪除這個雲端工程嗎？此操作不可恢復！',
+            cloud_delete_success: '🗑️ 工程已成功刪除',
+            cloud_delete_fail: '刪除失敗',
         },
         es: {
             lang_name: 'Español',
@@ -1903,7 +1915,7 @@
             itch_activate_title: 'Pega tu enlace de descarga de Itch.io o clave de licencia a continuación',
             itch_activate_placeholder: 'Pega el enlace de descarga completo de Itch.io aquí',
             itch_activate_btn: 'Activar',
-            
+
             cloud_history_title: '☁️ Mis Proyectos en la Nube',
             cloud_history_empty: 'Aún no has guardado ningún proyecto en la nube.',
             cloud_history_load: 'Haz clic para Cargar',
@@ -1915,6 +1927,9 @@
             cloud_history_close: 'Cerrar',
             cloud_history_save_prompt: 'Nombra tu proyecto en la nube:',
             cloud_history_default_name: 'Proyecto_',
+            confirm_delete_project: '¿Estás seguro de que deseas eliminar permanentemente este proyecto en la nube? ¡Esta acción no se puede deshacer!',
+            cloud_delete_success: '🗑️ Proyecto eliminado con éxito',
+            cloud_delete_fail: 'Error al eliminar',
         }
     }
 
