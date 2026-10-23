@@ -2451,17 +2451,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.addon-tag-badge').forEach(el => el.remove());
         const cards = document.querySelectorAll('.frame-thumb-card');
 
-        // 找到这一段
         cards.forEach((card, index) => {
             card.style.position = 'relative';
             card.style.overflow = 'visible';
 
-            // 🚨 改成这样：如果当前卡片或者前面有标签，才加 margin-top，否则为 0
+            // 🚨 改小一点 margin-top，把位置留给卡片本身
             const hasTagNearby = frameTags.some(t => t.from === index || t.to === index);
-            card.style.marginTop = hasTagNearby ? '24px' : '0px';
-
-            // 如果你想让卡片整体都往上靠，也可以把 24px 改成 12px 或更小
-            // ...
+            card.style.marginTop = hasTagNearby ? '14px' : '0px'; // 原来是 24px，改小
 
             // 1. 画起点标签
             const tagStart = frameTags.find(t => t.from === index);
@@ -2469,14 +2465,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const badge = document.createElement('div');
                 badge.className = 'addon-tag-badge';
                 badge.textContent = tagStart.name;
-                // 内联样式，绝对不依赖外部 CSS 漏掉
+                // 🚨 标签的高度和位置微调，防止溢出
                 badge.style.cssText = `
-                    position: absolute; top: -24px; left: -1px; height: 22px; padding: 0 8px;
-                    border-radius: 4px 4px 0 0; font-size: 11px; font-weight: 800;
-                    display: flex; align-items: center; z-index: 10; cursor: pointer;
-                    box-shadow: 0 -2px 6px rgba(0,0,0,0.3); color: #050b14;
-                    background-color: ${tagStart.color};
-                `;
+    position: absolute; top: -22px; left: -1px; height: 20px; padding: 0 8px;
+    border-radius: 4px 4px 0 0; font-size: 11px; font-weight: 800;
+    display: flex; align-items: center; z-index: 10; cursor: pointer;
+    box-shadow: 0 -2px 6px rgba(0,0,0,0.3); color: #050b14;
+    background-color: ${tagStart.color};
+`;
                 badge.title = '点击删除此动画段落';
 
                 badge.addEventListener('click', (e) => {
@@ -4599,31 +4595,33 @@ document.addEventListener('DOMContentLoaded', () => {
             const code = e.code || '';
 
             // ==========================================
-            // 🚨 沉浸式画布：按 Tab 键隐藏/显示两侧面板
+            // 🚨 沉浸式画布：按 Tab 键隐藏/显示所有面板（除语言切换）
+            // ==========================================
+            // ==========================================
+            // 🚨 沉浸式画布：按 Tab 键隐藏/显示所有面板（暴力修复版）
             // ==========================================
             if (k === 'tab') {
                 e.preventDefault();
-
-                // 防止键盘按住不放导致疯狂闪烁
                 if (e.repeat) return;
 
-                const leftSidebar = document.querySelector('.left-sidebar') || document.querySelector('.left-panel');
-                const rightSidebar = document.querySelector('.right-sidebar') || document.querySelector('.right-panel');
-                const topHeader = document.querySelector('header');
-                const bottomTimeline = document.querySelector('.bottom-timeline') || document.querySelector('.timeline-panel');
+                // 使用最精准的类名寻找元素
+                const leftSidebar = document.querySelector('.left-sidebar');
+                const rightSidebar = document.querySelector('.right-sidebar');
+                const topHeader = document.querySelector('.studio-header');
+                const bottomTimeline = document.querySelector('.timeline-bar');
                 const canvasContainer = document.querySelector('.canvas-container-box');
 
                 if (leftSidebar && rightSidebar && canvasContainer) {
-                    const isHidden = leftSidebar.style.display === 'none';
+                    // 只要左侧栏隐藏了，就认为是在沉浸模式
+                    const isHidden = (leftSidebar.style.display === 'none');
 
                     if (isHidden) {
-                        // ========== 退出沉浸模式（还原） ==========
-                        leftSidebar.style.display = 'flex';
-                        rightSidebar.style.display = 'flex';
-                        if (topHeader) topHeader.style.display = 'flex';
-                        if (bottomTimeline) bottomTimeline.style.display = 'flex';
+                        // ========== 退出沉浸模式 ==========
+                        leftSidebar.style.display = ''; // 清空内联样式，恢复默认
+                        rightSidebar.style.display = '';
+                        if (topHeader) topHeader.style.display = '';
+                        if (bottomTimeline) bottomTimeline.style.display = '';
 
-                        // 撤销绝对定位，恢复原样
                         canvasContainer.style.position = '';
                         canvasContainer.style.top = '';
                         canvasContainer.style.left = '';
@@ -4638,41 +4636,26 @@ document.addEventListener('DOMContentLoaded', () => {
                         leftSidebar.style.display = 'none';
                         rightSidebar.style.display = 'none';
                         if (topHeader) topHeader.style.display = 'none';
-                        if (bottomTimeline) bottomTimeline.style.display = 'none';
+                        if (bottomTimeline) bottomTimeline.style.display = 'none'; // 彻底隐藏时间轴
 
-                        // 🚨 核心魔法：把画布容器强行固定在屏幕正中央，脱离原本的 DOM 布局！
-                        canvasContainer.style.position = 'fixed';
-                        canvasContainer.style.top = '0';
-                        canvasContainer.style.left = '0';
-                        canvasContainer.style.width = '100vw';
-                        canvasContainer.style.height = '100vh';
-                        canvasContainer.style.zIndex = '9999';
-                        canvasContainer.style.background = 'var(--bg-dark, #0b0f19)'; // 铺一层底色防止穿帮
+                        // 强制画布容器覆盖全屏
+                        canvasContainer.style.setProperty('position', 'fixed', 'important');
+                        canvasContainer.style.setProperty('top', '0', 'important');
+                        canvasContainer.style.setProperty('left', '0', 'important');
+                        canvasContainer.style.setProperty('width', '100vw', 'important');
+                        canvasContainer.style.setProperty('height', '100vh', 'important');
+                        canvasContainer.style.setProperty('z-index', '999999', 'important');
+                        canvasContainer.style.setProperty('background', 'var(--bg-dark, #0b0f19)', 'important');
 
                         if (typeof showToast === 'function') showToast('🖼️ 已进入沉浸模式 (按 Tab 退出)');
                     }
 
-                    // 触发画布重绘，适应新尺寸
+                    // 延迟重新计算画布状态
                     setTimeout(() => {
                         if (typeof applyCanvasTransform === 'function') applyCanvasTransform(false);
                         if (typeof drawGridOverlay === 'function') drawGridOverlay();
                     }, 100);
                 }
-
-                // 🎉 隐藏彩蛋：输入 "ilovepixel" 自动触发无限色彩派对
-                let secretCode = '';
-                window.addEventListener('keypress', (e) => {
-                    secretCode += e.key.toLowerCase();
-                    if (secretCode.length > 10) secretCode = secretCode.slice(-10);
-                    if (secretCode === 'ilovepixel') {
-                        document.body.style.animation = 'rainbowBg 2s infinite';
-                        const style = document.createElement('style');
-                        style.innerHTML = `@keyframes rainbowBg { 0% { background: #0b0d14; } 50% { background: #1a0b2e; } 100% { background: #0b1c29; } }`;
-                        document.head.appendChild(style);
-                        showToast("🎉 发现隐藏彩蛋！欢迎来到 Pixel 宇宙！");
-                        secretCode = '';
-                    }
-                });
                 return;
             }
 
