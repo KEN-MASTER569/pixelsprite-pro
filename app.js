@@ -5755,8 +5755,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function handleFileImport(e) {
-        const file = e.target.files[0];
-        if (!file) return;
+        // 🚨 终极执法官：判断传进来的到底是不是真文件！
+        let file = null;
+
+        if (e && e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            // 如果是拖拽事件，拿真正的 File 对象
+            file = e.dataTransfer.files[0];
+        } else if (e && e.target && e.target.files && e.target.files.length > 0) {
+            // 如果是 input change 事件，拿真正的 File 对象
+            file = e.target.files[0];
+        } else if (e instanceof File) {
+            // 如果它本身就是一个 File 对象
+            file = e;
+        }
+
+        if (!file) {
+            alert('⚠️ 读取失败：没有获取到真实的本地文件，请确保你是拖拽的文件，而不是链接。');
+            return;
+        }
 
         const fileNameLower = file.name.toLowerCase();
 
@@ -5767,72 +5783,103 @@ document.addEventListener('DOMContentLoaded', () => {
             const loader = document.getElementById('global-loader');
             if (loader) loader.style.display = 'flex';
 
-            const reader = new FileReader();
-            reader.onload = function (evt) {
-                try {
-                    // 🚨 直接调用本地的高达引擎，瞬间解析！
-                    const frames = window.parseGIF(evt.target.result);
+            // 1. 打包成 FormData
+            const formData = new FormData();
+            formData.append('gif', file);
 
-                    if (!frames || frames.length === 0) {
-                        throw new Error('未能解析出任何图像块');
-                    }
+            try {
+                // 2. 发送到你的后端
+                const response = await fetch(`${API_BASE_URL}/api/gif/split`, {
+                    method: 'POST',
+                    body: formData
+                });
 
-                    const gifW = frames[0].width;
-                    const gifH = frames[0].height;
+                const result = await response.json();
 
-                    engine.resX = gifW;
-                    engine.resY = gifH;
-                    engine.resolution = Math.max(gifW, gifH);
-                    updateCanvasDOMDimensions(gifW, gifH);
+                if (!result.success) {
+                    throw new Error(result.error || '后端解析失败');
+                }
 
-                    frameBuffers = [];
-                    frameLayers = [];
+                const gifW = result.width;
+                const gifH = result.height;
+                const frameImages = result.frames; // 这是一个包含 Base64 PNG 的数组
 
-                    // 极速转换所有帧
-                    frames.forEach((frame, i) => {
-                        const buf = engine.createBuffer(gifW, gifH);
-                        for (let y = 0; y < gifH; y++) {
-                            for (let x = 0; x < gifW; x++) {
-                                const idx = frame.pixels[y * gifW + x];
-                                if (idx === frame.transparentIndex || !frame.colorTable[idx]) {
-                                    buf[y][x] = null;
-                                } else {
-                                    const rgb = frame.colorTable[idx];
-                                    buf[y][x] = engine.rgbToHex(rgb);
+                // 3. 重置画布尺寸
+                engine.resX = gifW;
+                engine.resY = gifH;
+                engine.resolution = Math.max(gifW, gifH);
+                updateCanvasDOMDimensions(gifW, gifH);
+
+                frameBuffers = [];
+                frameLayers = [];
+
+                // 4. 将每一帧的 Base64 加载到画布中
+                for (let i = 0; i < frameImages.length; i++) {
+                    const base64Str = frameImages[i];
+
+                    // 等待图片加载
+                    await new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const c = document.createElement('canvas');
+                            c.width = gifW;
+                            c.height = gifH;
+                            const ctx = c.getContext('2d');
+                            ctx.drawImage(img, 0, 0, gifW, gifH);
+
+                            const imgData = ctx.getImageData(0, 0, gifW, gifH).data;
+                            const buf = engine.createBuffer(gifW, gifH);
+
+                            for (let y = 0; y < gifH; y++) {
+                                for (let x = 0; x < gifW; x++) {
+                                    const idx = (y * gifW + x) * 4;
+                                    const a = imgData[idx + 3];
+                                    if (a > 20) {
+                                        buf[y][x] = engine.rgbToHex([imgData[idx], imgData[idx + 1], imgData[idx + 2]]);
+                                    } else {
+                                        buf[y][x] = null;
+                                    }
                                 }
                             }
-                        }
 
-                        frameBuffers.push(buf);
-                        frameLayers.push([{
-                            id: `layer_0_${Date.now()}_${i}`,
-                            name: `Layer 1 (GIF Frame ${i + 1})`,
-                            visible: true,
-                            opacity: 1.0,
-                            buffer: cloneBuffer(buf)
-                        }]);
+                            frameBuffers.push(buf);
+                            frameLayers.push([{
+                                id: `layer_0_${Date.now()}_${i}`,
+                                name: `Layer 1 (Frame ${i + 1})`,
+                                visible: true,
+                                opacity: 1.0,
+                                buffer: cloneBuffer(buf)
+                            }]);
+
+                            // 释放内存
+                            c.width = 0;
+                            c.height = 0;
+                            resolve();
+                        };
+                        img.onerror = () => reject(new Error('图片渲染失败'));
+                        img.src = base64Str;
                     });
-
-                    currentFrame = 0;
-                    activeLayerIndex = 0;
-                    undoStack = [];
-                    redoStack = [];
-                    if (typeof updateHistoryUI === 'function') updateHistoryUI();
-                    if (typeof resetZoom === 'function') resetZoom();
-                    if (typeof syncCurrentFrameBuffer === 'function') syncCurrentFrameBuffer();
-
-                    if (loader) loader.style.display = 'none';
-                    if (typeof renderAll === 'function') renderAll();
-
-                    showToast(`✨ 完美解析！成功导入 ${frames.length} 帧！`);
-
-                } catch (err) {
-                    console.error('解析失败:', err);
-                    if (loader) loader.style.display = 'none';
-                    alert('⚠️ 解析失败：' + err.message);
                 }
-            };
-            reader.readAsArrayBuffer(file);
+
+                // 5. 收尾工作
+                currentFrame = 0;
+                activeLayerIndex = 0;
+                undoStack = [];
+                redoStack = [];
+                if (typeof updateHistoryUI === 'function') updateHistoryUI();
+                if (typeof resetZoom === 'function') resetZoom();
+                if (typeof syncCurrentFrameBuffer === 'function') syncCurrentFrameBuffer();
+
+                if (loader) loader.style.display = 'none';
+                if (typeof renderAll === 'function') renderAll();
+
+                showToast(`✨ 后端解析成功！完美导入 ${frameBuffers.length} 帧！`);
+
+            } catch (err) {
+                console.error('GIF 后端解析错误:', err);
+                if (loader) loader.style.display = 'none';
+                alert('⚠️ 后端解析失败：' + err.message);
+            }
 
             return;
         }
