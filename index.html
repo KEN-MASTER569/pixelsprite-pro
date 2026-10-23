@@ -17,6 +17,63 @@
 </head>
 
 <style>
+    /* 🚀 1. 强制顶栏禁止换行，防止被日文撑爆 */
+    .studio-header {
+        flex-wrap: nowrap !important;
+        height: auto !important;
+        min-height: 70px !important;
+        padding: 8px 16px !important;
+    }
+
+    /* 顶栏内部的按钮组，允许横向滚动但不换行 */
+    .header-actions {
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+    }
+
+    /* 隐藏顶栏的滚动条，保持美观 */
+    .header-actions::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* 🚀 2. 重新计算主区域的可用高度，让画布自适应 */
+    .editor-layout {
+        height: calc(100vh - 90px) !important;
+        /* 动态减去顶栏高度 */
+        max-height: calc(100vh - 90px) !important;
+    }
+
+    .canvas-area {
+        height: 100% !important;
+        max-height: 100% !important;
+        overflow: hidden !important;
+    }
+
+    /* 🚀 3. 给画布容器留出足够空间，强行把底部时间轴往上顶 */
+    .canvas-container-box {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        /* 核心魔法：允许 flex 子元素收缩 */
+        overflow: auto !important;
+    }
+
+    /* 🚀 4. 强行锁死底部时间轴的高度，绝对不许被挤压 */
+    .timeline-bar {
+        flex: 0 0 155px !important;
+        /* 固定高度 155px，不放大不缩小 */
+        height: 155px !important;
+        min-height: 155px !important;
+        max-height: 155px !important;
+        margin-top: 4px !important;
+        margin-bottom: 4px !important;
+        background: var(--bg-panel) !important;
+        position: relative !important;
+        z-index: 10 !important;
+    }
+</style>
+
+<style>
     .frame-filmstrip {
         padding: 2px 0 !important;
         gap: 6px !important;
