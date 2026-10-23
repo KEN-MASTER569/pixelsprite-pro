@@ -419,7 +419,7 @@ document.addEventListener('DOMContentLoaded', () => {
         frameLayers.push([
             {
                 id: `layer_0_${Date.now()}`,
-                name: '图层 1 (背景)',
+                name: 'Layer 1 (Background)',
                 visible: true,
                 opacity: 1.0,
                 buffer: cloneBuffer(baseBuf)
@@ -5079,7 +5079,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 frameBuffers.push(buf);
                 frameLayers.push([{
                     id: `layer_0_${Date.now()}`,
-                    name: '图层 1 (背景)',
+                    name: 'Layer 1 (Background)',
                     visible: true,
                     opacity: 1.0,
                     buffer: cloneBuffer(buf)
@@ -5728,7 +5728,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         } else {
                             frameLayers = frameBuffers.map((buf, f) => [{
                                 id: `layer_0_${Date.now()}_${f}`,
-                                name: '图层 1 (背景)',
+                                name: 'Layer 1 (Background)',
                                 visible: true,
                                 opacity: 1.0,
                                 buffer: cloneBuffer(buf)
