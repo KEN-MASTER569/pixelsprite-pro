@@ -17,59 +17,77 @@
 </head>
 
 <style>
-    /* 🚀 终极排版修复：防止日文把导出按钮挤出屏幕 */
+    /* ============================================================ */
+    /* 🚀 终极顶栏布局：自动适应多语言，不换行，不重叠 */
+    /* ============================================================ */
 
-    /* 1. 强制顶栏横向排列，但不允许出现横向滚动条 */
+    /* 1. 强制顶栏横向排列，但绝对不许换行 */
     .studio-header {
         flex-wrap: nowrap !important;
         min-height: 70px !important;
-        padding: 8px 16px !important;
+        padding: 8px 12px !important;
+        /* 稍微缩小左右边距，给中间腾空间 */
         width: 100vw !important;
         box-sizing: border-box !important;
-        overflow: hidden !important;
+        position: relative !important;
+        z-index: 10000 !important;
+        /* 提高整个顶栏的层级 */
     }
 
-    /* 2. 左侧 Logo 区域不能缩得太小 */
+    /* 2. 左侧 Logo 区域锁死，不许收缩 */
     .logo-area {
         flex-shrink: 0 !important;
+        margin-right: 10px !important;
     }
 
-    /* 3. 重点：让中间的按钮组自动压缩 */
+    /* 3. 中间按钮组自动收缩，紧凑排列 */
     .header-actions {
         flex-wrap: nowrap !important;
         flex: 1 1 auto !important;
-        /* 允许它占据剩余空间并收缩 */
         min-width: 0 !important;
-        /* 核心魔法：允许子元素比内容更小 */
         justify-content: flex-end !important;
         gap: 6px !important;
-        /* 稍微缩小按钮之间的间距 */
+        /* 按钮间距紧凑点 */
     }
 
-    /* 4. 防止各个按钮内部的文字换行 */
+    /* 4. 所有按钮不允许被严重挤压变形 */
     .header-actions>* {
         flex-shrink: 0 !important;
     }
 
-    /* 5. 画布尺寸设置区允许被适当压缩 */
+    /* 5. 🚨 核心修复：救出被切掉的下拉菜单！ */
+    .export-dropdown-wrapper {
+        position: relative !important;
+        z-index: 100000 !important;
+        /* 让下拉菜单永远浮在最上层 */
+    }
+
+    #export-menu {
+        z-index: 100000 !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9) !important;
+    }
+
+    /* 6. 压缩画布尺寸设置区，拯救日文排版 */
     .res-selector {
         flex-shrink: 1 !important;
-        /* 允许这个最长的区域被挤压 */
-        overflow: hidden !important;
+        overflow: visible !important;
     }
 
-    /* 6. 导出按钮和头像必须稳稳留在右侧 */
-    #btn-export-main,
-    #btn-header-buy-pro,
-    #google-user-container {
-        flex-shrink: 0 !important;
-        /* 绝对不许被挤压 */
+    /* 让日文的“画布尺寸”四个字变小一点，给按钮留地方 */
+    .res-selector label {
+        font-size: 11px !important;
+        white-space: nowrap !important;
     }
 
-    /* 7. 动态计算主区域高度，给时间轴腾位置 */
+    /* 隐藏自定义宽高的 W/H 输入框，防止日文版太长（可选） */
+    #custom-res-group {
+        display: none !important;
+    }
+
+    /* 7. 强制恢复主画布布局，不被时间轴挤压 */
     .editor-layout {
-        height: calc(100vh - 90px) !important;
-        max-height: calc(100vh - 90px) !important;
+        height: calc(100vh - 75px) !important;
+        max-height: calc(100vh - 75px) !important;
     }
 
     .canvas-area {
@@ -84,7 +102,7 @@
         overflow: auto !important;
     }
 
-    /* 8. 锁死底部时间轴 */
+    /* 8. 锁死底部时间轴高度 */
     .timeline-bar {
         flex: 0 0 155px !important;
         height: 155px !important;
