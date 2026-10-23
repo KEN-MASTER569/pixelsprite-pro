@@ -4943,30 +4943,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const btn = document.getElementById(btnId);
             if (!btn) return;
 
-            // 克隆按钮以清除所有旧的绑定
-            const newBtn = btn.cloneNode(true);
-            btn.parentNode.replaceChild(newBtn, btn);
-
-            newBtn.addEventListener('click', (e) => {
+            // 🚨 温柔重写：直接覆盖 onclick，不克隆节点
+            btn.onclick = function (e) {
                 e.preventDefault();
                 e.stopPropagation();
 
-                // 1. 如果还没登录
                 if (!window.userState || !window.userState.isLoggedIn) {
-                    if (typeof showToast === 'function') showToast('👑 请先登录 Google 账号以解锁 PRO 功能');
+                    if (typeof showToast === 'function') showToast('👑 Please login with Google to unlock PRO');
                     return;
                 }
 
-                // 2. 如果没买 PRO
                 if (typeof checkIsProActive === 'function' && !checkIsProActive()) {
-                    if (typeof showToast === 'function') showToast('👑 此功能为 PRO 专属，请先解锁！');
+                    if (typeof showToast === 'function') showToast('👑 PRO exclusive feature, please unlock first!');
                     openProModal();
                     return;
                 }
 
-                // 3. 已解锁，执行原本的功能
                 if (typeof action === 'function') action();
-            });
+            };
         };
 
         // 重新绑定所有 PRO 按钮
