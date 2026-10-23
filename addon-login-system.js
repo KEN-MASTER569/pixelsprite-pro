@@ -76,6 +76,27 @@
         window.forceShow('app');
         window.updateUserAuthUI(); // 这个只更新了顶栏
 
+        // 🚨 核心修复：登录成功后，强制清除所有可能残留的遮罩层！
+        document.querySelectorAll('.modal-backdrop, #cyber-tour-overlay, #cyber-welcome-overlay').forEach(el => {
+            // 排除掉可能确实是打开的普通弹窗（如果你希望登录后保留某些弹窗，可以加条件）
+            if (el.id !== 'pro-modal') {
+                el.remove();
+            }
+        });
+
+        // 确保 app 和 gate 的层级正确
+        const gate = document.getElementById('mandatory-auth-gate');
+        if (gate) {
+            gate.style.display = 'none';
+            gate.style.pointerEvents = 'none'; // 防止穿透失败
+        }
+
+        const app = document.getElementById('app');
+        if (app) {
+            app.style.display = 'block';
+            app.style.pointerEvents = 'auto';
+        }
+
         // 🚨 核心修复：验证成功后，延迟 1.5 秒再弹教程，给 DOM 渲染的时间
         if (!localStorage.getItem('pixelsprite_has_seen_guide')) {
             setTimeout(() => {
