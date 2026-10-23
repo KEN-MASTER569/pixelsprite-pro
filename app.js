@@ -5768,14 +5768,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (loader) loader.style.display = 'flex';
 
             const reader = new FileReader();
-            reader.onload = (event) => {
-                // 把文件丢给 Image 对象，让浏览器自己去啃这个非标文件
-                const img = new Image();
-                img.src = event.target.result;
+            reader.onload = function (evt) {
+                try {
+                    // 🚨 直接调用本地的高达引擎，瞬间解析！
+                    const frames = window.parseGIF(evt.target.result);
 
-                img.onload = () => {
-                    const gifW = img.naturalWidth || 32;
-                    const gifH = img.naturalHeight || 32;
+                    if (!frames || frames.length === 0) {
+                        throw new Error('未能解析出任何图像块');
+                    }
+
+                    const gifW = frames[0].width;
+                    const gifH = frames[0].height;
 
                     engine.resX = gifW;
                     engine.resY = gifH;
@@ -5785,91 +5788,51 @@ document.addEventListener('DOMContentLoaded', () => {
                     frameBuffers = [];
                     frameLayers = [];
 
-                    const c = document.createElement('canvas');
-                    c.width = gifW;
-                    c.height = gifH;
-                    const ctx = c.getContext('2d', { willReadFrequently: true });
-
-                    // 🚨 核心魔法：把图片以极度微小的透明度挂在屏幕上，强制浏览器播放它
-                    img.style.cssText = 'position:fixed; top:0; left:0; width:1px; height:1px; opacity:0.01; z-index:-99999; pointer-events:none;';
-                    document.body.appendChild(img);
-
-                    let frameCount = 0;
-                    const MAX_FRAMES = 30; // 截取前 30 帧
-
-                    // 🚨 核心魔法 2：每 80ms 截屏一次，每次截屏前强制触发“回流”，逼浏览器刷新画面
-                    const timer = setInterval(() => {
-                        if (frameCount >= MAX_FRAMES) {
-                            clearInterval(timer);
-                            document.body.removeChild(img);
-                            finishImport();
-                            return;
-                        }
-
-                        // 强制触发浏览器的重绘机制
-                        void img.offsetWidth;
-
-                        ctx.clearRect(0, 0, gifW, gifH);
-                        ctx.drawImage(img, 0, 0, gifW, gifH);
-
-                        const imgData = ctx.getImageData(0, 0, gifW, gifH).data;
+                    // 极速转换所有帧
+                    frames.forEach((frame, i) => {
                         const buf = engine.createBuffer(gifW, gifH);
-                        let hasPixel = false;
-
                         for (let y = 0; y < gifH; y++) {
                             for (let x = 0; x < gifW; x++) {
-                                const idx = (y * gifW + x) * 4;
-                                const a = imgData[idx + 3];
-                                if (a > 20) {
-                                    buf[y][x] = engine.rgbToHex([imgData[idx], imgData[idx + 1], imgData[idx + 2]]);
-                                    hasPixel = true;
-                                } else {
+                                const idx = frame.pixels[y * gifW + x];
+                                if (idx === frame.transparentIndex || !frame.colorTable[idx]) {
                                     buf[y][x] = null;
+                                } else {
+                                    const rgb = frame.colorTable[idx];
+                                    buf[y][x] = engine.rgbToHex(rgb);
                                 }
                             }
                         }
 
-                        // 如果截出来全是透明的，说明可能还没加载出画面，跳过
-                        if (!hasPixel && frameCount === 0) return;
-
                         frameBuffers.push(buf);
                         frameLayers.push([{
-                            id: `layer_0_${Date.now()}_${frameCount}`,
-                            name: `Layer 1 (GIF Frame ${frameCount + 1})`,
+                            id: `layer_0_${Date.now()}_${i}`,
+                            name: `Layer 1 (GIF Frame ${i + 1})`,
                             visible: true,
                             opacity: 1.0,
                             buffer: cloneBuffer(buf)
                         }]);
+                    });
 
-                        frameCount++;
-                        renderFilmstripThumbnails(); // 实时更新底部的缩略图
+                    currentFrame = 0;
+                    activeLayerIndex = 0;
+                    undoStack = [];
+                    redoStack = [];
+                    if (typeof updateHistoryUI === 'function') updateHistoryUI();
+                    if (typeof resetZoom === 'function') resetZoom();
+                    if (typeof syncCurrentFrameBuffer === 'function') syncCurrentFrameBuffer();
 
-                    }, 80); // 80ms 对应 12.5 FPS，足够覆盖大部分游戏动画的帧率
-
-                    const finishImport = () => {
-                        c.width = 0;
-                        c.height = 0;
-                        currentFrame = 0;
-                        activeLayerIndex = 0;
-                        undoStack = [];
-                        redoStack = [];
-                        if (typeof updateHistoryUI === 'function') updateHistoryUI();
-                        if (typeof resetZoom === 'function') resetZoom();
-                        if (typeof syncCurrentFrameBuffer === 'function') syncCurrentFrameBuffer();
-
-                        if (loader) loader.style.display = 'none';
-                        if (typeof renderAll === 'function') renderAll();
-
-                        showToast(`✨ 强制物理截取成功！共导入 ${frameCount} 帧！`);
-                    };
-                };
-
-                img.onerror = () => {
                     if (loader) loader.style.display = 'none';
-                    alert('⚠️ 连浏览器的 Image 标签都打不开这个文件，它可能真的彻底损坏了。');
-                };
+                    if (typeof renderAll === 'function') renderAll();
+
+                    showToast(`✨ 完美解析！成功导入 ${frames.length} 帧！`);
+
+                } catch (err) {
+                    console.error('解析失败:', err);
+                    if (loader) loader.style.display = 'none';
+                    alert('⚠️ 解析失败：' + err.message);
+                }
             };
-            reader.readAsDataURL(file); // 🚨 关键：改回 readAsDataURL，不要读二进制了
+            reader.readAsArrayBuffer(file);
 
             return;
         }
