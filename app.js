@@ -4708,8 +4708,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (btnExportPng) btnExportPng.addEventListener('click', exportPng);
+        // 🚨 绑定 Sprite Sheet 设置弹窗的事件
+        const sheetConfigClose = document.getElementById('sheet-config-close');
+        const btnConfirmSheetExport = document.getElementById('btn-confirm-sheet-export');
+
+        if (sheetConfigClose) {
+            sheetConfigClose.addEventListener('click', () => {
+                document.getElementById('sheet-config-modal').style.display = 'none';
+            });
+        }
+
+        if (btnConfirmSheetExport) {
+            btnConfirmSheetExport.addEventListener('click', exportSpritesheet);
+        }
         if (btnExportGif) btnExportGif.addEventListener('click', exportGif);
-        if (btnExportSheet) btnExportSheet.addEventListener('click', exportSpritesheet);
+        if (btnExportSheet) {
+            btnExportSheet.addEventListener('click', () => {
+                if (!checkIsProActive()) { openProModal(); return; }
+                // 🚨 打开设置弹窗
+                const sheetModal = document.getElementById('sheet-config-modal');
+                if (sheetModal) sheetModal.style.display = 'flex';
+            });
+        }
         if (btnExportJsonAtlas) btnExportJsonAtlas.addEventListener('click', exportJsonAtlas);
         if (btnExportSvg) btnExportSvg.addEventListener('click', exportSvg);
 
@@ -5616,21 +5636,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const resY = engine.resY || 32;
         const totalFrames = frameBuffers.length;
 
-        // 🚨 获取用户输入的列数
+        // 🚨 从输入框获取用户想要的列数
         const colsInput = document.getElementById('param-sheet-cols');
         let cols = colsInput ? parseInt(colsInput.value) : 0;
-        if (cols <= 0) cols = totalFrames; // 如果填 0，就排成一行
+        if (cols <= 0) cols = totalFrames; // 填 0 表示横向排成一整条
         const rows = Math.ceil(totalFrames / cols);
 
         const exportCanvas = document.createElement('canvas');
-        // 画布总宽 = 每行最大帧数 * 单帧宽 * 缩放倍数
         exportCanvas.width = cols * resX * 8;
-        // 画布总高 = 总行数 * 单帧高 * 缩放倍数
         exportCanvas.height = rows * resY * 8;
 
         const ctx = exportCanvas.getContext('2d');
         ctx.imageSmoothingEnabled = false;
 
+        // 逐帧绘制到二维网格
         for (let f = 0; f < totalFrames; f++) {
             const fc = document.createElement('canvas');
             fc.width = resX * 8;
@@ -5638,19 +5657,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const buf = frameBuffers[f] || engine.createBuffer(resX, resY);
             engine.renderToCanvas(buf, fc, true);
 
-            // 🚨 核心计算：根据行列算出粘贴的 XY 坐标
+            // 🚨 二维网格坐标计算
             const col = f % cols;
             const row = Math.floor(f / cols);
 
             ctx.drawImage(fc, col * resX * 8, row * resY * 8);
         }
 
+        // 关闭弹窗
+        const sheetModal = document.getElementById('sheet-config-modal');
+        if (sheetModal) sheetModal.style.display = 'none';
+
         const filename = `spritesheet_${totalFrames}frames_${cols}x${rows}.png`;
         const dataUrl = exportCanvas.toDataURL('image/png');
         const status = await promptSaveFilePicker(dataUrl, filename, [{ description: 'PNG Spritesheet', accept: { 'image/png': ['.png'] } }]);
         if (status === 'cancel') return;
 
-        showExportModal(dataUrl, filename, `PNG Spritesheet | ${exportCanvas.width}x${exportCanvas.height}px`, '✨ Sprite Sheet 图集导出成功！');
+        showExportModal(dataUrl, filename, `PNG Spritesheet | ${exportCanvas.width}x${exportCanvas.height}px (${cols}列 ${rows}行)`, '✨ Sprite Sheet 图集导出成功！');
     }
 
     async function exportJsonAtlas() {
