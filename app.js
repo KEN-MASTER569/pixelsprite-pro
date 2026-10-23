@@ -40,23 +40,24 @@ window.addEventListener('message', (event) => {
         if (gate) gate.style.display = 'none';
         const loginModal = document.getElementById('google-login-modal');
         if (loginModal) loginModal.style.display = 'none';
+        setTimeout(() => {
+            const pill = document.getElementById('user-profile-pill');
+            if (pill) pill.style.display = 'flex';
+            // 🚨 新增：隐藏顶部的登录按钮
+            const hLoginBtn = document.getElementById('btn-header-login');
+            if (hLoginBtn) hLoginBtn.style.display = 'none';
 
-        const pill = document.getElementById('user-profile-pill');
-        if (pill) pill.style.display = 'flex';
-        // 🚨 新增：隐藏顶部的登录按钮
-        const hLoginBtn = document.getElementById('btn-header-login');
-        if (hLoginBtn) hLoginBtn.style.display = 'none';
+            const nameEl = document.getElementById('user-display-name');
+            if (nameEl) nameEl.textContent = window.userState.username;
 
-        const nameEl = document.getElementById('user-display-name');
-        if (nameEl) nameEl.textContent = window.userState.username;
+            const initials = (window.userState.username || 'P').charAt(0).toUpperCase();
+            const badge = document.getElementById('user-avatar-badge');
+            if (badge) badge.textContent = initials;
 
-        const initials = (window.userState.username || 'P').charAt(0).toUpperCase();
-        const badge = document.getElementById('user-avatar-badge');
-        if (badge) badge.textContent = initials;
-
-        if (typeof showToast === 'function') {
-            showToast(`🎉 欢迎，${window.userState.username} (${window.userState.email})！Google 官方 SSO 验证登录成功！`);
-        }
+            if (typeof showToast === 'function') {
+                showToast(`🎉 欢迎，${window.userState.username} (${window.userState.email})！Google 官方 SSO 验证登录成功！`);
+            }
+        }, 100);
     }
 });
 
@@ -868,9 +869,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const resX = engine.resX || engine.resolution || 32;
         const resY = engine.resY || engine.resolution || 32;
 
+        // 计算鼠标相对 canvas 边界的真实物理坐标
         let x = Math.floor((clientX - rect.left) / (rect.width / resX));
         let y = Math.floor((clientY - rect.top) / (rect.height / resY));
 
+        // 限制边界
         x = Math.max(0, Math.min(resX - 1, x));
         y = Math.max(0, Math.min(resY - 1, y));
 
@@ -4943,24 +4946,30 @@ document.addEventListener('DOMContentLoaded', () => {
             const btn = document.getElementById(btnId);
             if (!btn) return;
 
-            // 🚨 温柔重写：直接覆盖 onclick，不克隆节点
-            btn.onclick = function (e) {
+            // 克隆按钮以清除所有旧的绑定
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+
+            newBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
 
+                // 1. 如果还没登录
                 if (!window.userState || !window.userState.isLoggedIn) {
-                    if (typeof showToast === 'function') showToast('👑 Please login with Google to unlock PRO');
+                    if (typeof showToast === 'function') showToast('👑 请先登录 Google 账号以解锁 PRO 功能');
                     return;
                 }
 
+                // 2. 如果没买 PRO
                 if (typeof checkIsProActive === 'function' && !checkIsProActive()) {
-                    if (typeof showToast === 'function') showToast('👑 PRO exclusive feature, please unlock first!');
+                    if (typeof showToast === 'function') showToast('👑 此功能为 PRO 专属，请先解锁！');
                     openProModal();
                     return;
                 }
 
+                // 3. 已解锁，执行原本的功能
                 if (typeof action === 'function') action();
-            };
+            });
         };
 
         // 重新绑定所有 PRO 按钮
@@ -5206,6 +5215,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (e.target === aboutModal) {
                     aboutModal.style.display = 'none';
                 }
+            });
+        }
+
+        // 绑定购买 PRO 按钮
+        const buyProBtn = document.getElementById('btn-header-buy-pro'); // 👈 加上这一行获取元素
+        if (buyProBtn) {
+            buyProBtn.onclick = null;
+            buyProBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (typeof openProModal === 'function') {
+                    openProModal();
+                } else {
+                    const modal = document.getElementById('pro-modal');
+                    if (modal) modal.style.display = 'flex';
+                }
+            });
+        }
+
+        // 绑定 PRO 弹窗内部的关闭按钮
+        const proCloseBtn = document.getElementById('pro-modal-close'); // 👈 顺便加上这个
+        if (proCloseBtn) {
+            proCloseBtn.addEventListener('click', () => {
+                const modal = document.getElementById('pro-modal');
+                if (modal) modal.style.display = 'none';
             });
         }
 
@@ -6327,11 +6361,13 @@ document.addEventListener('DOMContentLoaded', () => {
         proModal.style.display = 'flex';
         if (typeof window.renderPayPalButtons === 'function') window.renderPayPalButtons();
     }
+    window.openProModal = openProModal; // 🚨 暴露给全局使用
 
     function closeProModal() {
         const proModal = document.getElementById('pro-modal');
         if (proModal) proModal.style.display = 'none';
     }
+    window.closeProModal = closeProModal;
 
     function activateLifetimePro() {
         proState.isLifetimePro = true;
@@ -6689,6 +6725,7 @@ document.addEventListener('DOMContentLoaded', () => {
             target.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
             setTimeout(() => {
+                if (!overlay) return; // 教程已被关闭（如退出登录）
                 const rect = target.getBoundingClientRect();
                 const padding = 10;
 
@@ -6745,17 +6782,25 @@ document.addEventListener('DOMContentLoaded', () => {
             else { updateStep(); }
         }
 
-        function endTour() {
+        function endTour(immediate) {
+            window.removeEventListener('keydown', handleTourKeydown);
             if (overlay) {
-                overlay.style.opacity = '0';
-                overlay.style.transition = 'opacity 0.3s';
-                window.removeEventListener('keydown', handleTourKeydown);
-                setTimeout(() => { overlay.remove(); }, 300);
+                const el = overlay;
+                overlay = null; // 让所有延迟回调立即失效
+                if (immediate === true) {
+                    el.remove();
+                } else {
+                    el.style.opacity = '0';
+                    el.style.transition = 'opacity 0.3s';
+                    setTimeout(() => { el.remove(); }, 300);
+                }
             }
+            if (window.endCyberTour === endTour) window.endCyberTour = null;
             localStorage.setItem('pixelsprite_has_seen_guide', 'true');
         }
 
         initTourDOM();
+        window.endCyberTour = endTour;
         setTimeout(() => updateStep(), 100);
     }
     window.startCyberTour = startCyberTour;
@@ -7200,4 +7245,4 @@ function applyGlobalPromotion() {
 }
 
 // 页面加载后自动执行打折
-setTimeout(applyGlobalPromotion, 1000);
+setTimeout(applyGlobalPromotion, 1000)

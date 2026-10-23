@@ -38,7 +38,7 @@
         </div>
     </div>
     <!-- 强制 Google 登录拦截幕帘 Mandatory Auth Gate -->
-    <div id="mandatory-auth-gate" class="mandatory-auth-gate" style="display: flex;">
+    <div id="mandatory-auth-gate" class="mandatory-auth-gate" style="display: none !important;">
         <div class="mandatory-auth-card"
             style="background: rgba(5, 8, 15, 0.85); backdrop-filter: blur(30px); border: 1px solid rgba(0, 242, 254, 0.4); box-shadow: 0 0 60px rgba(0, 242, 254, 0.2), inset 0 0 30px rgba(0, 242, 254, 0.1); border-radius: 4px; position: relative; overflow: hidden; padding: 50px 40px; max-width: 460px; width: 100%;">
 
@@ -142,7 +142,8 @@
         <!-- 顶栏 Header -->
         <header class="studio-header">
             <div class="logo-area" id="app-logo-trigger" data-i18n-title="logo_tooltip" title="点击查看软件信息"
-                style="position: relative; cursor: pointer;">
+                onclick="document.getElementById('about-app-modal').style.display='flex'"
+                style="position: relative; cursor: pointer; pointer-events: auto !important; z-index: 9999999 !important;">
                 <!-- 动态赛博 3D 魔方 Logo -->
                 <div class="logo-icon-wrapper">
                     <svg class="cyber-logo" viewBox="0 0 100 100" width="38" height="38">
@@ -292,6 +293,7 @@
 
                 <!-- PRO 解锁与用户 profile -->
                 <button id="btn-header-buy-pro" class="btn"
+                    onclick="if(window.openProModal) window.openProModal(); else document.getElementById('pro-modal').style.display='flex'"
                     style="background: linear-gradient(135deg, #ffc439 0%, #ff9800 100%); color: #003087; font-weight: 800; font-size: 13px; border: none; border-radius: var(--radius-sm); padding: 6px 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(255, 196, 57, 0.4); transition: transform 0.2s;"
                     title="通过 PayPal 购买解锁 PRO 终身尊享版 ($19.99 USD)" data-i18n-title="title_buy_pro">
                     👑 <span data-i18n="btn_header_buy_pro">PayPal 升级 PRO ($19.99)</span>
@@ -572,9 +574,12 @@
                         <div class="canvas-container-box"
                             style="flex: 1 !important; min-height: 0 !important; overflow: auto !important; display: flex !important; align-items: center !important; justify-content: center !important; padding: 20px;">
                             <div class="canvas-wrapper" id="canvas-wrapper">
-                                <canvas id="pixel-canvas" width="512" height="512"></canvas>
-                                <canvas id="grid-overlay" width="512" height="512"></canvas>
-                                <canvas id="symmetry-overlay" width="512" height="512"></canvas>
+                                <canvas id="pixel-canvas" width="512" height="512"
+                                    style="max-width: 512px; max-height: 512px; position: relative !important; pointer-events: auto !important;"></canvas>
+                                <canvas id="grid-overlay" width="512" height="512"
+                                    style="pointer-events: none !important; position: absolute; top: 0; left: 0;"></canvas>
+                                <canvas id="symmetry-overlay" width="512" height="512"
+                                    style="pointer-events: none !important; position: absolute; top: 0; left: 0;"></canvas>
                             </div>
                         </div>
 
@@ -965,7 +970,9 @@
         <div class="modal-card pro-modal-card">
             <div class="modal-header">
                 <h3 data-i18n="pro_modal_title">👑 PixelSprite PRO 终身尊享版解锁 ($19.99 USD)</h3>
-                <button id="pro-modal-close" class="modal-close-btn">&times;</button>
+                <button id="pro-modal-close" class="modal-close-btn"
+                    onclick="document.getElementById('pro-modal').style.display='none'"
+                    style="pointer-events: auto !important; z-index: 9999999 !important;">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="pro-banner">
@@ -1096,7 +1103,9 @@
         <div class="modal-card">
             <div class="modal-header">
                 <h3 data-i18n="slicer_modal_title">📦 Sprite Sheet 自动切割器 (Slicer)</h3>
-                <button id="slicer-modal-close" class="modal-close-btn">&times;</button>
+                <button id="slicer-modal-close" class="modal-close-btn"
+                    onclick="document.getElementById('slicer-modal').style.display='none'"
+                    style="position: relative; z-index: 9999999; pointer-events: auto !important;">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="form-group" style="width: 100%;">
@@ -1131,7 +1140,9 @@
         <div class="modal-card">
             <div class="modal-header">
                 <h3 data-i18n="pixelate_modal_title">🖼️ 照片 / 图片转像素画转换器</h3>
-                <button id="pixelate-modal-close" class="modal-close-btn">&times;</button>
+                <button id="pixelate-modal-close" class="modal-close-btn"
+                    onclick="document.getElementById('pixelate-modal').style.display='none'"
+                    style="position: relative; z-index: 9999999; pointer-events: auto !important;">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="form-group" style="width: 100%;">
@@ -1161,7 +1172,9 @@
         <div class="modal-card" style="width: 580px; max-width: 95vw;">
             <div class="modal-header">
                 <h3 data-i18n="adv_palette_modal_title">🎨 高级调色板工作台 (Advanced Palette Studio)</h3>
-                <button id="adv-palette-modal-close" class="modal-close-btn">&times;</button>
+                <button id="adv-palette-modal-close" class="modal-close-btn"
+                    onclick="document.getElementById('advanced-palette-modal').style.display='none'"
+                    style="position: relative; z-index: 9999999; pointer-events: auto !important;">&times;</button>
             </div>
             <div class="modal-body" style="gap: 16px; max-height: 75vh; overflow-y: auto;">
 
@@ -1476,7 +1489,9 @@
 
             <div class="modal-header"
                 style="position: relative; z-index: 2; border-bottom: none; padding-bottom: 0; justify-content: flex-end;">
-                <button id="about-modal-close" class="modal-close-btn" style="color: #ffffff;">&times;</button>
+                <button id="about-modal-close" class="modal-close-btn"
+                    onclick="document.getElementById('about-app-modal').style.display='none'"
+                    style="color: #ffffff; pointer-events: auto !important; z-index: 9999999 !important;">&times;</button>
             </div>
 
             <div class="modal-body"

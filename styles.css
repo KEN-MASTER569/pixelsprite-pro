@@ -4280,3 +4280,133 @@ body.logged-in #mandatory-auth-gate {
     display: none !important;
     pointer-events: none !important;
 }
+
+/* ============================================================ */
+/* 🚀 终极拯救：恢复侧边栏与画布的滚动条 */
+/* ============================================================ */
+
+/* 1. 恢复左侧工具栏滚动 */
+.left-sidebar {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: 100% !important;
+    max-height: calc(100vh - 90px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding-bottom: 30px !important;
+    /* 防止底部被切断 */
+}
+
+/* 2. 恢复右侧工具栏滚动 */
+.right-sidebar {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: 100% !important;
+    max-height: calc(100vh - 90px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding-bottom: 30px !important;
+}
+
+/* 3. 恢复中间画布区域的滚动（当画布很大时，可以上下左右拖动） */
+.canvas-container-box {
+    overflow: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* 4. 定制赛博朋克风格的滚动条，让它清晰可见 */
+.left-sidebar::-webkit-scrollbar,
+.right-sidebar::-webkit-scrollbar,
+.canvas-container-box::-webkit-scrollbar {
+    width: 8px !important;
+    height: 8px !important;
+}
+
+.left-sidebar::-webkit-scrollbar-thumb,
+.right-sidebar::-webkit-scrollbar-thumb,
+.canvas-container-box::-webkit-scrollbar-thumb {
+    background: rgba(0, 242, 254, 0.4) !important;
+    /* 青色滚动条 */
+    border-radius: 4px !important;
+}
+
+.left-sidebar::-webkit-scrollbar-thumb:hover,
+.right-sidebar::-webkit-scrollbar-thumb:hover,
+.canvas-container-box::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 242, 254, 0.8) !important;
+    /* 悬浮时变亮 */
+}
+
+.left-sidebar::-webkit-scrollbar-track,
+.right-sidebar::-webkit-scrollbar-track,
+.canvas-container-box::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2) !important;
+    /* 滚动条底色 */
+}
+
+/* 🚀 强制拯救画笔：确保 Canvas 霸占最高点击权限 */
+.canvas-wrapper {
+    pointer-events: auto !important;
+}
+
+#pixel-canvas,
+#grid-overlay,
+#symmetry-overlay {
+    pointer-events: none !important;
+    /* 🚨 核心：网格和对称层绝对不能让它们挡住画笔事件 */
+}
+
+/* 只有最底层的 pixel-canvas 接收点击 */
+#pixel-canvas {
+    pointer-events: auto !important;
+    z-index: 1 !important;
+    position: relative !important;
+}
+
+/* 网格层和对称层浮在最上面，但是鼠标穿透它们 */
+#grid-overlay,
+#symmetry-overlay {
+    z-index: 10 !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+}
+
+/* ============================================================ */
+/* 🚨 终极封印：绝对禁止画布拦截全屏点击！ */
+/* ============================================================ */
+
+/* 1. 画布容器必须被严格限制大小，且允许内部滚动 */
+.canvas-container-box {
+    position: relative !important;
+    /* 作为画布的坐标参考 */
+    overflow: auto !important;
+    pointer-events: auto !important;
+}
+
+/* 2. 画布包装器的大小受控，不能无限放大 */
+.canvas-wrapper {
+    position: relative !important;
+    pointer-events: auto !important;
+}
+
+/* 3. 画布本体：只接受绘画事件，绝不允许它超出容器当遮罩！ */
+#pixel-canvas {
+    position: relative !important;
+    pointer-events: auto !important;
+    display: block !important;
+    /* 绝对不要给它写 position: fixed 或 100vw/100vh */
+}
+
+/* 4. 覆盖在画布上的网格和对称层，要允许鼠标穿透，否则点不到画布本身 */
+#grid-overlay,
+#symmetry-overlay {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    pointer-events: none !important;
+    /* 🚨 网格必须穿透 */
+    z-index: 10 !important;
+}

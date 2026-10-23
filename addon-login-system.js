@@ -69,45 +69,40 @@
         window.userState.isGoogleVerified = true;
         window.userState.lastLoginTimestamp = Date.now();
 
-        try {
-            localStorage.setItem('pixelsprite_google_user', JSON.stringify(window.userState));
-        } catch (e) { }
+        try { localStorage.setItem('pixelsprite_google_user', JSON.stringify(window.userState)); } catch (e) { }
 
-        window.forceShow('app');
-        window.updateUserAuthUI(); // 这个只更新了顶栏
-
-        // 🚨 核心修复：登录成功后，强制清除所有可能残留的遮罩层！
-        document.querySelectorAll('.modal-backdrop, #cyber-tour-overlay, #cyber-welcome-overlay').forEach(el => {
-            // 排除掉可能确实是打开的普通弹窗（如果你希望登录后保留某些弹窗，可以加条件）
-            if (el.id !== 'pro-modal') {
-                el.remove();
-            }
-        });
-
-        // 确保 app 和 gate 的层级正确
+        // 关掉大闸，显示主界面
         const gate = document.getElementById('mandatory-auth-gate');
         if (gate) {
-            gate.style.display = 'none';
-            gate.style.pointerEvents = 'none'; // 防止穿透失败
+            gate.style.removeProperty('z-index');
+            gate.style.removeProperty('pointer-events');
+            gate.style.setProperty('display', 'none', 'important');
         }
+
+        // 🚨 只关闭弹窗，绝不留下 pointer-events:none，
+        // 否则之后再打开的弹窗全部点不动（这就是“重新登录后功能失灵”的根源）
+        resetAllModals();
 
         const app = document.getElementById('app');
         if (app) {
+            app.style.removeProperty('display'); // 清掉退出时写入的 !important
             app.style.display = 'block';
             app.style.pointerEvents = 'auto';
         }
 
-        // 🚨 核心修复：验证成功后，延迟 1.5 秒再弹教程，给 DOM 渲染的时间
+        window.updateUserAuthUI();
+
+        // 🚨 去掉了所有 remove() 的逻辑！
+        // 不要在这里删 DOM！千万不要！
+
         if (!localStorage.getItem('pixelsprite_has_seen_guide')) {
             setTimeout(() => {
-                // 确保 app.js 里的 startCyberTour 已经被定义
                 if (typeof window.startCyberTour === 'function') {
                     window.startCyberTour(false);
                 }
             }, 1500);
         }
 
-        // 🚨 新增：触发炫酷的欢迎仪式！
         if (typeof window.showLoginWelcome === 'function') {
             window.showLoginWelcome(name);
         }
@@ -141,74 +136,38 @@
             window.showToast((dict.auth_welcome_toast || '🎉 欢迎，{name}！登录成功！').replace('{name}', name));
         }
 
-        // 🚨 终极魔法：每次登录成功后，暴力重绑所有关键按钮！
-        setTimeout(() => {
-            console.log("🔨 正在执行登录后事件重绑...");
-
-            // 1. 绑定关于窗口
-            const logoBtn = document.getElementById('app-logo-trigger');
-            const aboutModal = document.getElementById('about-app-modal');
-            if (logoBtn && aboutModal) {
-                logoBtn.onclick = function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    aboutModal.style.display = 'flex';
-                };
-            }
-
-            // 2. 绑定购买 PRO 窗口
-            const buyProBtn = document.getElementById('btn-header-buy-pro');
-            const proModal = document.getElementById('pro-modal');
-            if (buyProBtn && proModal) {
-                buyProBtn.onclick = function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (typeof window.openProModal === 'function') {
-                        window.openProModal();
-                    } else {
-                        proModal.style.display = 'flex';
-                    }
-                };
-            }
-
-            // 3. 绑定个人头像下拉菜单
-            const pill = document.getElementById('user-profile-pill');
-            const dropdown = document.getElementById('user-profile-dropdown');
-            if (pill && dropdown) {
-                pill.onclick = function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    dropdown.classList.toggle('show');
-                };
-            }
-        }, 100); // 延迟100毫秒，确保所有的弹窗 DOM 已经渲染完毕
-
         document.body.classList.add('logged-in');
     };
+
+    // 关闭所有弹窗：只隐藏，并清除残留的 pointer-events，保证下次打开可正常点击
+    function resetAllModals() {
+        document.querySelectorAll('.modal-backdrop').forEach(el => {
+            el.style.display = 'none';
+            el.style.removeProperty('pointer-events');
+        });
+    }
 
     // 5. 退出登录入口
     window.performLogout = function (e) {
         if (e) { e.preventDefault(); e.stopPropagation(); }
 
-        // 🚨 终极扫地僧：强制销毁一切可能残留的遮罩层、教程层、欢迎层！
-        document.querySelectorAll('.modal-backdrop, #cyber-tour-overlay, #cyber-welcome-overlay').forEach(el => {
-            el.remove();
-        });
+        // 静态弹窗（HTML 里写死的）只能隐藏，不能 remove()
+        resetAllModals();
 
-        // 强制关闭任何可能存在的欢迎动画
-        const welcomeOverlay = document.getElementById('cyber-welcome-overlay');
-        if (welcomeOverlay) welcomeOverlay.remove();
+        // 新手教程：必须正规结束，否则它的键盘监听会一直吞掉 空格/回车/Esc，
+        // 且残留的 overlay 会让教程永远无法再次启动
+        if (typeof window.endCyberTour === 'function') window.endCyberTour(true);
+        // 动态生成的遮罩可以安全删除（下次会重新创建）
+        document.querySelectorAll('#cyber-tour-overlay, #cyber-welcome-overlay').forEach(el => el.remove());
 
         // 顺手关掉下拉菜单
         const dropdown = document.getElementById('user-profile-dropdown');
-        if (dropdown) dropdown.classList.remove('show');
+        if (dropdown) { dropdown.classList.remove('show'); dropdown.style.removeProperty('display'); }
 
-
-        // 🚨 核心新增：在退出前，立刻把当前画布保存到本地草稿库！
+        // 保存草稿
         if (typeof saveDraftToDB === 'function') {
             saveDraftToDB();
         }
-        window.userState.isLoggedIn = false;
 
         // 1. 清空状态
         window.userState.isLoggedIn = false;
@@ -216,8 +175,6 @@
         window.userState.email = '';
         window.userState.avatar = '';
         try { localStorage.removeItem('pixelsprite_google_user'); } catch (err) { }
-
-        if (dropdown) dropdown.classList.remove('show');
 
         // 3. 强制隐藏头像胶囊
         const pill = document.getElementById('user-profile-pill');
@@ -230,9 +187,11 @@
             loginBtn.style.setProperty('pointer-events', 'auto', 'important');
         }
 
-        // 5. 强行调出全屏大闸（覆盖所有可能的隐藏样式）
+        // 🚨 核心修复：唤醒登录大闸
         const gate = document.getElementById('mandatory-auth-gate');
         if (gate) {
+            gate.style.setProperty('display', 'flex', 'important'); // 强制显示
+            gate.style.setProperty('pointer-events', 'auto', 'important'); // 强制可点击
             gate.style.setProperty('z-index', '999999', 'important');
         }
 
@@ -311,7 +270,26 @@
         } catch (e) { }
 
         // 显示对应的界面
-        window.forceShow(loggedIn ? 'app' : 'gate');
+        // 🚨 终极防黑屏补丁：清理之前可能残留的 DOM 错误
+        const gate = document.getElementById('mandatory-auth-gate');
+        const app = document.getElementById('app');
+        if (gate) gate.style.display = 'none';
+        if (app) app.style.display = 'none';
+
+        // 🚨 强制去本地缓存里再查一次状态（防止假数据）
+        let realLoggedIn = false;
+        if (window.userState && window.userState.isLoggedIn && window.userState.email) {
+            realLoggedIn = true;
+        }
+
+        if (realLoggedIn) {
+            if (app) app.style.display = 'block';
+        } else {
+            if (gate) {
+                gate.style.display = 'flex';
+                gate.style.pointerEvents = 'auto';
+            }
+        }
         window.updateUserAuthUI();
 
         // 🚨 关键修复 1：初始化下拉菜单的数据（解决截图里显示 Max Artist 的错误）
@@ -388,40 +366,6 @@
             }
         });
 
-        // 🚨 终极防丢补丁：强行重绑右上角两个关键按钮的点击事件
-        setTimeout(() => {
-            const logoBtn = document.getElementById('app-logo-trigger');
-            const buyProBtn = document.getElementById('btn-header-buy-pro');
-            const aboutModal = document.getElementById('about-app-modal');
-            const proModal = document.getElementById('pro-modal');
-
-            if (logoBtn && aboutModal) {
-                logoBtn.onclick = function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    // 清除可能存在的错误状态
-                    logoBtn.style.pointerEvents = 'auto';
-                    aboutModal.style.display = 'flex';
-                };
-            }
-
-            if (buyProBtn && proModal) {
-                buyProBtn.onclick = function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    // 清除可能存在的错误状态
-                    buyProBtn.style.pointerEvents = 'auto';
-
-                    // 调用全局的 openProModal 方法
-                    if (typeof window.openProModal === 'function') {
-                        window.openProModal();
-                    } else {
-                        proModal.style.display = 'flex';
-                    }
-                };
-            }
-        }, 500); // 延迟500毫秒执行，确保所有DOM都渲染完毕
-
         console.log('✅ 独立登录系统 (Addon) 已就绪');
     }
 
@@ -448,7 +392,8 @@
         btnEdit.addEventListener('click', (e) => {
             e.stopPropagation();
             const dropdown = document.getElementById('user-profile-dropdown');
-            if (dropdown) dropdown.style.display = 'none';
+            // 🚨 用 class 关闭，不要写 inline display:none，否则下拉菜单之后再也打不开
+            if (dropdown) dropdown.classList.remove('show');
 
             inputNickname.value = window.userState.username || '';
             tempAvatarBase64 = null; // 重置暂存
