@@ -95,9 +95,10 @@
             zoom_label: '缩放:',
 
             // Timeline
-            timeline_locked_text: '👑 帧动画时间轴 (Timeline) 与洋葱皮为 PRO 专属功能',
+            toast_pro_timeline_locked: "👑 动画时间轴为 PRO 专属功能！",
             btn_unlock_timeline: '解锁 PRO 尊享版 ($19.99)',
             btn_anim_play: '▶ 播放动画',
+            btn_anim_pause: "⏸ 暂停动画",
             btn_anim_prev: '⏮ 上一帧',
             btn_anim_next: '⏭ 下一帧',
             loop_mode_loop: '🔁 正向循环',
@@ -501,9 +502,10 @@
             zoom_label: 'Zoom:',
 
             // Timeline
-            timeline_locked_text: '👑 Frame Timeline & Onion Skin are PRO Exclusive Features',
+            toast_pro_timeline_locked: "👑 Timeline is a PRO feature!",
             btn_unlock_timeline: 'Unlock PRO ($19.99)',
-            btn_anim_play: '▶ Play Animation',
+            btn_anim_play: '▶ Play',
+            btn_anim_pause: "⏸ Pause",
             btn_anim_prev: '⏮ Previous Frame',
             btn_anim_next: '⏭ Next Frame',
             loop_mode_loop: '🔁 Loop Forward',

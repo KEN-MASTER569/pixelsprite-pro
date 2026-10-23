@@ -4410,3 +4410,42 @@ body.logged-in #mandatory-auth-gate {
     /* 🚨 网格必须穿透 */
     z-index: 10 !important;
 }
+
+/* 5. 🚨 三层画布尺寸必须完全一致（都等于 wrapper 尺寸，由 JS 设定）
+      绝对不要给 #pixel-canvas 加 max-width/max-height，
+      否则只有底层被压缩：棋盘格只占一角、其余变黑、画笔对不准 */
+#pixel-canvas,
+#grid-overlay,
+#symmetry-overlay {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    box-sizing: border-box !important;
+}
+
+/* 限制时间轴胶片的长宽，防止导入多帧时 UI 崩溃 */
+.frame-filmstrip {
+    display: flex !important;
+    overflow-x: auto !important;
+    max-width: 100% !important;
+    gap: 8px;
+    align-items: center;
+    padding-bottom: 8px;
+}
+
+.frame-thumb-card {
+    flex-shrink: 0 !important;
+    /* 绝对不许挤压变形 */
+    width: 60px !important;
+    /* 强制固定宽度 */
+    height: 70px !important;
+    /* 强制固定高度 */
+    overflow: hidden;
+}
+
+.frame-thumb-canvas {
+    width: 100% !important;
+    height: 50px !important;
+    object-fit: contain !important;
+}

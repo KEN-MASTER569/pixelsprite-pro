@@ -2343,17 +2343,32 @@ document.addEventListener('DOMContentLoaded', () => {
     function startAnimation() {
         if (!checkIsProActive()) {
             openProModal();
-            showToast('👑 动画时间轴为 PRO 专属功能！');
+
+            // 🚨 多语言化提示
+            const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
+            showToast(dict.toast_pro_timeline_locked || '👑 动画时间轴为 PRO 专属功能！');
             return;
         }
         isPlaying = true;
-        if (btnAnimPlay) btnAnimPlay.textContent = '⏸ 暂停动画';
+
+        // 🚨 动态读取语言字典，回退到双语兜底
+        if (btnAnimPlay) {
+            const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
+            btnAnimPlay.textContent = dict.btn_anim_pause || (window.currentLang === 'en' ? '⏸ Pause' : '⏸ 暂停动画');
+        }
+
         restartAnimationTimer();
     }
 
     function stopAnimation() {
         isPlaying = false;
-        if (btnAnimPlay) btnAnimPlay.textContent = '▶ 播放动画';
+
+        // 🚨 动态读取语言字典，回退到双语兜底
+        if (btnAnimPlay) {
+            const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
+            btnAnimPlay.textContent = dict.btn_anim_play || (window.currentLang === 'en' ? '▶ Play' : '▶ 播放动画');
+        }
+
         if (animTimer) {
             clearInterval(animTimer);
             animTimer = null;
@@ -4133,7 +4148,12 @@ document.addEventListener('DOMContentLoaded', () => {
             dropTarget.addEventListener('drop', (e) => {
                 const dt = e.dataTransfer;
                 if (dt && dt.files && dt.files.length > 0) {
-                    handleFileImport({ target: { files: dt.files, value: '' } });
+                    // 🚨 不要伪造假对象了，直接传真实文件！
+                    const file = dt.files[0];
+                    if (file) {
+                        // 直接调用你的处理函数，但我们需要重构一下它的参数接收方式
+                        processDroppedFile(file);
+                    }
                 }
             }, false);
         }
@@ -5488,23 +5508,18 @@ document.addEventListener('DOMContentLoaded', () => {
     async function exportGif() {
         if (!checkIsProActive()) { openProModal(); return; }
         commitSelection();
+
+        // 1. 显示全局 Loading 遮罩，避免用户乱点
+        const loader = document.getElementById('global-loader');
+        if (loader) loader.style.display = 'flex';
+
         const resX = engine.resX || 32;
         const resY = engine.resY || 32;
 
-        // 🚨 动态防爆护盾
-        let exportScale = 8;
-        const maxSafeSize = 4096;
-
-        if (Math.max(resX, resY) * exportScale > maxSafeSize) {
-            exportScale = 4;
-            if (typeof showToast === 'function') showToast('⚠️ 画布较大，GIF 已自动降级至 4x 导出');
-        }
-        if (Math.max(resX, resY) * exportScale > maxSafeSize) {
-            exportScale = 2;
-            if (typeof showToast === 'function') showToast('⚠️ 画布超大，GIF 已自动降级至 2x 导出');
-        }
-
-        const size = Math.max(resX, resY) * exportScale;
+        // 🚨 核心优化 1：GIF 只需要 256 色，且原尺寸已经足够。
+        // 我们放弃 8x 放大！直接使用 1x 的原生分辨率生成 Canvas。
+        // 这能让 getImageData 和 LZW 计算量暴降 64 倍！
+        const size = Math.max(resX, resY);
         const framesCanvas = [];
 
         for (let f = 0; f < frameBuffers.length; f++) {
@@ -5512,21 +5527,39 @@ document.addEventListener('DOMContentLoaded', () => {
             fc.width = size;
             fc.height = size;
             const buf = frameBuffers[f] || engine.createBuffer(resX, resY);
-            engine.renderToCanvas(buf, fc, true);
+            // 注意这里第三个参数是 false，不再放大，保证速度最快
+            engine.renderToCanvas(buf, fc, false);
             framesCanvas.push(fc);
         }
 
         const delayMs = Math.round(1000 / fps);
-        const gifBlob = encodeGIF(framesCanvas, delayMs);
 
-        if (gifBlob) {
-            const gifUrl = URL.createObjectURL(gifBlob);
-            const filename = `animated_${fps}fps.gif`;
-            const status = await promptSaveFilePicker(gifBlob, filename, [{ description: 'GIF Animated Image', accept: { 'image/gif': ['.gif'] } }]);
-            if (status === 'cancel') return; // 👈 用户取消
+        // 2. 交给你的底层编码器（此时因为数据变小了，它算起来会飞快）
+        // 用 setTimeout 延迟 50ms 执行，让浏览器的 Loading 动画能先渲染出来，否则 JS 阻塞会导致画面直接白屏
+        setTimeout(async () => {
+            const gifBlob = encodeGIF(framesCanvas, delayMs);
 
-            showExportModal(gifUrl, filename, `GIF 动态图 | ${fps} FPS`, '✨ GIF 动态动画导出成功！');
-        }
+            // 3. 立刻释放临时 Canvas 内存
+            framesCanvas.forEach(canvas => {
+                canvas.width = 0;
+                canvas.height = 0;
+            });
+
+            if (loader) loader.style.display = 'none';
+
+            if (gifBlob) {
+                const gifUrl = URL.createObjectURL(gifBlob);
+                const filename = `animated_${fps}fps.gif`;
+
+                const status = await promptSaveFilePicker(gifBlob, filename, [{ description: 'GIF Animated Image', accept: { 'image/gif': ['.gif'] } }]);
+
+                if (status === 'cancel') return;
+
+                showExportModal(gifUrl, filename, `GIF 动态图 | ${fps} FPS`, '✨ GIF 动态动画导出成功！');
+            } else {
+                alert('❌ GIF 生成失败，请重试');
+            }
+        }, 50); // 延迟 50ms，拯救主线程假死
     }
 
     async function exportSpritesheet() {
@@ -5721,12 +5754,227 @@ document.addEventListener('DOMContentLoaded', () => {
         return 1;
     }
 
-    function handleFileImport(e) {
+    async function handleFileImport(e) {
         const file = e.target.files[0];
         if (!file) return;
-        pushHistoryState();
 
         const fileNameLower = file.name.toLowerCase();
+
+        // ==========================================
+        // 🚨 模块 1：GIF 动图专用解析通道
+        // ==========================================
+        if (fileNameLower.endsWith('.gif')) {
+            const loader = document.getElementById('global-loader');
+            if (loader) loader.style.display = 'flex';
+
+            const reader = new FileReader();
+            reader.onload = function (evt) {
+                // 🚨 核心：绝对不能叫 buffer，就叫 evt.target.result
+                const rawBuffer = evt.target.result;
+                if (!rawBuffer || rawBuffer.byteLength === 0) {
+                    if (loader) loader.style.display = 'none';
+                    alert('⚠️ 读取到的文件是空的');
+                    return;
+                }
+
+                // 🚨 终极探针：如果文件小于 10 个字节，绝对是假文件或者空文件！
+                if (!rawBuffer || rawBuffer.byteLength < 10) {
+                    if (loader) loader.style.display = 'none';
+                    console.error('文件读取失败，字节数:', rawBuffer ? rawBuffer.byteLength : 0);
+                    alert('⚠️ 文件读取失败，可能是空文件或浏览器读取限制！');
+                    return;
+                }
+
+                const bytes = new Uint8Array(rawBuffer);
+
+                try {
+                    let pos = 6; // 跳过 GIF 头
+                    const readByte = () => bytes[pos++];
+                    const readShort = () => readByte() | (readByte() << 8);
+
+                    const screenW = readShort();
+                    const screenH = readShort();
+                    const packed = readByte();
+                    readByte();
+                    readByte();
+
+                    let gct = [];
+                    if (packed & 0x80) {
+                        const gctSize = 2 << (packed & 7);
+                        for (let i = 0; i < gctSize; i++) {
+                            gct.push([readByte(), readByte(), readByte()]);
+                        }
+                    }
+
+                    let frames = [];
+                    let currentPixels = new Uint8Array(screenW * screenH);
+                    let transparentIndex = -1;
+
+                    function lzwDecode(minCodeSize, data) {
+                        const clearCode = 1 << minCodeSize;
+                        const eofCode = clearCode + 1;
+                        let codeSize = minCodeSize + 1;
+                        let dict = [];
+                        const resetDict = () => {
+                            dict = [];
+                            for (let i = 0; i < clearCode; i++) dict.push([i]);
+                            dict.push(null, null);
+                            codeSize = minCodeSize + 1;
+                        };
+                        resetDict();
+                        let output = [];
+                        let bitBuf = 0, bitCount = 0, ptr = 0;
+                        let prevCode = null;
+                        while (ptr < data.length) {
+                            while (bitCount < codeSize && ptr < data.length) {
+                                bitBuf |= data[ptr++] << bitCount;
+                                bitCount += 8;
+                            }
+                            if (bitCount < codeSize) break;
+                            let code = bitBuf & ((1 << codeSize) - 1);
+                            bitBuf >>= codeSize;
+                            bitCount -= codeSize;
+                            if (code === clearCode) { resetDict(); prevCode = null; continue; }
+                            if (code === eofCode) break;
+                            if (prevCode === null) {
+                                output.push(...dict[code]);
+                                prevCode = code;
+                            } else {
+                                let entry = dict[code] ? [...dict[code]] : [...dict[prevCode], dict[prevCode][0]];
+                                output.push(...entry);
+                                dict.push([...dict[prevCode], entry[0]]);
+                                prevCode = code;
+                                if (dict.length === (1 << codeSize) && codeSize < 12) codeSize++;
+                            }
+                        }
+                        return output;
+                    }
+
+                    while (pos < bytes.length) {
+                        const blockType = readByte();
+                        if (blockType === 0x3B) break;
+
+                        if (blockType === 0x21) {
+                            const label = readByte();
+                            if (label === 0xF9) {
+                                readByte();
+                                const p = readByte();
+                                transparentIndex = (p & 0x01) ? readByte() : -1;
+                                readShort();
+                                readByte();
+                                readByte();
+                            } else {
+                                readByte();
+                                while (bytes[pos] !== 0) pos += bytes[pos] + 1;
+                                pos++;
+                            }
+                        } else if (blockType === 0x2C) {
+                            const left = readShort();
+                            const top = readShort();
+                            const w = readShort();
+                            const h = readShort();
+                            const imgPacked = readByte();
+
+                            let lct = gct;
+                            if (imgPacked & 0x80) {
+                                const lctSize = 2 << (imgPacked & 7);
+                                lct = [];
+                                for (let i = 0; i < lctSize; i++) {
+                                    lct.push([readByte(), readByte(), readByte()]);
+                                }
+                            }
+
+                            const minCodeSize = readByte();
+                            let lzwData = [];
+                            while (bytes[pos] !== 0) {
+                                const size = readByte();
+                                for (let i = 0; i < size; i++) lzwData.push(readByte());
+                            }
+                            pos++;
+
+                            const decodedPixels = lzwDecode(minCodeSize, lzwData);
+                            let pIdx = 0;
+                            for (let y = 0; y < h; y++) {
+                                for (let x = 0; x < w; x++) {
+                                    const px = left + x;
+                                    const py = top + y;
+                                    if (px < screenW && py < screenH) {
+                                        currentPixels[py * screenW + px] = decodedPixels[pIdx++];
+                                    }
+                                }
+                            }
+
+                            const buf = engine.createBuffer(screenW, screenH);
+                            for (let y = 0; y < screenH; y++) {
+                                for (let x = 0; x < screenW; x++) {
+                                    const idx = currentPixels[y * screenW + x];
+                                    // 遇到透明色或越界颜色就设为 null
+                                    if (idx === transparentIndex || !lct[idx]) {
+                                        buf[y][x] = null;
+                                    } else {
+                                        const rgb = lct[idx];
+                                        buf[y][x] = engine.rgbToHex(rgb);
+                                    }
+                                }
+                            }
+                            frames.push(buf);
+                        } else {
+                            break; // 遇到不认识的块直接退出，防止死循环
+                        }
+                    }
+
+                    if (frames.length === 0) throw new Error('未能解析出任何图像块');
+
+                    engine.resX = screenW;
+                    engine.resY = screenH;
+                    engine.resolution = Math.max(screenW, screenH);
+                    updateCanvasDOMDimensions(screenW, screenH);
+
+                    frameBuffers = [];
+                    frameLayers = [];
+
+                    frames.forEach((buf, i) => {
+                        frameBuffers.push(buf);
+                        frameLayers.push([{
+                            id: `layer_0_${Date.now()}_${i}`,
+                            name: `Layer 1 (GIF Frame ${i + 1})`,
+                            visible: true,
+                            opacity: 1.0,
+                            buffer: cloneBuffer(buf)
+                        }]);
+                    });
+
+                    currentFrame = 0;
+                    activeLayerIndex = 0;
+                    undoStack = [];
+                    redoStack = [];
+                    if (typeof updateHistoryUI === 'function') updateHistoryUI();
+                    if (typeof resetZoom === 'function') resetZoom();
+                    if (typeof syncCurrentFrameBuffer === 'function') syncCurrentFrameBuffer();
+
+                    if (loader) loader.style.display = 'none';
+                    if (typeof renderAll === 'function') renderAll();
+
+                    showToast(`✨ 完美解析！成功提取 ${frames.length} 帧！`);
+
+                } catch (err) {
+                    console.error('底层解码失败:', err);
+                    if (loader) loader.style.display = 'none';
+                    alert('⚠️ 解析失败：' + err.message);
+                }
+            };
+
+            // 🚨 用最稳妥的 readAsArrayBuffer
+            reader.readAsArrayBuffer(file);
+
+            // 🚨 这里不要再写 e.target.value = '' 了！直接 return
+            return;
+        }
+
+        // ==========================================
+        // 🚨 模块 2：普通工程文件 (.json / .pixelsprite)
+        // ==========================================
+        pushHistoryState();
 
         if (fileNameLower.endsWith('.pixelsprite') || fileNameLower.endsWith('.json')) {
             const reader = new FileReader();
@@ -5771,6 +6019,9 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             reader.readAsText(file);
         } else {
+            // ==========================================
+            // 🚨 模块 3：普通图片文件 (PNG/JPG)
+            // ==========================================
             const reader = new FileReader();
             reader.onload = (event) => {
                 const img = new Image();
@@ -5807,7 +6058,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     syncCurrentFrameBuffer();
                     renderAll();
-                    showToast(`✨ 已自动将画布与图层尺寸调整为 ${targetW} × ${targetH}，成功导入图片！`);
+                    showToast(`✨ 成功导入图片！`);
                 };
                 img.src = event.target.result;
             };
@@ -5816,6 +6067,17 @@ document.addEventListener('DOMContentLoaded', () => {
         e.target.value = '';
     }
     // #endregion [R8] 导入导出与工程保存 (Export / Import)
+
+    async function processDroppedFile(file) {
+        // 我们伪造一个 input change 事件传给 handleFileImport
+        // 但因为对象是伪造的，千万别在 handleFileImport 里去碰 e.target.value
+        const fakeEvent = {
+            target: {
+                files: [file]
+            }
+        };
+        handleFileImport(fakeEvent);
+    }
 
     // ============================================================
     // TOAST & PAYPAL SUBSCRIPTION ENGINE (PRESERVED)
