@@ -438,7 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!frameLayers[frameIdx] || !Array.isArray(frameLayers[frameIdx]) || frameLayers[frameIdx].length === 0) {
             const buf = engine.createBuffer(resX, resY);
-            const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+            const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
             const bgName = `${dict.layer_default_name || '图层'} 1 ${dict.layer_bg_tag || '(背景)'}`;
             frameLayers[frameIdx] = [
                 {
@@ -563,7 +563,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (layer.id) {
                             layerCustomNames[layer.id] = trimmed;
                         }
-                        const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+                        const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
                         showToast((dict.layer_renamed || '✏️ 图层重命名为 {name}').replace('{name}', layer.name));
                     }
                     renderLayersUI();
@@ -2425,7 +2425,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 badge.addEventListener('click', (e) => {
                     e.stopPropagation();
                     // 🚨 修改这里，支持多语言
-                    const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+                    const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
                     const msg = (dict.tag_delete_confirm || '确定要删除动画段落【{name}】吗？').replace('{name}', tagStart.name);
 
                     if (confirm(msg)) {
@@ -2482,7 +2482,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const buf = frameBuffers[f] || engine.createBuffer();
             engine.renderToCanvas(buf, canvas, true);
 
-            const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+            const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
             const label = document.createElement('span');
             label.className = 'frame-number-tag';
             label.setAttribute('data-frame-index', f + 1);
@@ -2524,7 +2524,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 if (selectedFrames.length === 0) return;
 
-                const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+                const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
 
                 const sorted = [...selectedFrames].sort((a, b) => a - b);
                 const from = sorted[0];
@@ -3368,7 +3368,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 frameBuffers.push(buf);
                 frameLayers.push([{
                     id: `layer_0_${Date.now()}_${frameBuffers.length}`,
-                    name: '图层 1 (背景)',
+                    name: 'Layer 1 (Background)',
                     visible: true,
                     opacity: 1.0,
                     buffer: cloneBuffer(buf)
@@ -3935,7 +3935,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const newIdx = layers.length + 1;
                 const resX = engine.resX || 32;
                 const resY = engine.resY || 32;
-                const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+                const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
                 layers.push({
                     id: `layer_${Date.now()}`,
                     name: `${dict.layer_default_name || '图层'} ${newIdx}`,
@@ -4676,7 +4676,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnCloudSave = document.getElementById('btn-cloud-save');
         if (btnCloudSave) {
             btnCloudSave.addEventListener('click', async () => {
-                const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+                const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
 
                 showLoader();
                 btnCloudSave.disabled = true;
@@ -4769,7 +4769,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnCloudLoad = document.getElementById('btn-cloud-load');
         if (btnCloudLoad) {
             btnCloudLoad.onclick = async () => {
-                const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+                const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
 
                 // 1. 如果登录了，走历史档案库
                 if (window.userState && window.userState.isLoggedIn && window.userState.email) {
@@ -5264,7 +5264,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (canvasContainerBox) canvasContainerBox.style.cursor = (activeTool === 'move') ? 'move' : '';
         if (pixelCanvas) pixelCanvas.style.cursor = (activeTool === 'move') ? 'move' : '';
 
-        const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+        const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
         if (toolName === 'shading') {
             showToast(dict.tool_shading_hint || '☀️ 阴影/高光笔刷：左键加亮高光 (Lighten)，右键加深阴影 (Darken)');
         } else if (toolName === 'select') {
@@ -5922,7 +5922,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const proWidget = document.getElementById('pro-floating-widget');
         const dropdownProBadge = document.getElementById('dropdown-pro-badge');
         const btnHeaderBuyPro = document.getElementById('btn-header-buy-pro');
-        const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+        const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
 
         // 2. 时间轴锁定
         if (timelineControlsWrapper && timelineProLockedBanner) {
@@ -5994,7 +5994,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!hintEl) return;
 
-        const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+        const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
 
         if (window.proState && window.proState.isLifetimePro) {
             // 已买断：显示绿色已激活提示
@@ -6243,7 +6243,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isTrialActive = !isLifetime && remainingMs > 0;
 
         // 🚨 获取当前语言字典
-        const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+        const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
 
         // 🚨 获取当前的动态折扣价格
         const promo = typeof window.getDynamicPrice === 'function' ? window.getDynamicPrice() : { isPromo: false, finalPrice: 19.99, originalPrice: 19.99, discount: 10 };
@@ -6348,7 +6348,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 🚨 核心：加上撒花特效和高级 Toast
         if (typeof window.fireConfetti === 'function') window.fireConfetti();
 
-        const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+        const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
         // 把原来的普通 Toast 换成类似弹窗的高级感提示（如果你有自定义弹窗的话）
         showToast('🎉 尊贵的 PRO 终身会员，欢迎加入！');
     }
@@ -6479,7 +6479,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // ==========================================
         const btnThemeToggle = document.getElementById('btn-theme-toggle');
         if (btnThemeToggle) {
-            const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+            const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
             const savedTheme = localStorage.getItem('pixelsprite_theme');
             if (savedTheme === 'light') {
                 document.body.classList.add('light-theme');
@@ -6490,7 +6490,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             btnThemeToggle.addEventListener('click', () => {
                 const isLight = document.body.classList.toggle('light-theme');
-                const d = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+                const d = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
 
                 if (isLight) {
                     btnThemeToggle.innerHTML = d.theme_dark || '🌙 夜间模式';
@@ -6590,7 +6590,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!forceShow && localStorage.getItem('pixelsprite_has_seen_guide')) return;
         if (document.getElementById('cyber-tour-overlay')) return;
 
-        const d = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+        const d = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
 
         // 教程步骤文案
         const tourSteps = [
@@ -7007,7 +7007,7 @@ window.showLoginWelcome = function (userName) {
     `;
 
     // 2. 获取当前语言字典
-    const d = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+    const d = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
     // 如果没有专门的欢迎词，直接用中英结合兜底
     const welcomeTitle = d.welcome_title || '欢迎来到 PixelSprite Pro';
     const welcomeSubtitle = d.welcome_subtitle || `认证成功，${userName}。正在为您装载画布...`;

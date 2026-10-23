@@ -1269,16 +1269,12 @@
         // 🚨 强制单独更新【修改资料】按钮的文字
         const btnEditProfile = document.querySelector('#btn-edit-profile span');
         if (btnEditProfile) {
-            if (lang === 'en') {
-                btnEditProfile.textContent = '✏️ Edit Profile';
+            if (lang === 'zh') {
+                btnEditProfile.textContent = '✏️ 修改昵称与头像';
             } else if (lang === 'ja') {
                 btnEditProfile.textContent = '✏️ プロフィールを編集';
-            } else if (lang === 'zh-TW') {
-                btnEditProfile.textContent = '✏️ 修改暱稱與頭像';
-            } else if (lang === 'es') {
-                btnEditProfile.textContent = '✏️ Editar Perfil';
             } else {
-                btnEditProfile.textContent = '✏️ 修改昵称与头像';
+                btnEditProfile.textContent = '✏️ Edit Profile';
             }
         }
 
@@ -1349,8 +1345,8 @@
 
     // 🔤 全局翻译辅助函数
     window.t = function (key, vars) {
-        const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
-        let str = dict[key] || window.I18N_TRANSLATIONS.zh[key] || key;
+        const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
+        let str = dict[key] || window.I18N_TRANSLATIONS.en[key] || key;
         if (vars) {
             Object.keys(vars).forEach(k => { str = str.split(`{${k}}`).join(vars[k]); });
         }
