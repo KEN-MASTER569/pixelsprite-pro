@@ -141,6 +141,48 @@
             window.showToast((dict.auth_welcome_toast || '🎉 欢迎，{name}！登录成功！').replace('{name}', name));
         }
 
+        // 🚨 终极魔法：每次登录成功后，暴力重绑所有关键按钮！
+        setTimeout(() => {
+            console.log("🔨 正在执行登录后事件重绑...");
+
+            // 1. 绑定关于窗口
+            const logoBtn = document.getElementById('app-logo-trigger');
+            const aboutModal = document.getElementById('about-app-modal');
+            if (logoBtn && aboutModal) {
+                logoBtn.onclick = function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    aboutModal.style.display = 'flex';
+                };
+            }
+
+            // 2. 绑定购买 PRO 窗口
+            const buyProBtn = document.getElementById('btn-header-buy-pro');
+            const proModal = document.getElementById('pro-modal');
+            if (buyProBtn && proModal) {
+                buyProBtn.onclick = function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (typeof window.openProModal === 'function') {
+                        window.openProModal();
+                    } else {
+                        proModal.style.display = 'flex';
+                    }
+                };
+            }
+
+            // 3. 绑定个人头像下拉菜单
+            const pill = document.getElementById('user-profile-pill');
+            const dropdown = document.getElementById('user-profile-dropdown');
+            if (pill && dropdown) {
+                pill.onclick = function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropdown.classList.toggle('show');
+                };
+            }
+        }, 100); // 延迟100毫秒，确保所有的弹窗 DOM 已经渲染完毕
+
         document.body.classList.add('logged-in');
     };
 
