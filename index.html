@@ -17,6 +17,85 @@
 </head>
 
 <style>
+    /* 🚀 终极排版修复：防止日文把导出按钮挤出屏幕 */
+
+    /* 1. 强制顶栏横向排列，但不允许出现横向滚动条 */
+    .studio-header {
+        flex-wrap: nowrap !important;
+        min-height: 70px !important;
+        padding: 8px 16px !important;
+        width: 100vw !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+    }
+
+    /* 2. 左侧 Logo 区域不能缩得太小 */
+    .logo-area {
+        flex-shrink: 0 !important;
+    }
+
+    /* 3. 重点：让中间的按钮组自动压缩 */
+    .header-actions {
+        flex-wrap: nowrap !important;
+        flex: 1 1 auto !important;
+        /* 允许它占据剩余空间并收缩 */
+        min-width: 0 !important;
+        /* 核心魔法：允许子元素比内容更小 */
+        justify-content: flex-end !important;
+        gap: 6px !important;
+        /* 稍微缩小按钮之间的间距 */
+    }
+
+    /* 4. 防止各个按钮内部的文字换行 */
+    .header-actions>* {
+        flex-shrink: 0 !important;
+    }
+
+    /* 5. 画布尺寸设置区允许被适当压缩 */
+    .res-selector {
+        flex-shrink: 1 !important;
+        /* 允许这个最长的区域被挤压 */
+        overflow: hidden !important;
+    }
+
+    /* 6. 导出按钮和头像必须稳稳留在右侧 */
+    #btn-export-main,
+    #btn-header-buy-pro,
+    #google-user-container {
+        flex-shrink: 0 !important;
+        /* 绝对不许被挤压 */
+    }
+
+    /* 7. 动态计算主区域高度，给时间轴腾位置 */
+    .editor-layout {
+        height: calc(100vh - 90px) !important;
+        max-height: calc(100vh - 90px) !important;
+    }
+
+    .canvas-area {
+        height: 100% !important;
+        max-height: 100% !important;
+        overflow: hidden !important;
+    }
+
+    .canvas-container-box {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        overflow: auto !important;
+    }
+
+    /* 8. 锁死底部时间轴 */
+    .timeline-bar {
+        flex: 0 0 155px !important;
+        height: 155px !important;
+        min-height: 155px !important;
+        max-height: 155px !important;
+        margin-top: 4px !important;
+        margin-bottom: 4px !important;
+    }
+</style>
+
+<style>
     .frame-filmstrip {
         padding: 2px 0 !important;
         gap: 6px !important;
