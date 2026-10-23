@@ -6998,6 +6998,10 @@ window.fireConfetti = function () {
 // 🚀 登录成功专属欢迎仪式 (Cyber Welcome Sequence)
 // ============================================================
 window.showLoginWelcome = function (userName) {
+    // 🚨 修复：如果之前有残留，先删掉
+    const oldOverlay = document.getElementById('cyber-welcome-overlay');
+    if (oldOverlay) oldOverlay.remove();
+
     // 1. 创建全屏遮罩
     const overlay = document.createElement('div');
     overlay.id = 'cyber-welcome-overlay';
@@ -7006,6 +7010,7 @@ window.showLoginWelcome = function (userName) {
         background: rgba(5, 7, 12, 0.95); backdrop-filter: blur(25px);
         display: flex; flex-direction: column; align-items: center; justify-content: center;
         opacity: 0; transition: opacity 0.6s ease;
+        pointer-events: none; /* 🚨 核心：就算它还在屏幕上，鼠标点击也直接穿透它！ */
     `;
 
     // 2. 获取当前语言字典

@@ -148,9 +148,9 @@
     window.performLogout = function (e) {
         if (e) { e.preventDefault(); e.stopPropagation(); }
 
-        // 🚨 核心修复：清理所有可能在底层拦截点击的“透明幽灵层”
+        // 🚨 终极扫地僧：强制销毁一切可能残留的遮罩层、教程层、欢迎层！
         document.querySelectorAll('.modal-backdrop, #cyber-tour-overlay, #cyber-welcome-overlay').forEach(el => {
-            el.remove(); // 直接从 DOM 树上拔除，绝不残留！
+            el.remove();
         });
 
         // 强制关闭任何可能存在的欢迎动画
