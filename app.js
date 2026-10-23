@@ -5664,23 +5664,32 @@ document.addEventListener('DOMContentLoaded', () => {
             const buf = frameBuffers[f] || engine.createBuffer(resX, resY);
             engine.renderToCanvas(buf, fc, true);
 
-            // 🚨 二维网格坐标计算
+            // 二维网格坐标计算
             const col = f % cols;
             const row = Math.floor(f / cols);
 
             ctx.drawImage(fc, col * resX * 8, row * resY * 8);
-        }
 
-        // 关闭弹窗
-        const sheetModal = document.getElementById('sheet-config-modal');
-        if (sheetModal) sheetModal.style.display = 'none';
+            // 释放临时 Canvas
+            fc.width = 0;
+            fc.height = 0;
+        }
 
         const filename = `spritesheet_${totalFrames}frames_${cols}x${rows}.png`;
         const dataUrl = exportCanvas.toDataURL('image/png');
-        const status = await promptSaveFilePicker(dataUrl, filename, [{ description: 'PNG Spritesheet', accept: { 'image/png': ['.png'] } }]);
-        if (status === 'cancel') return;
 
-        showExportModal(dataUrl, filename, `PNG Spritesheet | ${exportCanvas.width}x${exportCanvas.height}px (${cols}列 ${rows}行)`, '✨ Sprite Sheet 图集导出成功！');
+        // 🚨 核心修复：直接呼叫预览弹窗，不再触发系统另存为文件框！
+        showExportModal(
+            dataUrl,
+            filename,
+            `PNG Spritesheet | ${exportCanvas.width}x${exportCanvas.height}px (${cols}列 ${rows}行)`,
+            '✨ Sprite Sheet 图集导出成功！',
+            '点击下方按钮保存到本地。'
+        );
+
+        // 释放大画布内存
+        exportCanvas.width = 0;
+        exportCanvas.height = 0;
     }
 
     async function exportJsonAtlas() {
