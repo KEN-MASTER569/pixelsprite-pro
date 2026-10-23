@@ -120,14 +120,23 @@
         overflow: auto !important;
     }
 
-    /* 8. 锁死底部时间轴 */
+    /* 锁死时间轴总高度，让内部的上下控制完全贴合 */
     .timeline-bar {
         flex: 0 0 155px !important;
         height: 155px !important;
         min-height: 155px !important;
         max-height: 155px !important;
-        margin-top: 4px !important;
-        margin-bottom: 4px !important;
+        padding: 10px 16px !important;
+        border-radius: 12px !important;
+        margin-top: 6px !important;
+        background: var(--bg-panel) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    .timeline-controls-wrapper {
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100% !important;
     }
 </style>
 
@@ -750,56 +759,77 @@
                             </div>
 
                             <div id="timeline-controls-wrapper" class="timeline-controls-wrapper">
-                                <div class="timeline-top-controls">
-                                    <div class="anim-btn-group">
-                                        <button id="btn-anim-play" class="anim-btn" data-i18n="btn_anim_play">▶
-                                            播放动画</button>
-                                        <button id="btn-anim-prev" class="anim-btn" data-i18n="btn_anim_prev">⏮
-                                            上一帧</button>
-                                        <button id="btn-anim-next" class="anim-btn" data-i18n="btn_anim_next">⏭
-                                            下一帧</button>
-                                        <select id="select-loop-mode" class="select-input" style="font-size: 11px;">
-                                            <option value="loop" data-i18n="loop_mode_loop">🔁 正向循环</option>
-                                            <option value="reverse" data-i18n="loop_mode_reverse">⏮ 倒放</option>
-                                            <option value="pingpong" data-i18n="loop_mode_pingpong">🏓 乒乓往复</option>
-                                        </select>
-                                        <select id="select-tag-mode" class="select-input"
-                                            style="font-size: 11px; max-width: 120px;" title="选择播放的动画段落">
-                                            <option value="all" data-i18n="tag_play_all">▶ 播放全部帧</option>
-                                        </select>
+                                <!-- 🚨 改为左右两端对齐 -->
+                                <div class="timeline-top-controls"
+                                    style="display: flex !important; justify-content: space-between !important; align-items: center !important; width: 100% !important; padding-bottom: 6px;">
+
+                                    <!-- 左侧：播放控制 & 循环 & 洋葱皮 -->
+                                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                        <div class="anim-btn-group" style="display: flex; gap: 4px;">
+                                            <button id="btn-anim-play" class="anim-btn" data-i18n="btn_anim_play"
+                                                style="min-width: 80px;">▶ 播放动画</button>
+                                            <button id="btn-anim-prev" class="anim-btn" data-i18n="btn_anim_prev">⏮
+                                                上一帧</button>
+                                            <button id="btn-anim-next" class="anim-btn" data-i18n="btn_anim_next">⏭
+                                                下一帧</button>
+                                        </div>
+
+                                        <div style="display: flex; gap: 4px;">
+                                            <select id="select-loop-mode" class="select-input" style="font-size: 11px;">
+                                                <option value="loop" data-i18n="loop_mode_loop">🔁 正向循环</option>
+                                                <option value="reverse" data-i18n="loop_mode_reverse">⏮ 倒放</option>
+                                                <option value="pingpong" data-i18n="loop_mode_pingpong">🏓 乒乓往复</option>
+                                            </select>
+                                            <select id="select-tag-mode" class="select-input"
+                                                style="font-size: 11px; max-width: 120px;" title="选择播放的动画段落">
+                                                <option value="all" data-i18n="tag_play_all">▶ 播放全部帧</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- 洋葱皮放左边，和预览相关 -->
+                                        <div class="onion-skin-group"
+                                            style="display: flex; align-items: center; gap: 6px; margin-left: 8px; border-left: 1px solid rgba(255,255,255,0.15); padding-left: 12px;">
+                                            <button id="btn-toggle-onion" class="tool-btn" data-i18n="btn_toggle_onion"
+                                                title="开启洋葱皮" data-i18n-title="title_toggle_onion"
+                                                style="height: 28px; padding: 0 10px;">🧅 洋葱皮</button>
+                                            <label
+                                                style="font-size: 11px; display: flex; align-items: center; gap: 4px; color: var(--text-muted); cursor: pointer;">
+                                                <input type="checkbox" id="check-onion-tint" style="cursor: pointer;">
+                                                <span data-i18n="check_onion_tint">🔴🔵 红蓝对比</span>
+                                            </label>
+                                        </div>
                                     </div>
 
-                                    <div class="anim-btn-group">
-                                        <button id="btn-frame-add" class="anim-btn" data-i18n="btn_frame_add"
-                                            title="新建空白帧" data-i18n-title="title_frame_add">➕ 新增帧</button>
-                                        <button id="btn-frame-duplicate" class="anim-btn" data-i18n="btn_frame_dup"
-                                            title="复制当前帧" data-i18n-title="title_frame_dup">📋 复制帧</button>
-                                        <button id="btn-frame-delete" class="anim-btn danger-btn"
-                                            data-i18n="btn_frame_del" title="删除当前帧"
-                                            data-i18n-title="title_frame_del">🗑️ 删除帧</button>
+                                    <!-- 右侧：帧增删操作 & FPS -->
+                                    <div style="display: flex; align-items: center; gap: 16px;">
+                                        <div class="anim-btn-group" style="display: flex; gap: 4px;">
+                                            <button id="btn-frame-add" class="anim-btn" data-i18n="btn_frame_add"
+                                                title="新建空白帧" data-i18n-title="title_frame_add">➕ 新增帧</button>
+                                            <button id="btn-frame-duplicate" class="anim-btn" data-i18n="btn_frame_dup"
+                                                title="复制当前帧" data-i18n-title="title_frame_dup">📋 复制帧</button>
+                                            <button id="btn-frame-delete" class="anim-btn danger-btn"
+                                                data-i18n="btn_frame_del" title="删除当前帧"
+                                                data-i18n-title="title_frame_del">🗑️ 删除帧</button>
+                                        </div>
+
+                                        <!-- FPS 控制靠最右 -->
+                                        <div class="speed-control"
+                                            style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); padding: 4px 10px; border-radius: 6px;">
+                                            <label
+                                                style="font-size: 11px; font-weight: bold; color: var(--text-muted);">FPS:</label>
+                                            <input type="range" id="param-fps" min="1" max="30" value="12"
+                                                class="slider-input" style="width: 70px;">
+                                            <span id="val-fps"
+                                                style="font-size: 11px; font-weight: bold; color: var(--accent-cyan); min-width: 36px;">12
+                                                FPS</span>
+                                        </div>
                                     </div>
 
-                                    <!-- 洋葱皮 控制 (Onion Skin) -->
-                                    <div class="onion-skin-group" style="display: flex; align-items: center; gap: 6px;">
-                                        <button id="btn-toggle-onion" class="tool-btn" data-i18n="btn_toggle_onion"
-                                            title="开启洋葱皮" data-i18n-title="title_toggle_onion">🧅 洋葱皮</button>
-                                        <label
-                                            style="font-size: 11px; display: flex; align-items: center; gap: 4px; color: var(--text-muted);">
-                                            <input type="checkbox" id="check-onion-tint" style="cursor: pointer;">
-                                            <span data-i18n="check_onion_tint">🔴🔵 红蓝对比</span>
-                                        </label>
-                                    </div>
-
-                                    <div class="speed-control">
-                                        <label>FPS:</label>
-                                        <input type="range" id="param-fps" min="1" max="30" value="12"
-                                            class="slider-input" style="width: 70px;">
-                                        <span id="val-fps">12 FPS</span>
-                                    </div>
                                 </div>
 
                                 <!-- 帧缩略图胶片 (Filmstrip) -->
-                                <div class="frame-filmstrip" id="frame-filmstrip">
+                                <div class="frame-filmstrip" id="frame-filmstrip"
+                                    style="flex: 1 !important; min-height: 0 !important; display: flex; align-items: center; gap: 8px; overflow-x: auto; padding: 4px 0; border-top: 1px solid rgba(255,255,255,0.05);">
                                     <!-- 动态渲染帧卡片 -->
                                 </div>
                             </div>
