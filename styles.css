@@ -4449,3 +4449,104 @@ body.logged-in #mandatory-auth-gate {
     height: 50px !important;
     object-fit: contain !important;
 }
+
+/* 🚨 核心：把胶片条本身的高度撑起来，并且给个底部 padding */
+.frame-filmstrip {
+    display: flex;
+    gap: 8px;
+    padding: 26px 10px 16px 10px !important;
+    /* 顶部留足 tag 空间，底部留空 */
+    overflow-x: auto;
+    overflow-y: hidden;
+    height: 120px;
+    /* 给卡片一个充足的高度 */
+    align-items: flex-start;
+}
+
+/* 调整卡片：稍微变大一点 */
+.frame-thumb-card {
+    flex-shrink: 0;
+    width: 64px;
+    height: 88px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-card, #151a25);
+    border: 1px solid var(--border-color, #2a3441);
+    border-radius: 6px;
+    padding: 6px 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+/* 缩略图大小 */
+.frame-thumb-canvas {
+    width: 52px !important;
+    height: 52px !important;
+    border-radius: 3px;
+    image-rendering: pixelated;
+}
+
+/* 🚨 核心修复：让 Frame 1 的文字变得极其清晰、亮眼 */
+.frame-number-tag {
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    color: #ffffff !important;
+    /* 纯白文字 */
+    background: rgba(0, 242, 254, 0.15);
+    /* 加一层青色半透明底色 */
+    border: 1px solid rgba(0, 242, 254, 0.3);
+    padding: 2px 4px;
+    border-radius: 4px;
+    margin-top: 6px;
+    white-space: nowrap;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+/* 选中状态加亮 */
+.frame-thumb-card.active {
+    border-color: #00f2fe !important;
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.4) !important;
+}
+
+.frame-thumb-card.active .frame-number-tag {
+    background: #00f2fe;
+    color: #050b14 !important;
+    /* 选中时反色，更显眼 */
+    border-color: #ffffff;
+}
+
+/* 🚨 强制 Toast 提示条显示在屏幕正上方居中，绝不挡住面板 */
+.toast-container {
+    position: fixed !important;
+    top: 20px !important;
+    /* 改为距离顶部 20px */
+    left: 50% !important;
+    /* 水平居中 */
+    transform: translateX(-50%) !important;
+    /* 居中修正 */
+    z-index: 2147483647 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 10px !important;
+    pointer-events: none !important;
+}
+
+.toast-message {
+    background: rgba(5, 11, 20, 0.95) !important;
+    /* 深色背景，更显眼 */
+    border: 1px solid #00f2fe !important;
+    color: #00f2fe !important;
+    /* 青色高亮文字 */
+    padding: 12px 24px !important;
+    border-radius: 8px !important;
+    font-weight: 800 !important;
+    box-shadow: 0 8px 30px rgba(0, 242, 254, 0.4) !important;
+    /* 加上青色发光阴影 */
+    backdrop-filter: blur(10px) !important;
+    font-size: 14px !important;
+}
