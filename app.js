@@ -2946,6 +2946,66 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('🗑️ 已删除选区像素');
     }
 
+    // ============================================================
+    // 🚨 新增：时间轴帧删除逻辑 (支持多选删除)
+    // ============================================================
+    function deleteSelectedFrames() {
+        // 1. 判断至少保留一帧
+        if (frameBuffers.length <= 1) {
+            showToast('⚠️ 至少保留一帧！');
+            return;
+        }
+
+        if (!checkIsProActive()) {
+            openProModal();
+            showToast('👑 时间轴多帧删除为 PRO 专属功能！');
+            return;
+        }
+
+        // 2. 确保 selectedFrames 数组不是空的
+        if (!selectedFrames || selectedFrames.length === 0) {
+            selectedFrames = [currentFrame];
+        }
+
+        // 3. 如果全选了，且没有剩余，直接清空（或者提示）
+        if (selectedFrames.length >= frameBuffers.length) {
+            showToast('⚠️ 不能删除所有帧！');
+            return;
+        }
+
+        pushHistoryState(); // 记录历史，支持撤销
+        stopAnimation();    // 停止播放
+
+        // 4. 过滤掉要删除的帧
+        const newBuffers = [];
+        const newLayers = [];
+
+        for (let i = 0; i < frameBuffers.length; i++) {
+            if (!selectedFrames.includes(i)) {
+                newBuffers.push(frameBuffers[i]);
+                newLayers.push(frameLayers[i]);
+            }
+        }
+
+        const deletedCount = frameBuffers.length - newBuffers.length;
+
+        frameBuffers = newBuffers;
+        frameLayers = newLayers;
+
+        // 5. 修正当前选中的帧索引，防止越界
+        if (currentFrame >= frameBuffers.length) {
+            currentFrame = frameBuffers.length - 1;
+        }
+
+        // 重新选中当前帧
+        selectedFrames = [currentFrame];
+        lastClickedFrame = currentFrame;
+        activeLayerIndex = 0;
+
+        renderAll();
+        showToast(`🗑️ 已删除 ${deletedCount} 帧！`);
+    }
+
     function isInsideSelection(x, y) {
         if (!selection) return true; // Drawing constraint: no selection => all coordinates permitted
         const selMinX = selection.x + (selection.offsetX || 0);
@@ -4584,7 +4644,16 @@ document.addEventListener('DOMContentLoaded', () => {
             // 基础快捷键
             // ==========================================
             if (k === 'delete' || k === 'backspace') {
-                if (selection) { deleteActiveSelection(); e.preventDefault(); }
+                // 🚨 如果当前有选区，优先删除选区里的像素
+                if (selection) {
+                    deleteActiveSelection();
+                    e.preventDefault();
+                }
+                // 🚨 如果没有选区，就删除时间轴上选中的帧
+                else {
+                    deleteSelectedFrames();
+                    e.preventDefault();
+                }
             }
             if (k === 'enter') {
                 if (selection) {

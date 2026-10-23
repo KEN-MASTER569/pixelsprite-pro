@@ -415,7 +415,6 @@
             // 🚨 Sprite Sheet & GIF
             sheet_cols_label: '📊 Sprite Sheet 每行帧数 (Columns)',
             sheet_cols_placeholder: '填 0 自动横向排满',
-            btn_generate_sheet: '生成 Sprite Sheet 图集',
             gif_solid_bg: '🎨 导出 GIF 时填充纯白背景 (防止透明黑边)',
             toast_sheet_success: '✨ Sprite Sheet 图集导出成功！',
             sheet_save_hint: '点击下方“保存到本地”即可下载。',
@@ -832,7 +831,6 @@
             // 🚨 Sprite Sheet & GIF
             sheet_cols_label: '📊 Sprite Sheet Columns:',
             sheet_cols_placeholder: '0 = auto horizontal',
-            btn_generate_sheet: 'Generate Sprite Sheet',
             gif_solid_bg: '🎨 Fill solid background for GIF (Prevent black edges)',
             toast_sheet_success: '✨ Sprite Sheet exported successfully!',
             sheet_save_hint: "Click 'Save to Local' below to download.",
@@ -1245,7 +1243,6 @@
             // --- Sprite Sheet & GIF (Japanese) ---
             sheet_cols_label: '📊 Sprite Sheet の列数:',
             sheet_cols_placeholder: '0 = 自動で横一列',
-            btn_generate_sheet: 'Sprite Sheet を生成',
             gif_solid_bg: '🎨 GIF 書き出し時に背景色を塗りつぶす（黒縁防止）',
             toast_sheet_success: '✨ Sprite Sheet の書き出しに成功しました！',
             sheet_save_hint: '下の「ローカルに保存」をクリックしてダウンロードします。',
