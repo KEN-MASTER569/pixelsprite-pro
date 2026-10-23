@@ -2378,24 +2378,61 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function restartAnimationTimer() {
         if (animTimer) clearInterval(animTimer);
+
         animTimer = setInterval(() => {
+            // 🚨 判断当前是否选择了 Tag
+            const tagSel = document.getElementById('select-tag-mode');
+            const tagIdx = tagSel ? tagSel.value : 'all';
+
+            let minFrame = 0;
+            let maxFrame = frameBuffers.length - 1;
+
+            if (tagIdx !== 'all' && frameTags[tagIdx]) {
+                // 如果选了特定的 Tag，限制播放范围
+                minFrame = frameTags[tagIdx].from;
+                maxFrame = frameTags[tagIdx].to;
+            }
+
+            // 更新帧索引逻辑
             if (loopMode === 'loop') {
-                currentFrame = (currentFrame + 1) % frameBuffers.length;
+                if (currentFrame >= maxFrame || currentFrame < minFrame) {
+                    currentFrame = minFrame;
+                } else {
+                    currentFrame++;
+                }
             } else if (loopMode === 'reverse') {
-                currentFrame = (currentFrame - 1 + frameBuffers.length) % frameBuffers.length;
+                if (currentFrame <= minFrame || currentFrame > maxFrame) {
+                    currentFrame = maxFrame;
+                } else {
+                    currentFrame--;
+                }
             } else if (loopMode === 'pingpong') {
                 currentFrame += playDirection;
-                if (currentFrame >= frameBuffers.length - 1) {
-                    currentFrame = frameBuffers.length - 1;
+                if (currentFrame >= maxFrame) {
+                    currentFrame = maxFrame;
                     playDirection = -1;
-                } else if (currentFrame <= 0) {
-                    currentFrame = 0;
+                } else if (currentFrame <= minFrame) {
+                    currentFrame = minFrame;
                     playDirection = 1;
                 }
             }
+
             updateFrameUI();
             renderMainCanvas();
         }, 1000 / fps);
+    }
+
+    function updateTagSelectorUI() {
+        const sel = document.getElementById('select-tag-mode');
+        if (!sel) return;
+
+        sel.innerHTML = '<option value="all">▶ 播放全部帧</option>';
+        frameTags.forEach((tag, idx) => {
+            const opt = document.createElement('option');
+            opt.value = idx;
+            opt.textContent = `🎬 ${tag.name} (${tag.from + 1}-${tag.to + 1})`;
+            sel.appendChild(opt);
+        });
     }
 
     function updateFrameUI() {
@@ -5526,8 +5563,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const fc = document.createElement('canvas');
             fc.width = size;
             fc.height = size;
+            const fctx = fc.getContext('2d');
+
+            // 🚨 核心新增：判断是否需要填充背景色
+            // 你可以加一个 checkbox，比如 id="check-gif-solid-bg"
+            const solidBgCheck = document.getElementById('check-gif-solid-bg');
+            if (solidBgCheck && solidBgCheck.checked) {
+                fctx.fillStyle = solidBgColor || '#ffffff'; // 用画布设置里的纯色，或者默认白色
+                fctx.fillRect(0, 0, size, size);
+            }
+
             const buf = frameBuffers[f] || engine.createBuffer(resX, resY);
-            // 注意这里第三个参数是 false，不再放大，保证速度最快
             engine.renderToCanvas(buf, fc, false);
             framesCanvas.push(fc);
         }
@@ -5565,12 +5611,22 @@ document.addEventListener('DOMContentLoaded', () => {
     async function exportSpritesheet() {
         if (!checkIsProActive()) { openProModal(); return; }
         commitSelection();
+
         const resX = engine.resX || 32;
         const resY = engine.resY || 32;
-        const exportCanvas = document.createElement('canvas');
         const totalFrames = frameBuffers.length;
-        exportCanvas.width = resX * 8 * totalFrames;
-        exportCanvas.height = resY * 8;
+
+        // 🚨 获取用户输入的列数
+        const colsInput = document.getElementById('param-sheet-cols');
+        let cols = colsInput ? parseInt(colsInput.value) : 0;
+        if (cols <= 0) cols = totalFrames; // 如果填 0，就排成一行
+        const rows = Math.ceil(totalFrames / cols);
+
+        const exportCanvas = document.createElement('canvas');
+        // 画布总宽 = 每行最大帧数 * 单帧宽 * 缩放倍数
+        exportCanvas.width = cols * resX * 8;
+        // 画布总高 = 总行数 * 单帧高 * 缩放倍数
+        exportCanvas.height = rows * resY * 8;
 
         const ctx = exportCanvas.getContext('2d');
         ctx.imageSmoothingEnabled = false;
@@ -5581,13 +5637,18 @@ document.addEventListener('DOMContentLoaded', () => {
             fc.height = resY * 8;
             const buf = frameBuffers[f] || engine.createBuffer(resX, resY);
             engine.renderToCanvas(buf, fc, true);
-            ctx.drawImage(fc, f * resX * 8, 0);
+
+            // 🚨 核心计算：根据行列算出粘贴的 XY 坐标
+            const col = f % cols;
+            const row = Math.floor(f / cols);
+
+            ctx.drawImage(fc, col * resX * 8, row * resY * 8);
         }
 
-        const filename = `spritesheet_${totalFrames}frames.png`;
+        const filename = `spritesheet_${totalFrames}frames_${cols}x${rows}.png`;
         const dataUrl = exportCanvas.toDataURL('image/png');
         const status = await promptSaveFilePicker(dataUrl, filename, [{ description: 'PNG Spritesheet', accept: { 'image/png': ['.png'] } }]);
-        if (status === 'cancel') return; // 👈 用户取消
+        if (status === 'cancel') return;
 
         showExportModal(dataUrl, filename, `PNG Spritesheet | ${exportCanvas.width}x${exportCanvas.height}px`, '✨ Sprite Sheet 图集导出成功！');
     }

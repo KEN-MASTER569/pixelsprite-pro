@@ -263,11 +263,26 @@
                             style="width: 100%; justify-content: flex-start; text-align: left; font-size: 13px; padding: 8px 12px; border: none; background: transparent; color: #ffea70;"
                             data-i18n="export_gif" title="导出多帧 GIF 动态动画 (PRO)" data-i18n-title="title_export_gif">🎞️ 导出
                             GIF 动画 <span class="pro-tag-badge">PRO</span></button>
+                        <div style="margin-bottom: 10px;">
+                            <label
+                                style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-main); cursor: pointer;">
+                                <input type="checkbox" id="check-gif-solid-bg" checked>
+                                <span>🎨 导出 GIF 时填充纯白背景 (防止透明黑边)</span>
+                            </label>
+                        </div>
                         <button id="btn-export-sheet" class="btn btn-secondary pro-feature-element"
                             style="width: 100%; justify-content: flex-start; text-align: left; font-size: 13px; padding: 8px 12px; border: none; background: transparent; color: #ffea70;"
                             data-i18n="export_sheet" title="导出游戏 Sprite Sheet 图集 (PRO)"
                             data-i18n-title="title_export_sheet">📊 导出 Sprite Sheet 图集 <span
                                 class="pro-tag-badge">PRO</span></button>
+                        <div id="export-sheet-options"
+                            style="display: none; margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 6px;">
+                            <label style="font-size: 12px; color: var(--text-muted);">每行帧数 (Columns):</label>
+                            <input type="number" id="param-sheet-cols" value="0" min="0" max="32" class="select-input"
+                                style="width: 60px; margin-left: 8px;">
+                            <span style="font-size: 11px; color: var(--text-muted); margin-left: 8px;">(填 0
+                                自动横向排满)</span>
+                        </div>
                         <button id="btn-export-json-atlas" class="btn btn-secondary pro-feature-element"
                             style="width: 100%; justify-content: flex-start; text-align: left; font-size: 13px; padding: 8px 12px; border: none; background: transparent; color: #00f2fe;"
                             data-i18n="export_json" title="导出 Cocos / Unity JSON 动画元数据 (PRO)"
@@ -607,6 +622,11 @@
                                             <option value="loop" data-i18n="loop_mode_loop">🔁 正向循环</option>
                                             <option value="reverse" data-i18n="loop_mode_reverse">⏮ 倒放</option>
                                             <option value="pingpong" data-i18n="loop_mode_pingpong">🏓 乒乓往复</option>
+                                        </select>
+                                        <select id="select-tag-mode" class="select-input"
+                                            style="font-size: 11px; max-width: 120px;">
+                                            <option value="all">▶ 播放全部帧</option>
+                                            <!-- 动态渲染 Tags -->
                                         </select>
                                     </div>
 
