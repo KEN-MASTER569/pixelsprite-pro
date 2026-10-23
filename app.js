@@ -5768,206 +5768,109 @@ document.addEventListener('DOMContentLoaded', () => {
             if (loader) loader.style.display = 'flex';
 
             const reader = new FileReader();
-            reader.onload = function (evt) {
-                // 🚨 核心：绝对不能叫 buffer，就叫 evt.target.result
-                const rawBuffer = evt.target.result;
-                if (!rawBuffer || rawBuffer.byteLength === 0) {
-                    if (loader) loader.style.display = 'none';
-                    alert('⚠️ 读取到的文件是空的');
-                    return;
-                }
+            reader.onload = (event) => {
+                // 把文件丢给 Image 对象，让浏览器自己去啃这个非标文件
+                const img = new Image();
+                img.src = event.target.result;
 
-                // 🚨 终极探针：如果文件小于 10 个字节，绝对是假文件或者空文件！
-                if (!rawBuffer || rawBuffer.byteLength < 10) {
-                    if (loader) loader.style.display = 'none';
-                    console.error('文件读取失败，字节数:', rawBuffer ? rawBuffer.byteLength : 0);
-                    alert('⚠️ 文件读取失败，可能是空文件或浏览器读取限制！');
-                    return;
-                }
+                img.onload = () => {
+                    const gifW = img.naturalWidth || 32;
+                    const gifH = img.naturalHeight || 32;
 
-                const bytes = new Uint8Array(rawBuffer);
-
-                try {
-                    let pos = 6; // 跳过 GIF 头
-                    const readByte = () => bytes[pos++];
-                    const readShort = () => readByte() | (readByte() << 8);
-
-                    const screenW = readShort();
-                    const screenH = readShort();
-                    const packed = readByte();
-                    readByte();
-                    readByte();
-
-                    let gct = [];
-                    if (packed & 0x80) {
-                        const gctSize = 2 << (packed & 7);
-                        for (let i = 0; i < gctSize; i++) {
-                            gct.push([readByte(), readByte(), readByte()]);
-                        }
-                    }
-
-                    let frames = [];
-                    let currentPixels = new Uint8Array(screenW * screenH);
-                    let transparentIndex = -1;
-
-                    function lzwDecode(minCodeSize, data) {
-                        const clearCode = 1 << minCodeSize;
-                        const eofCode = clearCode + 1;
-                        let codeSize = minCodeSize + 1;
-                        let dict = [];
-                        const resetDict = () => {
-                            dict = [];
-                            for (let i = 0; i < clearCode; i++) dict.push([i]);
-                            dict.push(null, null);
-                            codeSize = minCodeSize + 1;
-                        };
-                        resetDict();
-                        let output = [];
-                        let bitBuf = 0, bitCount = 0, ptr = 0;
-                        let prevCode = null;
-                        while (ptr < data.length) {
-                            while (bitCount < codeSize && ptr < data.length) {
-                                bitBuf |= data[ptr++] << bitCount;
-                                bitCount += 8;
-                            }
-                            if (bitCount < codeSize) break;
-                            let code = bitBuf & ((1 << codeSize) - 1);
-                            bitBuf >>= codeSize;
-                            bitCount -= codeSize;
-                            if (code === clearCode) { resetDict(); prevCode = null; continue; }
-                            if (code === eofCode) break;
-                            if (prevCode === null) {
-                                output.push(...dict[code]);
-                                prevCode = code;
-                            } else {
-                                let entry = dict[code] ? [...dict[code]] : [...dict[prevCode], dict[prevCode][0]];
-                                output.push(...entry);
-                                dict.push([...dict[prevCode], entry[0]]);
-                                prevCode = code;
-                                if (dict.length === (1 << codeSize) && codeSize < 12) codeSize++;
-                            }
-                        }
-                        return output;
-                    }
-
-                    while (pos < bytes.length) {
-                        const blockType = readByte();
-                        if (blockType === 0x3B) break;
-
-                        if (blockType === 0x21) {
-                            const label = readByte();
-                            if (label === 0xF9) {
-                                readByte();
-                                const p = readByte();
-                                transparentIndex = (p & 0x01) ? readByte() : -1;
-                                readShort();
-                                readByte();
-                                readByte();
-                            } else {
-                                readByte();
-                                while (bytes[pos] !== 0) pos += bytes[pos] + 1;
-                                pos++;
-                            }
-                        } else if (blockType === 0x2C) {
-                            const left = readShort();
-                            const top = readShort();
-                            const w = readShort();
-                            const h = readShort();
-                            const imgPacked = readByte();
-
-                            let lct = gct;
-                            if (imgPacked & 0x80) {
-                                const lctSize = 2 << (imgPacked & 7);
-                                lct = [];
-                                for (let i = 0; i < lctSize; i++) {
-                                    lct.push([readByte(), readByte(), readByte()]);
-                                }
-                            }
-
-                            const minCodeSize = readByte();
-                            let lzwData = [];
-                            while (bytes[pos] !== 0) {
-                                const size = readByte();
-                                for (let i = 0; i < size; i++) lzwData.push(readByte());
-                            }
-                            pos++;
-
-                            const decodedPixels = lzwDecode(minCodeSize, lzwData);
-                            let pIdx = 0;
-                            for (let y = 0; y < h; y++) {
-                                for (let x = 0; x < w; x++) {
-                                    const px = left + x;
-                                    const py = top + y;
-                                    if (px < screenW && py < screenH) {
-                                        currentPixels[py * screenW + px] = decodedPixels[pIdx++];
-                                    }
-                                }
-                            }
-
-                            const buf = engine.createBuffer(screenW, screenH);
-                            for (let y = 0; y < screenH; y++) {
-                                for (let x = 0; x < screenW; x++) {
-                                    const idx = currentPixels[y * screenW + x];
-                                    // 遇到透明色或越界颜色就设为 null
-                                    if (idx === transparentIndex || !lct[idx]) {
-                                        buf[y][x] = null;
-                                    } else {
-                                        const rgb = lct[idx];
-                                        buf[y][x] = engine.rgbToHex(rgb);
-                                    }
-                                }
-                            }
-                            frames.push(buf);
-                        } else {
-                            break; // 遇到不认识的块直接退出，防止死循环
-                        }
-                    }
-
-                    if (frames.length === 0) throw new Error('未能解析出任何图像块');
-
-                    engine.resX = screenW;
-                    engine.resY = screenH;
-                    engine.resolution = Math.max(screenW, screenH);
-                    updateCanvasDOMDimensions(screenW, screenH);
+                    engine.resX = gifW;
+                    engine.resY = gifH;
+                    engine.resolution = Math.max(gifW, gifH);
+                    updateCanvasDOMDimensions(gifW, gifH);
 
                     frameBuffers = [];
                     frameLayers = [];
 
-                    frames.forEach((buf, i) => {
+                    const c = document.createElement('canvas');
+                    c.width = gifW;
+                    c.height = gifH;
+                    const ctx = c.getContext('2d', { willReadFrequently: true });
+
+                    // 🚨 核心魔法：把图片以极度微小的透明度挂在屏幕上，强制浏览器播放它
+                    img.style.cssText = 'position:fixed; top:0; left:0; width:1px; height:1px; opacity:0.01; z-index:-99999; pointer-events:none;';
+                    document.body.appendChild(img);
+
+                    let frameCount = 0;
+                    const MAX_FRAMES = 30; // 截取前 30 帧
+
+                    // 🚨 核心魔法 2：每 80ms 截屏一次，每次截屏前强制触发“回流”，逼浏览器刷新画面
+                    const timer = setInterval(() => {
+                        if (frameCount >= MAX_FRAMES) {
+                            clearInterval(timer);
+                            document.body.removeChild(img);
+                            finishImport();
+                            return;
+                        }
+
+                        // 强制触发浏览器的重绘机制
+                        void img.offsetWidth;
+
+                        ctx.clearRect(0, 0, gifW, gifH);
+                        ctx.drawImage(img, 0, 0, gifW, gifH);
+
+                        const imgData = ctx.getImageData(0, 0, gifW, gifH).data;
+                        const buf = engine.createBuffer(gifW, gifH);
+                        let hasPixel = false;
+
+                        for (let y = 0; y < gifH; y++) {
+                            for (let x = 0; x < gifW; x++) {
+                                const idx = (y * gifW + x) * 4;
+                                const a = imgData[idx + 3];
+                                if (a > 20) {
+                                    buf[y][x] = engine.rgbToHex([imgData[idx], imgData[idx + 1], imgData[idx + 2]]);
+                                    hasPixel = true;
+                                } else {
+                                    buf[y][x] = null;
+                                }
+                            }
+                        }
+
+                        // 如果截出来全是透明的，说明可能还没加载出画面，跳过
+                        if (!hasPixel && frameCount === 0) return;
+
                         frameBuffers.push(buf);
                         frameLayers.push([{
-                            id: `layer_0_${Date.now()}_${i}`,
-                            name: `Layer 1 (GIF Frame ${i + 1})`,
+                            id: `layer_0_${Date.now()}_${frameCount}`,
+                            name: `Layer 1 (GIF Frame ${frameCount + 1})`,
                             visible: true,
                             opacity: 1.0,
                             buffer: cloneBuffer(buf)
                         }]);
-                    });
 
-                    currentFrame = 0;
-                    activeLayerIndex = 0;
-                    undoStack = [];
-                    redoStack = [];
-                    if (typeof updateHistoryUI === 'function') updateHistoryUI();
-                    if (typeof resetZoom === 'function') resetZoom();
-                    if (typeof syncCurrentFrameBuffer === 'function') syncCurrentFrameBuffer();
+                        frameCount++;
+                        renderFilmstripThumbnails(); // 实时更新底部的缩略图
 
+                    }, 80); // 80ms 对应 12.5 FPS，足够覆盖大部分游戏动画的帧率
+
+                    const finishImport = () => {
+                        c.width = 0;
+                        c.height = 0;
+                        currentFrame = 0;
+                        activeLayerIndex = 0;
+                        undoStack = [];
+                        redoStack = [];
+                        if (typeof updateHistoryUI === 'function') updateHistoryUI();
+                        if (typeof resetZoom === 'function') resetZoom();
+                        if (typeof syncCurrentFrameBuffer === 'function') syncCurrentFrameBuffer();
+
+                        if (loader) loader.style.display = 'none';
+                        if (typeof renderAll === 'function') renderAll();
+
+                        showToast(`✨ 强制物理截取成功！共导入 ${frameCount} 帧！`);
+                    };
+                };
+
+                img.onerror = () => {
                     if (loader) loader.style.display = 'none';
-                    if (typeof renderAll === 'function') renderAll();
-
-                    showToast(`✨ 完美解析！成功提取 ${frames.length} 帧！`);
-
-                } catch (err) {
-                    console.error('底层解码失败:', err);
-                    if (loader) loader.style.display = 'none';
-                    alert('⚠️ 解析失败：' + err.message);
-                }
+                    alert('⚠️ 连浏览器的 Image 标签都打不开这个文件，它可能真的彻底损坏了。');
+                };
             };
+            reader.readAsDataURL(file); // 🚨 关键：改回 readAsDataURL，不要读二进制了
 
-            // 🚨 用最稳妥的 readAsArrayBuffer
-            reader.readAsArrayBuffer(file);
-
-            // 🚨 这里不要再写 e.target.value = '' 了！直接 return
             return;
         }
 
