@@ -4723,11 +4723,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (btnExportGif) btnExportGif.addEventListener('click', exportGif);
         if (btnExportSheet) {
-            btnExportSheet.addEventListener('click', () => {
+            btnExportSheet.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
                 if (!checkIsProActive()) { openProModal(); return; }
-                // 🚨 打开设置弹窗
-                const sheetModal = document.getElementById('sheet-config-modal');
-                if (sheetModal) sheetModal.style.display = 'flex';
+
+                // 🚨 关闭下拉菜单，防止挡住画面
+                const exportMenu = document.getElementById('export-menu');
+                if (exportMenu) exportMenu.style.display = 'none';
+
+                // 🚨 直接执行导出（此时输入框里的数值会被 exportSpritesheet 读取）
+                await exportSpritesheet();
             });
         }
         if (btnExportJsonAtlas) btnExportJsonAtlas.addEventListener('click', exportJsonAtlas);

@@ -270,12 +270,22 @@
                                 <span>🎨 导出 GIF 时填充纯白背景 (防止透明黑边)</span>
                             </label>
                         </div>
+                        <!-- 🚨 替换开始 -->
+                        <div
+                            style="padding: 8px 12px; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); margin: 4px 0;">
+                            <label
+                                style="font-size: 12px; color: var(--text-main); display: block; margin-bottom: 4px;">📊
+                                Sprite Sheet 每行帧数 (Columns):</label>
+                            <input type="number" id="param-sheet-cols" value="0" min="0" max="64" class="select-input"
+                                style="width: 100%; padding: 6px; font-size: 12px;" placeholder="填 0 自动横向排满">
+                        </div>
                         <button id="btn-export-sheet" class="btn btn-secondary pro-feature-element"
                             style="width: 100%; justify-content: flex-start; text-align: left; font-size: 13px; padding: 8px 12px; border: none; background: transparent; color: #ffea70;"
                             data-i18n="export_sheet" title="导出游戏 Sprite Sheet 图集 (PRO)"
-                            data-i18n-title="title_export_sheet">📊 导出 Sprite Sheet 图集 <span
+                            data-i18n-title="title_export_sheet">📊 生成 Sprite Sheet 图集 <span
                                 class="pro-tag-badge">PRO</span>
                         </button>
+                        <!-- 🚨 替换结束 -->
                         <button id="btn-export-json-atlas" class="btn btn-secondary pro-feature-element"
                             style="width: 100%; justify-content: flex-start; text-align: left; font-size: 13px; padding: 8px 12px; border: none; background: transparent; color: #00f2fe;"
                             data-i18n="export_json" title="导出 Cocos / Unity JSON 动画元数据 (PRO)"
@@ -1248,30 +1258,6 @@
             </div>
             <div class="modal-footer">
                 <button id="adv-palette-modal-close-btn" class="btn btn-secondary" data-i18n="btn_close">关闭</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 📊 Sprite Sheet 自定义导出设置弹窗 -->
-    <div id="sheet-config-modal" class="modal-backdrop" style="display: none; z-index: 100000;">
-        <div class="modal-card" style="width: 400px;">
-            <div class="modal-header">
-                <h3 style="color: var(--accent-cyan);">📊 Sprite Sheet 图集排版设置</h3>
-                <button id="sheet-config-close" class="modal-close-btn">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group" style="width: 100%;">
-                    <label style="color: var(--text-main); margin-bottom: 8px;">每行帧数 (Columns):</label>
-                    <input type="number" id="param-sheet-cols" value="0" min="0" max="64" class="select-input"
-                        style="width: 100%; padding: 10px;">
-                    <span style="font-size: 11px; color: var(--text-muted); margin-top: 6px; display: block;">
-                        * 填 0 将自动把所有的帧拼成超长横条。<br>
-                        * 比如填入 8，总共有 18 帧，则会自动排成 3 行，每行 8 帧。
-                    </span>
-                </div>
-            </div>
-            <div class="modal-footer" style="margin-top: 16px;">
-                <button id="btn-confirm-sheet-export" class="btn btn-primary" style="width: 100%;">✨ 开始生成并导出</button>
             </div>
         </div>
     </div>
