@@ -233,7 +233,6 @@
         // 5. 强行调出全屏大闸（覆盖所有可能的隐藏样式）
         const gate = document.getElementById('mandatory-auth-gate');
         if (gate) {
-            gate.style.setProperty('display', 'flex', 'important');
             gate.style.setProperty('z-index', '999999', 'important');
         }
 
