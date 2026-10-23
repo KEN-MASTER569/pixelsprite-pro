@@ -273,18 +273,27 @@
                         <!-- 🚨 替换开始 -->
                         <div
                             style="padding: 8px 12px; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); margin: 4px 0;">
-                            <label
-                                style="font-size: 12px; color: var(--text-main); display: block; margin-bottom: 4px;">📊
-                                Sprite Sheet 每行帧数 (Columns):</label>
+                            <label style="font-size: 12px; color: var(--text-main); display: block; margin-bottom: 4px;"
+                                data-i18n="sheet_cols_label">📊 Sprite Sheet 每行帧数 (Columns):</label>
                             <input type="number" id="param-sheet-cols" value="0" min="0" max="64" class="select-input"
-                                style="width: 100%; padding: 6px; font-size: 12px;" placeholder="填 0 自动横向排满">
+                                style="width: 100%; padding: 6px; font-size: 12px;" placeholder="填 0 自动横向排满"
+                                data-i18n-placeholder="sheet_cols_placeholder">
                         </div>
                         <button id="btn-export-sheet" class="btn btn-secondary pro-feature-element"
                             style="width: 100%; justify-content: flex-start; text-align: left; font-size: 13px; padding: 8px 12px; border: none; background: transparent; color: #ffea70;"
                             data-i18n="export_sheet" title="导出游戏 Sprite Sheet 图集 (PRO)"
-                            data-i18n-title="title_export_sheet">📊 生成 Sprite Sheet 图集 <span
-                                class="pro-tag-badge">PRO</span>
+                            data-i18n-title="title_export_sheet">📊 <span data-i18n="btn_generate_sheet">生成 Sprite Sheet
+                                图集</span> <span class="pro-tag-badge">PRO</span>
                         </button>
+
+                        <!-- GIF 背景填充选项 -->
+                        <div style="padding: 0 12px 8px 12px;">
+                            <label
+                                style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-main); cursor: pointer;">
+                                <input type="checkbox" id="check-gif-solid-bg" checked>
+                                <span data-i18n="gif_solid_bg">🎨 导出 GIF 时填充纯白背景 (防止透明黑边)</span>
+                            </label>
+                        </div>
                         <!-- 🚨 替换结束 -->
                         <button id="btn-export-json-atlas" class="btn btn-secondary pro-feature-element"
                             style="width: 100%; justify-content: flex-start; text-align: left; font-size: 13px; padding: 8px 12px; border: none; background: transparent; color: #00f2fe;"

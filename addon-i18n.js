@@ -411,6 +411,14 @@
             profile_name_empty: '⚠️ 昵称不能为空！',
             profile_img_too_large: '⚠️ 图片过大，保存失败',
             profile_save_success: '✨ 资料修改成功！',
+
+            // 🚨 Sprite Sheet & GIF
+            sheet_cols_label: '📊 Sprite Sheet 每行帧数 (Columns)',
+            sheet_cols_placeholder: '填 0 自动横向排满',
+            btn_generate_sheet: '生成 Sprite Sheet 图集',
+            gif_solid_bg: '🎨 导出 GIF 时填充纯白背景 (防止透明黑边)',
+            toast_sheet_success: '✨ Sprite Sheet 图集导出成功！',
+            sheet_save_hint: '点击下方“保存到本地”即可下载。',
         },
         en: {
             lang_name: 'English',
@@ -818,6 +826,14 @@
             profile_name_empty: '⚠️ Nickname cannot be empty!',
             profile_img_too_large: '⚠️ Image too large, save failed',
             profile_save_success: '✨ Profile updated successfully!',
+
+            // 🚨 Sprite Sheet & GIF
+            sheet_cols_label: '📊 Sprite Sheet Columns:',
+            sheet_cols_placeholder: '0 = auto horizontal',
+            btn_generate_sheet: 'Generate Sprite Sheet',
+            gif_solid_bg: '🎨 Fill solid background for GIF (Prevent black edges)',
+            toast_sheet_success: '✨ Sprite Sheet exported successfully!',
+            sheet_save_hint: "Click 'Save to Local' below to download.",
         },
         ja: {
             lang_name: '日本語',
@@ -1209,7 +1225,26 @@
             cloud_save_success_toast: '☁️ プロジェクト【{name}】がクラウドに安全に保存されました！',
             cloud_save_timeout_success: '✅ 保存に成功しました！\n(ネットワークの遅延ですが、データは安全です)',
             cloud_save_failed: '⚠️ 保存に失敗しました。ネットワークを確認して再試行してください。',
-            cloud_save_offline: '⚠️ ネットワークが切断されました。保存状況を確認できません。後で「クラウド読み込み」を確認してください。'
+            cloud_save_offline: '⚠️ ネットワークが切断されました。保存状況を確認できません。後で「クラウド読み込み」を確認してください。',
+
+            // --- User Auth & Profile (Japanese) ---
+            auth_welcome_toast: '🎉 ようこそ、{name} さん！ログインに成功しました！',
+            auth_logout_toast: '👋 ログアウトしました',
+            auth_err_no_info: '⚠️ Google の情報を取得できません',
+            auth_err_fetch_fail: '⚠️ 情報の取得に失敗しました',
+            auth_cancel: '👋 Google ログインがキャンセルされました',
+            auth_sdk_not_ready: '⚠️ Google SDK の準備ができていません。ページを更新してください',
+            profile_name_empty: '⚠️ ニックネームは空にできません！',
+            profile_img_too_large: '⚠️ 画像が大きすぎるため、保存に失敗しました',
+            profile_save_success: '✨ プロフィールを更新しました！',
+
+            // --- Sprite Sheet & GIF (Japanese) ---
+            sheet_cols_label: '📊 Sprite Sheet の列数:',
+            sheet_cols_placeholder: '0 = 自動で横一列',
+            btn_generate_sheet: 'Sprite Sheet を生成',
+            gif_solid_bg: '🎨 GIF 書き出し時に背景色を塗りつぶす（黒縁防止）',
+            toast_sheet_success: '✨ Sprite Sheet の書き出しに成功しました！',
+            sheet_save_hint: '下の「ローカルに保存」をクリックしてダウンロードします。',
         }
     }
 

@@ -5485,9 +5485,9 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (dataUrlOrBlob instanceof Blob) modalPreviewImg.src = URL.createObjectURL(dataUrlOrBlob);
         }
 
-        if (modalTitle) modalTitle.textContent = titleText || '✨ 资产导出成功';
+        if (modalTitle) modalTitle.textContent = titleText || dict.export_success_title || '✨ 资产导出成功';
         if (modalBadge) modalBadge.textContent = badgeText || 'PNG | 512x512';
-        if (modalDesc) modalDesc.textContent = descText || '可随时点击“浏览保存路径”选择 Windows 本地保存目录！';
+        if (modalDesc) modalDesc.textContent = descText || dict.export_success_desc || '可随时点击保存到本地！';
 
         if (modalDownloadLink) {
             if (dataUrlStr) modalDownloadLink.href = dataUrlStr;
@@ -5678,13 +5678,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const filename = `spritesheet_${totalFrames}frames_${cols}x${rows}.png`;
         const dataUrl = exportCanvas.toDataURL('image/png');
 
-        // 🚨 核心修复：直接呼叫预览弹窗，不再触发系统另存为文件框！
+        // 获取当前语言字典
+        const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+
+        // 🚨 终极绝杀：不搞任何花里胡哨的系统另存为，直接弹窗！
         showExportModal(
             dataUrl,
             filename,
-            `PNG Spritesheet | ${exportCanvas.width}x${exportCanvas.height}px (${cols}列 ${rows}行)`,
-            '✨ Sprite Sheet 图集导出成功！',
-            '点击下方按钮保存到本地。'
+            `PNG Spritesheet | ${cols}列 ${rows}行`,
+            dict.toast_sheet_success || '✨ Sprite Sheet 图集导出成功！',
+            dict.sheet_save_hint || '点击下方“保存到本地”即可下载。'
         );
 
         // 释放大画布内存
