@@ -5783,28 +5783,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const loader = document.getElementById('global-loader');
             if (loader) loader.style.display = 'flex';
 
-            // 1. 打包成 FormData
             const formData = new FormData();
             formData.append('gif', file);
 
             try {
-                // 2. 发送到你的后端
-                const response = await fetch(`${API_BASE_URL}/api/gif/split`, {
+                // 这里请确保请求的地址是你刚刚改好的后端
+                const response = await fetch(`https://pixelsprite-backend.onrender.com/api/gif/split`, {
                     method: 'POST',
                     body: formData
                 });
 
                 const result = await response.json();
 
-                if (!result.success) {
-                    throw new Error(result.error || '后端解析失败');
-                }
+                if (!result.success) throw new Error(result.error || '后端解析失败');
 
                 const gifW = result.width;
-                const gifH = result.height;
-                const frameImages = result.frames; // 这是一个包含 Base64 PNG 的数组
+                const gifH = result.height; // 这里是准确的单帧高度了
+                const frameImages = result.frames;
 
-                // 3. 重置画布尺寸
                 engine.resX = gifW;
                 engine.resY = gifH;
                 engine.resolution = Math.max(gifW, gifH);
@@ -5813,11 +5809,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 frameBuffers = [];
                 frameLayers = [];
 
-                // 4. 将每一帧的 Base64 加载到画布中
                 for (let i = 0; i < frameImages.length; i++) {
-                    const base64Str = frameImages[i];
-
-                    // 等待图片加载
                     await new Promise((resolve, reject) => {
                         const img = new Image();
                         img.onload = () => {
@@ -5833,8 +5825,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             for (let y = 0; y < gifH; y++) {
                                 for (let x = 0; x < gifW; x++) {
                                     const idx = (y * gifW + x) * 4;
-                                    const a = imgData[idx + 3];
-                                    if (a > 20) {
+                                    // 只提取不透明的像素
+                                    if (imgData[idx + 3] > 20) {
                                         buf[y][x] = engine.rgbToHex([imgData[idx], imgData[idx + 1], imgData[idx + 2]]);
                                     } else {
                                         buf[y][x] = null;
@@ -5851,17 +5843,15 @@ document.addEventListener('DOMContentLoaded', () => {
                                 buffer: cloneBuffer(buf)
                             }]);
 
-                            // 释放内存
                             c.width = 0;
                             c.height = 0;
                             resolve();
                         };
                         img.onerror = () => reject(new Error('图片渲染失败'));
-                        img.src = base64Str;
+                        img.src = frameImages[i];
                     });
                 }
 
-                // 5. 收尾工作
                 currentFrame = 0;
                 activeLayerIndex = 0;
                 undoStack = [];
@@ -5873,7 +5863,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (loader) loader.style.display = 'none';
                 if (typeof renderAll === 'function') renderAll();
 
-                showToast(`✨ 后端解析成功！完美导入 ${frameBuffers.length} 帧！`);
+                showToast(`✨ 完美导入 ${frameBuffers.length} 帧！`);
 
             } catch (err) {
                 console.error('GIF 后端解析错误:', err);
