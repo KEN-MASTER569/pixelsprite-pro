@@ -16,6 +16,28 @@
     <link rel="stylesheet" href="styles.css?v=99.1">
 </head>
 
+<style>
+    .frame-filmstrip {
+        padding: 2px 0 !important;
+        gap: 6px !important;
+    }
+
+    .frame-thumb-card {
+        width: 46px !important;
+        height: 56px !important;
+    }
+
+    .frame-thumb-canvas {
+        width: 100% !important;
+        height: 36px !important;
+    }
+
+    .timeline-top-controls {
+        gap: 6px !important;
+        margin-bottom: 2px !important;
+    }
+</style>
+
 <body>
     <!-- 🚨 全屏极客风 Loading -->
     <div id="global-loader"
@@ -603,7 +625,7 @@
 
                         <!-- 底部 PRO 动画时间轴 & 洋葱皮 (Timeline Bar: Locked to PRO) -->
                         <div class="timeline-bar"
-                            style="flex-shrink: 0 !important; height: 180px !important; min-height: 180px !important; max-height: 180px !important; overflow: hidden; width: 100%;">
+                            style="flex-shrink: 0 !important; height: 155px !important; min-height: 155px !important; max-height: 155px !important; padding: 8px 16px !important; margin-top: 4px !important; margin-bottom: 4px !important; overflow: hidden; width: 100%; display: flex; flex-direction: column; justify-content: space-between;">
                             <!-- PRO 动画未激活时的锁定遮罩 Header -->
                             <div id="timeline-pro-locked-banner" class="pro-locked-banner-timeline"
                                 style="display: none;">
