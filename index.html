@@ -18,48 +18,71 @@
 
 <style>
     /* ============================================================ */
-    /* 🚀 终极顶栏布局：自动适应多语言，不换行，不重叠 */
+    /* 🚀 顶栏终极铁壁布局：不换行、不挤压、绝对不重叠 */
     /* ============================================================ */
 
-    /* 1. 强制顶栏横向排列，但绝对不许换行 */
+    /* 1. 顶栏总控 */
     .studio-header {
+        display: flex !important;
         flex-wrap: nowrap !important;
+        /* 绝对不许换行 */
+        align-items: center !important;
+        height: 70px !important;
+        /* 强制死高度 */
         min-height: 70px !important;
-        padding: 8px 12px !important;
-        /* 稍微缩小左右边距，给中间腾空间 */
-        width: 100vw !important;
+        max-height: 70px !important;
+        padding: 0 16px !important;
         box-sizing: border-box !important;
-        position: relative !important;
-        z-index: 10000 !important;
-        /* 提高整个顶栏的层级 */
+        overflow: hidden !important;
+        /* 顶栏超出部分绝对裁切 */
     }
 
-    /* 2. 左侧 Logo 区域锁死，不许收缩 */
+    /* 2. 左侧 Logo 区域：画个圈，绝对不许动 */
     .logo-area {
-        flex-shrink: 0 !important;
-        margin-right: 10px !important;
+        flex: 0 0 auto !important;
+        margin-right: 16px !important;
     }
 
-    /* 3. 中间按钮组自动收缩，紧凑排列 */
+    /* 3. 右侧动作区域（核心战场）：允许内部滚动，但不允许顶破天 */
     .header-actions {
+        display: flex !important;
         flex-wrap: nowrap !important;
         flex: 1 1 auto !important;
         min-width: 0 !important;
+        /* 魔法生效的前提 */
         justify-content: flex-end !important;
-        gap: 6px !important;
-        /* 按钮间距紧凑点 */
+        /* 默认靠右对齐 */
+        align-items: center !important;
+        gap: 8px !important;
+        overflow-x: auto !important;
+        /* 放不下时出现横向滚动条 */
+        overflow-y: hidden !important;
+        padding-bottom: 2px !important;
     }
 
-    /* 4. 所有按钮不允许被严重挤压变形 */
+    /* 隐藏顶栏内部的滚动条，保持干净 */
+    .header-actions::-webkit-scrollbar {
+        display: none !important;
+    }
+
+    /* 4. 右侧所有按钮：保持原样，不许被缩小 */
     .header-actions>* {
-        flex-shrink: 0 !important;
+        flex: 0 0 auto !important;
     }
 
-    /* 5. 🚨 核心修复：救出被切掉的下拉菜单！ */
+    /* 5. 救命恩人：强制导出按钮和 PRO 按钮永远在最右侧、最顶层 */
+    #btn-export-main,
+    #btn-header-buy-pro,
+    #google-user-container {
+        flex-shrink: 0 !important;
+        position: relative !important;
+        z-index: 100 !important;
+    }
+
+    /* 救活被遮挡的下拉菜单 */
     .export-dropdown-wrapper {
         position: relative !important;
         z-index: 100000 !important;
-        /* 让下拉菜单永远浮在最上层 */
     }
 
     #export-menu {
@@ -67,24 +90,19 @@
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9) !important;
     }
 
-    /* 6. 压缩画布尺寸设置区，拯救日文排版 */
+    /* 6. 压缩画布尺寸设置区，防止它作妖 */
     .res-selector {
         flex-shrink: 1 !important;
-        overflow: visible !important;
+        /* 允许它被压小 */
+        overflow: hidden !important;
     }
 
-    /* 让日文的“画布尺寸”四个字变小一点，给按钮留地方 */
-    .res-selector label {
-        font-size: 11px !important;
-        white-space: nowrap !important;
-    }
-
-    /* 隐藏自定义宽高的 W/H 输入框，防止日文版太长（可选） */
     #custom-res-group {
         display: none !important;
+        /* 顶栏不够宽时，隐藏自定义宽高 W:H */
     }
 
-    /* 7. 强制恢复主画布布局，不被时间轴挤压 */
+    /* 7. 重新算画布可用高度 */
     .editor-layout {
         height: calc(100vh - 75px) !important;
         max-height: calc(100vh - 75px) !important;
@@ -102,7 +120,7 @@
         overflow: auto !important;
     }
 
-    /* 8. 锁死底部时间轴高度 */
+    /* 8. 锁死底部时间轴 */
     .timeline-bar {
         flex: 0 0 155px !important;
         height: 155px !important;
