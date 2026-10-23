@@ -140,6 +140,8 @@
             const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
             window.showToast((dict.auth_welcome_toast || '🎉 欢迎，{name}！登录成功！').replace('{name}', name));
         }
+
+        document.body.classList.add('logged-in');
     };
 
     // 5. 退出登录入口

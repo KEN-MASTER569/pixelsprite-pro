@@ -2696,6 +2696,16 @@ body::after {
     animation: fadeInGate 0.35s ease-out;
 }
 
+/* 🚨 终极碾压：当登录大闸被隐藏时，强制彻底抽离 DOM 视线，绝不挡路！ */
+#mandatory-auth-gate[style*="display: none"],
+#mandatory-auth-gate[style*="display: none;"] {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+    z-index: -9999 !important;
+}
+
 @keyframes fadeInGate {
     from {
         opacity: 0;
@@ -4264,4 +4274,9 @@ body .timeline-bar {
 .glitch-text::after {
     padding: 2px 4px;
     margin: -2px -4px;
+}
+
+body.logged-in #mandatory-auth-gate {
+    display: none !important;
+    pointer-events: none !important;
 }
