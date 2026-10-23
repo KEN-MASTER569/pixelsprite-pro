@@ -2426,7 +2426,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const sel = document.getElementById('select-tag-mode');
         if (!sel) return;
 
-        sel.innerHTML = '<option value="all">▶ 播放全部帧</option>';
+        const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
+
+        sel.innerHTML = `<option value="all">${dict.tag_play_all || '▶ 播放全部帧'}</option>`;
         frameTags.forEach((tag, idx) => {
             const opt = document.createElement('option');
             opt.value = idx;
@@ -2707,6 +2709,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         renderFrameTags();
+        updateTagSelectorUI(); // 👈 补上这句，每次刷新时间轴都同步刷新下拉框
     }
     // #endregion [R7] 动画时间轴与段落标签 (Timeline & Tags)
 
@@ -5156,6 +5159,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (selectLoopMode) selectLoopMode.addEventListener('change', (e) => { loopMode = e.target.value; });
 
+        const selectTagMode = document.getElementById('select-tag-mode');
+        if (selectTagMode) {
+            selectTagMode.addEventListener('change', (e) => {
+                // 如果正在播放，切换 Tag 时自动跳转到该 Tag 的第一帧
+                const tagIdx = e.target.value;
+                if (tagIdx !== 'all' && frameTags[tagIdx]) {
+                    currentFrame = frameTags[tagIdx].from;
+                    updateFrameUI();
+                    renderMainCanvas();
+                }
+            });
+        }
+
         if (btnFrameAdd) {
             btnFrameAdd.addEventListener('click', () => {
                 if (!checkIsProActive()) { openProModal(); return; }
@@ -5592,11 +5608,11 @@ document.addEventListener('DOMContentLoaded', () => {
             fc.height = size;
             const fctx = fc.getContext('2d');
 
-            // 🚨 核心新增：判断是否需要填充背景色
-            // 你可以加一个 checkbox，比如 id="check-gif-solid-bg"
+            // 🚨 核心：检测是否勾选了纯色背景
             const solidBgCheck = document.getElementById('check-gif-solid-bg');
             if (solidBgCheck && solidBgCheck.checked) {
-                fctx.fillStyle = solidBgColor || '#ffffff'; // 用画布设置里的纯色，或者默认白色
+                // 如果勾选了，铺一层白色（你也可以让他选颜色，这里默认白色）
+                fctx.fillStyle = '#FFFFFF';
                 fctx.fillRect(0, 0, size, size);
             }
 

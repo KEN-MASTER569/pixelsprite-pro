@@ -263,11 +263,12 @@
                             style="width: 100%; justify-content: flex-start; text-align: left; font-size: 13px; padding: 8px 12px; border: none; background: transparent; color: #ffea70;"
                             data-i18n="export_gif" title="导出多帧 GIF 动态动画 (PRO)" data-i18n-title="title_export_gif">🎞️ 导出
                             GIF 动画 <span class="pro-tag-badge">PRO</span></button>
-                        <div style="margin-bottom: 10px;">
+                        <!-- GIF 背景填充选项 -->
+                        <div style="padding: 0 12px 8px 12px; margin-top: 4px;">
                             <label
                                 style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-main); cursor: pointer;">
-                                <input type="checkbox" id="check-gif-solid-bg" checked>
-                                <span>🎨 导出 GIF 时填充纯白背景 (防止透明黑边)</span>
+                                <input type="checkbox" id="check-gif-solid-bg">
+                                <span data-i18n="gif_solid_bg">🎨 填充纯色背景 (防黑边)</span>
                             </label>
                         </div>
                         <!-- 🚨 替换开始 -->
@@ -285,15 +286,6 @@
                             data-i18n-title="title_export_sheet">📊 <span data-i18n="btn_generate_sheet">生成 Sprite Sheet
                                 图集</span> <span class="pro-tag-badge">PRO</span>
                         </button>
-
-                        <!-- GIF 背景填充选项 -->
-                        <div style="padding: 0 12px 8px 12px;">
-                            <label
-                                style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-main); cursor: pointer;">
-                                <input type="checkbox" id="check-gif-solid-bg" checked>
-                                <span data-i18n="gif_solid_bg">🎨 导出 GIF 时填充纯白背景 (防止透明黑边)</span>
-                            </label>
-                        </div>
                         <!-- 🚨 替换结束 -->
                         <button id="btn-export-json-atlas" class="btn btn-secondary pro-feature-element"
                             style="width: 100%; justify-content: flex-start; text-align: left; font-size: 13px; padding: 8px 12px; border: none; background: transparent; color: #00f2fe;"
@@ -631,6 +623,10 @@
                                         <button id="btn-anim-next" class="anim-btn" data-i18n="btn_anim_next">⏭
                                             下一帧</button>
                                         <select id="select-loop-mode" class="select-input" style="font-size: 11px;">
+                                            <select id="select-tag-mode" class="select-input"
+                                                style="font-size: 11px; max-width: 120px;" title="选择播放的动画段落">
+                                                <option value="all" data-i18n="tag_play_all">▶ 播放全部帧</option>
+                                            </select>
                                             <option value="loop" data-i18n="loop_mode_loop">🔁 正向循环</option>
                                             <option value="reverse" data-i18n="loop_mode_reverse">⏮ 倒放</option>
                                             <option value="pingpong" data-i18n="loop_mode_pingpong">🏓 乒乓往复</option>

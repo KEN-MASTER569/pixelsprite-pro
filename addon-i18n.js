@@ -419,6 +419,8 @@
             gif_solid_bg: '🎨 导出 GIF 时填充纯白背景 (防止透明黑边)',
             toast_sheet_success: '✨ Sprite Sheet 图集导出成功！',
             sheet_save_hint: '点击下方“保存到本地”即可下载。',
+
+            tag_play_all: '▶ 播放全部帧',
         },
         en: {
             lang_name: 'English',
@@ -834,6 +836,8 @@
             gif_solid_bg: '🎨 Fill solid background for GIF (Prevent black edges)',
             toast_sheet_success: '✨ Sprite Sheet exported successfully!',
             sheet_save_hint: "Click 'Save to Local' below to download.",
+
+            tag_play_all: '▶ Play All Frames',
         },
         ja: {
             lang_name: '日本語',
@@ -1245,6 +1249,8 @@
             gif_solid_bg: '🎨 GIF 書き出し時に背景色を塗りつぶす（黒縁防止）',
             toast_sheet_success: '✨ Sprite Sheet の書き出しに成功しました！',
             sheet_save_hint: '下の「ローカルに保存」をクリックしてダウンロードします。',
+
+            tag_play_all: '▶ すべてのフレームを再生',
         }
     }
 
