@@ -16,6 +16,152 @@
     <link rel="stylesheet" href="styles.css?v=99.1">
 </head>
 
+<style>
+    /* ============================================================ */
+    /* 🚀 顶栏终极铁壁布局：不换行、不挤压、绝对不重叠 */
+    /* ============================================================ */
+
+    /* 1. 顶栏总控 */
+    .studio-header {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        /* 绝对不许换行 */
+        align-items: center !important;
+        height: 70px !important;
+        /* 强制死高度 */
+        min-height: 70px !important;
+        max-height: 70px !important;
+        padding: 0 16px !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+        /* 顶栏超出部分绝对裁切 */
+    }
+
+    /* 2. 左侧 Logo 区域：画个圈，绝对不许动 */
+    .logo-area {
+        flex: 0 0 auto !important;
+        margin-right: 16px !important;
+    }
+
+    /* 3. 右侧动作区域（核心战场）：允许内部滚动，但不允许顶破天 */
+    .header-actions {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        /* 魔法生效的前提 */
+        justify-content: flex-end !important;
+        /* 默认靠右对齐 */
+        align-items: center !important;
+        gap: 8px !important;
+        overflow-x: auto !important;
+        /* 放不下时出现横向滚动条 */
+        overflow-y: hidden !important;
+        padding-bottom: 2px !important;
+    }
+
+    /* 隐藏顶栏内部的滚动条，保持干净 */
+    .header-actions::-webkit-scrollbar {
+        display: none !important;
+    }
+
+    /* 4. 右侧所有按钮：保持原样，不许被缩小 */
+    .header-actions>* {
+        flex: 0 0 auto !important;
+    }
+
+    /* 5. 救命恩人：强制导出按钮和 PRO 按钮永远在最右侧、最顶层 */
+    #btn-export-main,
+    #btn-header-buy-pro,
+    #google-user-container {
+        flex-shrink: 0 !important;
+        position: relative !important;
+        z-index: 100 !important;
+    }
+
+    /* 救活被遮挡的下拉菜单 */
+    .export-dropdown-wrapper {
+        position: relative !important;
+        z-index: 100000 !important;
+    }
+
+    #export-menu {
+        z-index: 100000 !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9) !important;
+    }
+
+    /* 6. 压缩画布尺寸设置区，防止它作妖 */
+    .res-selector {
+        flex-shrink: 1 !important;
+        /* 允许它被压小 */
+        overflow: hidden !important;
+    }
+
+    #custom-res-group {
+        display: none !important;
+        /* 顶栏不够宽时，隐藏自定义宽高 W:H */
+    }
+
+    /* 7. 重新算画布可用高度 */
+    .editor-layout {
+        height: calc(100vh - 75px) !important;
+        max-height: calc(100vh - 75px) !important;
+    }
+
+    .canvas-area {
+        height: 100% !important;
+        max-height: 100% !important;
+        overflow: hidden !important;
+    }
+
+    .canvas-container-box {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        overflow: auto !important;
+    }
+
+    /* 锁死时间轴总高度，让内部的上下控制完全贴合 */
+    .timeline-bar {
+        flex: 0 0 155px !important;
+        height: 155px !important;
+        min-height: 155px !important;
+        max-height: 155px !important;
+        padding: 10px 16px !important;
+        border-radius: 12px !important;
+        margin-top: 6px !important;
+        background: var(--bg-panel) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    .timeline-controls-wrapper {
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100% !important;
+    }
+</style>
+
+<style>
+    .frame-filmstrip {
+        padding: 2px 0 !important;
+        gap: 6px !important;
+    }
+
+    .frame-thumb-card {
+        width: 46px !important;
+        height: 56px !important;
+    }
+
+    .frame-thumb-canvas {
+        width: 100% !important;
+        height: 36px !important;
+    }
+
+    .timeline-top-controls {
+        gap: 6px !important;
+        margin-bottom: 2px !important;
+    }
+</style>
+
 <body>
     <!-- 🚨 全屏极客风 Loading -->
     <div id="global-loader"
@@ -603,7 +749,7 @@
 
                         <!-- 底部 PRO 动画时间轴 & 洋葱皮 (Timeline Bar: Locked to PRO) -->
                         <div class="timeline-bar"
-                            style="flex-shrink: 0 !important; height: 260px !important; min-height: 260px !important; max-height: 260px !important; overflow-y: auto !important; overflow-x: hidden !important; width: 100%;">
+                            style="flex-shrink: 0 !important; height: 180px !important; min-height: 180px !important; max-height: 180px !important; overflow: hidden; width: 100%;">
                             <!-- PRO 动画未激活时的锁定遮罩 Header -->
                             <div id="timeline-pro-locked-banner" class="pro-locked-banner-timeline"
                                 style="display: none;">
@@ -613,56 +759,77 @@
                             </div>
 
                             <div id="timeline-controls-wrapper" class="timeline-controls-wrapper">
-                                <div class="timeline-top-controls">
-                                    <div class="anim-btn-group">
-                                        <button id="btn-anim-play" class="anim-btn" data-i18n="btn_anim_play">▶
-                                            播放动画</button>
-                                        <button id="btn-anim-prev" class="anim-btn" data-i18n="btn_anim_prev">⏮
-                                            上一帧</button>
-                                        <button id="btn-anim-next" class="anim-btn" data-i18n="btn_anim_next">⏭
-                                            下一帧</button>
-                                        <select id="select-loop-mode" class="select-input" style="font-size: 11px;">
-                                            <option value="loop" data-i18n="loop_mode_loop">🔁 正向循环</option>
-                                            <option value="reverse" data-i18n="loop_mode_reverse">⏮ 倒放</option>
-                                            <option value="pingpong" data-i18n="loop_mode_pingpong">🏓 乒乓往复</option>
-                                        </select>
-                                        <select id="select-tag-mode" class="select-input"
-                                            style="font-size: 11px; max-width: 120px;" title="选择播放的动画段落">
-                                            <option value="all" data-i18n="tag_play_all">▶ 播放全部帧</option>
-                                        </select>
+                                <!-- 🚨 改为左右两端对齐 -->
+                                <div class="timeline-top-controls"
+                                    style="display: flex !important; justify-content: space-between !important; align-items: center !important; width: 100% !important; padding-bottom: 6px;">
+
+                                    <!-- 左侧：播放控制 & 循环 & 洋葱皮 -->
+                                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                        <div class="anim-btn-group" style="display: flex; gap: 4px;">
+                                            <button id="btn-anim-play" class="anim-btn" data-i18n="btn_anim_play"
+                                                style="min-width: 80px;">▶ 播放动画</button>
+                                            <button id="btn-anim-prev" class="anim-btn" data-i18n="btn_anim_prev">⏮
+                                                上一帧</button>
+                                            <button id="btn-anim-next" class="anim-btn" data-i18n="btn_anim_next">⏭
+                                                下一帧</button>
+                                        </div>
+
+                                        <div style="display: flex; gap: 4px;">
+                                            <select id="select-loop-mode" class="select-input" style="font-size: 11px;">
+                                                <option value="loop" data-i18n="loop_mode_loop">🔁 正向循环</option>
+                                                <option value="reverse" data-i18n="loop_mode_reverse">⏮ 倒放</option>
+                                                <option value="pingpong" data-i18n="loop_mode_pingpong">🏓 乒乓往复</option>
+                                            </select>
+                                            <select id="select-tag-mode" class="select-input"
+                                                style="font-size: 11px; max-width: 120px;" title="选择播放的动画段落">
+                                                <option value="all" data-i18n="tag_play_all">▶ 播放全部帧</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- 洋葱皮放左边，和预览相关 -->
+                                        <div class="onion-skin-group"
+                                            style="display: flex; align-items: center; gap: 6px; margin-left: 8px; border-left: 1px solid rgba(255,255,255,0.15); padding-left: 12px;">
+                                            <button id="btn-toggle-onion" class="tool-btn" data-i18n="btn_toggle_onion"
+                                                title="开启洋葱皮" data-i18n-title="title_toggle_onion"
+                                                style="height: 28px; padding: 0 10px;">🧅 洋葱皮</button>
+                                            <label
+                                                style="font-size: 11px; display: flex; align-items: center; gap: 4px; color: var(--text-muted); cursor: pointer;">
+                                                <input type="checkbox" id="check-onion-tint" style="cursor: pointer;">
+                                                <span data-i18n="check_onion_tint">🔴🔵 红蓝对比</span>
+                                            </label>
+                                        </div>
                                     </div>
 
-                                    <div class="anim-btn-group">
-                                        <button id="btn-frame-add" class="anim-btn" data-i18n="btn_frame_add"
-                                            title="新建空白帧" data-i18n-title="title_frame_add">➕ 新增帧</button>
-                                        <button id="btn-frame-duplicate" class="anim-btn" data-i18n="btn_frame_dup"
-                                            title="复制当前帧" data-i18n-title="title_frame_dup">📋 复制帧</button>
-                                        <button id="btn-frame-delete" class="anim-btn danger-btn"
-                                            data-i18n="btn_frame_del" title="删除当前帧"
-                                            data-i18n-title="title_frame_del">🗑️ 删除帧</button>
+                                    <!-- 右侧：帧增删操作 & FPS -->
+                                    <div style="display: flex; align-items: center; gap: 16px;">
+                                        <div class="anim-btn-group" style="display: flex; gap: 4px;">
+                                            <button id="btn-frame-add" class="anim-btn" data-i18n="btn_frame_add"
+                                                title="新建空白帧" data-i18n-title="title_frame_add">➕ 新增帧</button>
+                                            <button id="btn-frame-duplicate" class="anim-btn" data-i18n="btn_frame_dup"
+                                                title="复制当前帧" data-i18n-title="title_frame_dup">📋 复制帧</button>
+                                            <button id="btn-frame-delete" class="anim-btn danger-btn"
+                                                data-i18n="btn_frame_del" title="删除当前帧"
+                                                data-i18n-title="title_frame_del">🗑️ 删除帧</button>
+                                        </div>
+
+                                        <!-- FPS 控制靠最右 -->
+                                        <div class="speed-control"
+                                            style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); padding: 4px 10px; border-radius: 6px;">
+                                            <label
+                                                style="font-size: 11px; font-weight: bold; color: var(--text-muted);">FPS:</label>
+                                            <input type="range" id="param-fps" min="1" max="30" value="12"
+                                                class="slider-input" style="width: 70px;">
+                                            <span id="val-fps"
+                                                style="font-size: 11px; font-weight: bold; color: var(--accent-cyan); min-width: 36px;">12
+                                                FPS</span>
+                                        </div>
                                     </div>
 
-                                    <!-- 洋葱皮 控制 (Onion Skin) -->
-                                    <div class="onion-skin-group" style="display: flex; align-items: center; gap: 6px;">
-                                        <button id="btn-toggle-onion" class="tool-btn" data-i18n="btn_toggle_onion"
-                                            title="开启洋葱皮" data-i18n-title="title_toggle_onion">🧅 洋葱皮</button>
-                                        <label
-                                            style="font-size: 11px; display: flex; align-items: center; gap: 4px; color: var(--text-muted);">
-                                            <input type="checkbox" id="check-onion-tint" style="cursor: pointer;">
-                                            <span data-i18n="check_onion_tint">🔴🔵 红蓝对比</span>
-                                        </label>
-                                    </div>
-
-                                    <div class="speed-control">
-                                        <label>FPS:</label>
-                                        <input type="range" id="param-fps" min="1" max="30" value="12"
-                                            class="slider-input" style="width: 70px;">
-                                        <span id="val-fps">12 FPS</span>
-                                    </div>
                                 </div>
 
                                 <!-- 帧缩略图胶片 (Filmstrip) -->
-                                <div class="frame-filmstrip" id="frame-filmstrip">
+                                <div class="frame-filmstrip" id="frame-filmstrip"
+                                    style="flex: 1 !important; min-height: 0 !important; display: flex; align-items: center; gap: 8px; overflow-x: auto; padding: 4px 0; border-top: 1px solid rgba(255,255,255,0.05);">
                                     <!-- 动态渲染帧卡片 -->
                                 </div>
                             </div>
