@@ -347,6 +347,40 @@
             }
         });
 
+        // 🚨 终极防丢补丁：强行重绑右上角两个关键按钮的点击事件
+        setTimeout(() => {
+            const logoBtn = document.getElementById('app-logo-trigger');
+            const buyProBtn = document.getElementById('btn-header-buy-pro');
+            const aboutModal = document.getElementById('about-app-modal');
+            const proModal = document.getElementById('pro-modal');
+
+            if (logoBtn && aboutModal) {
+                logoBtn.onclick = function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // 清除可能存在的错误状态
+                    logoBtn.style.pointerEvents = 'auto';
+                    aboutModal.style.display = 'flex';
+                };
+            }
+
+            if (buyProBtn && proModal) {
+                buyProBtn.onclick = function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // 清除可能存在的错误状态
+                    buyProBtn.style.pointerEvents = 'auto';
+
+                    // 调用全局的 openProModal 方法
+                    if (typeof window.openProModal === 'function') {
+                        window.openProModal();
+                    } else {
+                        proModal.style.display = 'flex';
+                    }
+                };
+            }
+        }, 500); // 延迟500毫秒执行，确保所有DOM都渲染完毕
+
         console.log('✅ 独立登录系统 (Addon) 已就绪');
     }
 
