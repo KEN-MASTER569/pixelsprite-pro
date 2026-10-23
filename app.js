@@ -2947,10 +2947,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ============================================================
-    // 🚨 新增：时间轴帧删除逻辑 (支持多选删除)
+    // 🚨 新增：时间轴帧删除逻辑 (支持多选 + 标签修复 + UI强制刷新)
     // ============================================================
     function deleteSelectedFrames() {
-        // 1. 判断至少保留一帧
         if (frameBuffers.length <= 1) {
             showToast('⚠️ 至少保留一帧！');
             return;
@@ -2962,28 +2961,30 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // 2. 确保 selectedFrames 数组不是空的
         if (!selectedFrames || selectedFrames.length === 0) {
             selectedFrames = [currentFrame];
         }
 
-        // 3. 如果全选了，且没有剩余，直接清空（或者提示）
         if (selectedFrames.length >= frameBuffers.length) {
             showToast('⚠️ 不能删除所有帧！');
             return;
         }
 
-        pushHistoryState(); // 记录历史，支持撤销
-        stopAnimation();    // 停止播放
+        pushHistoryState();
+        stopAnimation();
 
-        // 4. 过滤掉要删除的帧
         const newBuffers = [];
         const newLayers = [];
+        // 记录旧索引 -> 新索引的映射，用于修复 Tag
+        const indexMap = {};
+        let newIndex = 0;
 
         for (let i = 0; i < frameBuffers.length; i++) {
             if (!selectedFrames.includes(i)) {
                 newBuffers.push(frameBuffers[i]);
                 newLayers.push(frameLayers[i]);
+                indexMap[i] = newIndex;
+                newIndex++;
             }
         }
 
@@ -2992,17 +2993,52 @@ document.addEventListener('DOMContentLoaded', () => {
         frameBuffers = newBuffers;
         frameLayers = newLayers;
 
-        // 5. 修正当前选中的帧索引，防止越界
+        // 🚨 核心修复 1：修复受影响的动画标签（Tags）
+        if (frameTags && frameTags.length > 0) {
+            frameTags.forEach(tag => {
+                // 如果标签原本的起点还在，用新索引替换；如果起点被删了，用被删位置的新帧顶替
+                tag.from = indexMap[tag.from] !== undefined ? indexMap[tag.from] : Math.min(tag.from, frameBuffers.length - 1);
+
+                // 如果标签原本的终点还在，用新索引替换；如果终点被删了，向前回溯
+                if (indexMap[tag.to] !== undefined) {
+                    tag.to = indexMap[tag.to];
+                } else {
+                    // 找它前面最近的一个没有被删的帧
+                    let safeTo = tag.to;
+                    while (safeTo > 0 && indexMap[safeTo] === undefined) {
+                        safeTo--;
+                    }
+                    tag.to = indexMap[safeTo] !== undefined ? indexMap[safeTo] : Math.min(tag.to, frameBuffers.length - 1);
+                }
+
+                // 如果标签被彻底删没了，标记为待清理
+                if (tag.from > frameBuffers.length - 1) tag.from = frameBuffers.length - 1;
+                if (tag.to < tag.from) tag.to = tag.from;
+            });
+            // 过滤掉彻底失效的标签
+            frameTags = frameTags.filter(tag => tag.from <= frameBuffers.length - 1);
+        }
+
+        // 🚨 核心修复 2：强制修正当前帧
         if (currentFrame >= frameBuffers.length) {
             currentFrame = frameBuffers.length - 1;
         }
+        if (currentFrame < 0) currentFrame = 0;
 
-        // 重新选中当前帧
         selectedFrames = [currentFrame];
         lastClickedFrame = currentFrame;
         activeLayerIndex = 0;
 
+        // 🚨 核心修复 3：彻底重绘 UI（这步是解决"最后一帧没往下推"的关键！）
+        // 1. 清空胶片条 DOM
+        if (frameFilmstrip) frameFilmstrip.innerHTML = '';
+
+        // 2. 重新渲染所有组件
         renderAll();
+
+        // 3. 刷新标签选择器
+        if (typeof updateTagSelectorUI === 'function') updateTagSelectorUI();
+
         showToast(`🗑️ 已删除 ${deletedCount} 帧！`);
     }
 
