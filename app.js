@@ -6889,7 +6889,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // ---------- 2. 下拉菜单里的 PRO 按钮 ----------
         const btnDropdownPro = document.getElementById('btn-dropdown-pro-upgrade');
         if (btnDropdownPro) {
-            btnDropdownPro.innerHTML = `<span>👑 解锁 PRO 永久尊享版 ($${displayPrice})</span><span class="btn-shine-sparkle">✨</span>`;
+            const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
+            const upgradeText = (dict.btn_dropdown_pro_upgrade || '👑 Unlock PRO Lifetime ($19.99)').replace('$19.99', '$' + displayPrice);
+            btnDropdownPro.innerHTML = `<span>${upgradeText}</span><span class="btn-shine-sparkle">✨</span>`;
         }
 
         // ---------- 3. Lemon Squeezy 弹窗购买按钮 ----------

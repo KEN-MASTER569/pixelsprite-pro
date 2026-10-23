@@ -200,6 +200,7 @@
             pro_expired_desc: "解锁 PRO 终身尊享版，继续享受高级功能。",
             pro_status_lifetime: "👑 尊贵的 PRO 终身版用户，所有高级功能已为您开启。",
             pro_status_refresh_hint: "✨ 只需一次买断，即刻开启无限制的像素创作之旅！",
+            btn_dropdown_pro_upgrade: '👑 解锁 PRO 永久尊享版 ($19.99)',
 
             // Slicer & Pixelate & Export Modals
             slicer_modal_title: '📦 Sprite Sheet 自动切割器 (Slicer)',
@@ -605,6 +606,7 @@
             pro_expired_desc: "Unlock the PRO Lifetime edition to continue using advanced features.",
             pro_status_lifetime: "👑 Welcome, PRO Lifetime Member. All premium features are unlocked.",
             pro_status_refresh_hint: "✨ One-time payment. Start your unlimited pixel art journey instantly!",
+            btn_dropdown_pro_upgrade: '👑 Unlock PRO Lifetime ($19.99)',
 
             // Slicer & Pixelate & Export Modals
             slicer_modal_title: '📦 Sprite Sheet Auto Slicer',
@@ -1010,6 +1012,7 @@
             pro_expired_desc: "PRO 永久エディションのロックを解除して、引き続き高度な機能をご利用ください。",
             pro_status_lifetime: "👑 PRO 永久版メンバーへようこそ。すべてのプレミアム機能がロック解除されました。",
             pro_status_refresh_hint: "✨ 一度の購入で、無限のピクセルアート制作の旅へ！",
+            btn_dropdown_pro_upgrade: '👑 PRO生涯版を解除 ($19.99)',
 
             // Slicer & Pixelate & Export Modals
             slicer_modal_title: '📦 スプライトシート切断',
