@@ -5787,71 +5787,80 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('gif', file);
 
             try {
-                // 这里请确保请求的地址是你刚刚改好的后端
+                // 请求后端拿长条
                 const response = await fetch(`https://pixelsprite-backend.onrender.com/api/gif/split`, {
                     method: 'POST',
                     body: formData
                 });
 
                 const result = await response.json();
-
-                if (!result.success) throw new Error(result.error || '后端解析失败');
+                if (!result.success) throw new Error(result.error);
 
                 const gifW = result.width;
-                const gifH = result.height; // 这里是准确的单帧高度了
-                const frameImages = result.frames;
+                const totalFrames = result.totalFrames;
+                const stripBase64 = result.strip;
+
+                // 加载长条图片
+                const stripImg = await new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.onerror = reject;
+                    img.src = stripBase64;
+                });
+
+                // 🚨 核心算数：长条总高 / 帧数 = 真实单帧高
+                const totalH = stripImg.naturalHeight;
+                const frameH = totalH / totalFrames;
 
                 engine.resX = gifW;
-                engine.resY = gifH;
-                engine.resolution = Math.max(gifW, gifH);
-                updateCanvasDOMDimensions(gifW, gifH);
+                engine.resY = frameH;
+                engine.resolution = Math.max(gifW, frameH);
+                updateCanvasDOMDimensions(gifW, frameH);
 
                 frameBuffers = [];
                 frameLayers = [];
 
-                for (let i = 0; i < frameImages.length; i++) {
-                    await new Promise((resolve, reject) => {
-                        const img = new Image();
-                        img.onload = () => {
-                            const c = document.createElement('canvas');
-                            c.width = gifW;
-                            c.height = gifH;
-                            const ctx = c.getContext('2d');
-                            ctx.drawImage(img, 0, 0, gifW, gifH);
+                const c = document.createElement('canvas');
+                c.width = gifW;
+                c.height = frameH;
+                const ctx = c.getContext('2d', { willReadFrequently: true });
 
-                            const imgData = ctx.getImageData(0, 0, gifW, gifH).data;
-                            const buf = engine.createBuffer(gifW, gifH);
+                // 逐个切片
+                for (let i = 0; i < totalFrames; i++) {
+                    ctx.clearRect(0, 0, gifW, frameH);
+                    // 从长条中裁剪出第 i 帧
+                    ctx.drawImage(
+                        stripImg,
+                        0, i * frameH, gifW, frameH, // 源图裁剪区域
+                        0, 0, gifW, frameH           // 目标画布区域
+                    );
 
-                            for (let y = 0; y < gifH; y++) {
-                                for (let x = 0; x < gifW; x++) {
-                                    const idx = (y * gifW + x) * 4;
-                                    // 只提取不透明的像素
-                                    if (imgData[idx + 3] > 20) {
-                                        buf[y][x] = engine.rgbToHex([imgData[idx], imgData[idx + 1], imgData[idx + 2]]);
-                                    } else {
-                                        buf[y][x] = null;
-                                    }
-                                }
+                    const imgData = ctx.getImageData(0, 0, gifW, frameH).data;
+                    const buf = engine.createBuffer(gifW, frameH);
+
+                    for (let y = 0; y < frameH; y++) {
+                        for (let x = 0; x < gifW; x++) {
+                            const idx = (y * gifW + x) * 4;
+                            if (imgData[idx + 3] > 20) {
+                                buf[y][x] = engine.rgbToHex([imgData[idx], imgData[idx + 1], imgData[idx + 2]]);
+                            } else {
+                                buf[y][x] = null;
                             }
+                        }
+                    }
 
-                            frameBuffers.push(buf);
-                            frameLayers.push([{
-                                id: `layer_0_${Date.now()}_${i}`,
-                                name: `Layer 1 (Frame ${i + 1})`,
-                                visible: true,
-                                opacity: 1.0,
-                                buffer: cloneBuffer(buf)
-                            }]);
-
-                            c.width = 0;
-                            c.height = 0;
-                            resolve();
-                        };
-                        img.onerror = () => reject(new Error('图片渲染失败'));
-                        img.src = frameImages[i];
-                    });
+                    frameBuffers.push(buf);
+                    frameLayers.push([{
+                        id: `layer_0_${Date.now()}_${i}`,
+                        name: `Layer 1 (Frame ${i + 1})`,
+                        visible: true,
+                        opacity: 1.0,
+                        buffer: cloneBuffer(buf)
+                    }]);
                 }
 
+                c.width = 0;
+                c.height = 0;
                 currentFrame = 0;
                 activeLayerIndex = 0;
                 undoStack = [];
@@ -5863,14 +5872,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (loader) loader.style.display = 'none';
                 if (typeof renderAll === 'function') renderAll();
 
-                showToast(`✨ 完美导入 ${frameBuffers.length} 帧！`);
+                showToast(`✨ 完美切片！成功导入 ${totalFrames} 帧！`);
 
             } catch (err) {
-                console.error('GIF 后端解析错误:', err);
+                console.error('前端切片失败:', err);
                 if (loader) loader.style.display = 'none';
-                alert('⚠️ 后端解析失败：' + err.message);
+                alert('⚠️ 解析失败：' + err.message);
             }
-
             return;
         }
 
