@@ -4662,3 +4662,32 @@ body.tile-mode-active #pixel-canvas {
     margin-left: auto !important;
     margin-right: auto !important;
 }
+
+/* 反向旋转 */
+@keyframes spinRingReverse {
+    from {
+        transform: rotate(360deg);
+    }
+
+    to {
+        transform: rotate(0deg);
+    }
+}
+
+/* 霓虹呼吸灯效果 */
+@keyframes neonPulse {
+
+    0%,
+    100% {
+        filter: drop-shadow(0 0 8px rgba(0, 242, 254, 0.4)) brightness(1);
+    }
+
+    50% {
+        filter: drop-shadow(0 0 20px rgba(0, 242, 254, 0.9)) brightness(1.2);
+    }
+}
+
+/* 鼠标悬停时，整个 Logo 发光加剧 */
+.logo-area:hover .logo-icon-wrapper svg {
+    animation: neonPulse 1.5s infinite;
+}
