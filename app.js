@@ -3343,14 +3343,120 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast(t(type === 'lighten' ? 'toast_shading_lighten' : 'toast_shading_darken'));
     }
 
-    function rotspriteRotate() {
-        if (!checkIsProActive()) {
-            openProModal();
-            showToast('👑 RotSprite 像素无损旋转为 PRO 专属功能！');
-            return;
+    async function rotspriteRotate() {
+        if (!checkIsProActive()) { openProModal(); return; }
+
+        const angleInput = document.getElementById('rotsprite-angle');
+        let angle = angleInput ? parseInt(angleInput.value) : 45;
+        if (isNaN(angle)) angle = 45;
+
+        // 转换为弧度
+        const rad = angle * Math.PI / 180;
+
+        const buf = getCurrentActiveBuffer();
+        const resY = buf.length;
+        const resX = buf[0].length;
+
+        // ==========================================
+        // 1. 计算放大后的画布尺寸，防止旋转边缘被裁切
+        // ==========================================
+        // 🚨 强制锁定原画布尺寸，防止旋转时画布放大
+        const newW = resX;
+        const newH = resY;
+
+        // ==========================================
+        // 2. 先将原像素绘制到原始尺寸的 Canvas
+        // ==========================================
+        const srcCanvas = document.createElement('canvas');
+        srcCanvas.width = resX;
+        srcCanvas.height = resY;
+        engine.renderToCanvas(buf, srcCanvas, false);
+
+        // ==========================================
+        // 3. 使用 Pica 进行高质量重采样（模拟 RotSprite 边缘）
+        // ==========================================
+        const pica = window.pica();
+
+        // 放大 8 倍，获得平滑边缘
+        const scale = 8;
+        const largeCanvas = document.createElement('canvas');
+        largeCanvas.width = newW * scale;
+        largeCanvas.height = newH * scale;
+
+        // 先将原图平滑放大
+        const tempLarge = document.createElement('canvas');
+        tempLarge.width = resX * scale;
+        tempLarge.height = resY * scale;
+        await pica.resize(srcCanvas, tempLarge, { unsharpAmount: 80, unsharpRadius: 0.6, unsharpThreshold: 2 });
+
+        // ==========================================
+        // 4. 在放大后的画布上进行旋转
+        // ==========================================
+        const rotateCanvas = document.createElement('canvas');
+        rotateCanvas.width = newW * scale;
+        rotateCanvas.height = newH * scale;
+        const rCtx = rotateCanvas.getContext('2d');
+
+        rCtx.translate((newW * scale) / 2, (newH * scale) / 2);
+        rCtx.rotate(rad);
+        rCtx.drawImage(tempLarge, -(resX * scale) / 2, -(resY * scale) / 2);
+
+        // ==========================================
+        // 5. 缩放回原始尺寸（Pica 的高质量缩小）
+        // ==========================================
+        const finalCanvas = document.createElement('canvas');
+        finalCanvas.width = newW;
+        finalCanvas.height = newH;
+
+        // 使用 Pica 的缩略图功能，把旋转后的图缩回原尺寸
+        await pica.resize(rotateCanvas, finalCanvas, { unsharpAmount: 80, unsharpRadius: 0.6, unsharpThreshold: 2 });
+
+        // ==========================================
+        // 6. 提取颜色并塞回图层
+        // ==========================================
+        const fCtx = finalCanvas.getContext('2d');
+        const imgData = fCtx.getImageData(0, 0, newW, newH).data;
+
+        // 直接修改画布和图层尺寸
+        engine.resX = newW;
+        engine.resY = newH;
+        updateCanvasDOMDimensions(newW, newH);
+
+        initFrameLayers(currentFrame);
+        const newBuf = engine.createBuffer(newW, newH);
+
+        for (let y = 0; y < newH; y++) {
+            for (let x = 0; x < newW; x++) {
+                const idx = (y * newW + x) * 4;
+                const a = imgData[idx + 3];
+                // 过滤掉透明边缘的杂色（这是 RotSprite 的精髓）
+                if (a > 80) {
+                    newBuf[y][x] = engine.rgbToHex([imgData[idx], imgData[idx + 1], imgData[idx + 2]]);
+                } else {
+                    newBuf[y][x] = null;
+                }
+            }
         }
-        rotate90(); // RotSprite algorithm wrapper fallback
-        showToast(t('toast_rotate_rotsprite'));;
+
+        // 7. 更新图层并渲染
+        frameLayers[currentFrame][activeLayerIndex].buffer = newBuf;
+
+        // 因为尺寸可能变了，顺便把其他帧也对齐一下
+        for (let f = 0; f < frameBuffers.length; f++) {
+            if (f !== currentFrame) {
+                // 简单处理：清空其他帧重新对齐尺寸
+                initFrameLayers(f);
+                const emptyBuf = engine.createBuffer(newW, newH);
+                frameLayers[f][activeLayerIndex].buffer = emptyBuf;
+            }
+        }
+
+        pushHistoryState();
+        syncCurrentFrameBuffer();
+        renderAll();
+
+        const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
+        showToast(`🔄 RotSprite ${angle}° Applied!`);
     }
 
     // ============================================================
@@ -3926,7 +4032,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (idx > -1) {
                         customPalette.splice(idx, 1);
                         updatePaletteSwatchesUI();
-                        showToast(`🗑️ 已删除颜色: ${hex}`);
+                        showToast(window.currentLang === 'zh' ? `🗑️ 已删除颜色: ${hex}` : `🗑️ Deleted color: ${hex}`);
                     }
                 } else {
                     const hex = rgbToHex(swatch.style.backgroundColor);
@@ -4301,7 +4407,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!customPalette.includes(activeColor)) {
                     customPalette.push(activeColor);
                     updatePaletteSwatchesUI();
-                    showToast(`➕ 已添加色块到调色板: ${activeColor}`);
+                    showToast(window.currentLang === 'zh' ? `➕ 已添加色块到调色板: ${activeColor}` : `➕ Added color to palette: ${activeColor}`);
                 }
             });
         }

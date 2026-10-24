@@ -14,6 +14,7 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="styles.css?v=99.1">
+    <script src="https://cdn.jsdelivr.net/npm/pica@9.0.1/dist/pica.min.js"></script>
 </head>
 
 <style>
@@ -1068,10 +1069,16 @@
                                     </div>
 
                                     <!-- 🔄 RotSprite 算法旋转形变 -->
-                                    <button id="btn-rotsprite-rotate" class="btn btn-pro-item">
-                                        <span data-i18n="btn_rotsprite">🔄 RotSprite 算法无损像素旋转</span>
-                                        <span class="pro-tag-badge">PRO</span>
-                                    </button>
+                                    <div style="display: flex; gap: 6px; align-items: stretch;">
+                                        <input type="number" id="rotsprite-angle" value="45" min="0" max="360"
+                                            style="width: 60px; background: rgba(0,0,0,0.5); color: #00f2fe; border: 1px solid rgba(0,242,254,0.3); border-radius: var(--radius-sm); text-align: center; font-weight: bold; font-size: 12px;"
+                                            title="输入旋转角度">
+                                        <button id="btn-rotsprite-rotate" class="btn btn-pro-item"
+                                            style="flex: 1; margin: 0;">
+                                            <span data-i18n="btn_rotsprite">🔄 RotSprite 旋转</span>
+                                            <span class="pro-tag-badge">PRO</span>
+                                        </button>
+                                    </div>
 
                                 </div>
                             </div>
