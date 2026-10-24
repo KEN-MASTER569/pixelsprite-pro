@@ -478,6 +478,8 @@
             toast_deselect: '✖️ 已取消选区',
             toast_commit_selection: '✔️ 已确认固定选区',
             toast_moved_layer: '🖐️ 已移动图层像素 ({dx}, {dy})',
+
+            promo_month_range: '📅 促销期间：{month}月1日 至 {month}月10日',
         },
         en: {
             lang_name: 'English',
@@ -951,6 +953,8 @@
             toast_deselect: '✖️ Deselected',
             toast_commit_selection: '✔️ Selection committed',
             toast_moved_layer: '🖐️ Layer pixels moved ({dx}, {dy})',
+
+            promo_month_range: '📅 Promotion Period: {month} 1st to {month} 10th',
         },
         ja: {
             lang_name: '日本語',
@@ -1420,6 +1424,8 @@
             toast_deselect: '✖️ 選択解除しました',
             toast_commit_selection: '✔️ 選択を確定しました',
             toast_moved_layer: '🖐️ レイヤーを移動しました ({dx}, {dy})',
+
+            promo_month_range: '📅 キャンペーン期間：{month}月1日 〜 {month}月10日',
         }
     }
 
@@ -1647,6 +1653,14 @@
         // 顺便把 PRO 按钮也刷新一下
         if (typeof updateProStatusAndUI === 'function') {
             updateProStatusAndUI();
+        }
+
+        // 🚨 核心修复：如果当前 PRO 弹窗是开着的，切语言时强制让它重新渲染
+        const proModal = document.getElementById('pro-modal');
+        if (proModal && proModal.style.display === 'flex') {
+            if (typeof window.openProModal === 'function') {
+                window.openProModal();
+            }
         }
 
         // 在 changeAppLanguage 的最后面加上：

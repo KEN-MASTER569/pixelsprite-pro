@@ -6844,15 +6844,62 @@ document.addEventListener('DOMContentLoaded', () => {
         // 🚨 获取当前的动态折扣价格
         const promo = typeof window.getDynamicPrice === 'function' ? window.getDynamicPrice() : { isPromo: false, finalPrice: 19.99, originalPrice: 19.99, discount: 10 };
 
-        // 🚨 动态更新弹窗标题
+        // 🚨 动态更新弹窗标题（完美版：彻底解决切语言价格消失问题）
         const modalTitle = proModal.querySelector('.modal-header h3');
         if (modalTitle) {
-            let baseTitle = dict.pro_modal_title || '👑 PixelSprite PRO 终身尊享版解锁 ($19.99 USD)';
+            // 1. 获取基础标题，并且无论原字典里有没有 $19.99，都先把它强行剥离掉
+            let baseTitle = dict.pro_modal_title || '👑 PixelSprite PRO 终身尊享版解锁';
+            // 移除原版标题里的 ($19.99 USD) 这种硬编码
+            baseTitle = baseTitle.replace(/\s*\(\$[\d\.]+\s*USD\)/gi, '').replace(/\s*\(\$[\d\.]+\)/gi, '');
+
+            // 2. 无论打不打折，我们都把价格重新拼上去
             if (promo.isPromo) {
-                // 🚨 核心修复：根据语言显示不同的折扣标签
                 const discountText = dict.pro_modal_discount_tag || (window.currentLang === 'en' ? `${promo.discount * 10}% OFF` : `限时 ${promo.discount} 折`);
-                baseTitle = baseTitle.replace('$19.99', `<span style="text-decoration: line-through; opacity: 0.5; font-size: 14px;">$${promo.originalPrice}</span> <span style="color: #ffc439; font-size: 22px;">$${promo.finalPrice}</span> <span style="color: #ff4757; font-size: 12px; border: 1px solid #ff4757; padding: 2px 6px; border-radius: 10px; margin-left: 8px;">${discountText}</span>`);
+
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = now.getMonth(); // 0-11
+                const day = now.getDate();
+                const monthNum = month + 1;
+
+                let dateHint = '';
+
+                // 首发特惠（2026年10月24日-31日）
+                if (year === 2026 && month === 9 && day >= 24 && day <= 31) {
+                    if (window.currentLang === 'en') {
+                        dateHint = '📅 Promotion Period: Oct 24 to Oct 31';
+                    } else if (window.currentLang === 'ja') {
+                        dateHint = '📅 キャンペーン期間：10月24日 〜 10月31日';
+                    } else {
+                        dateHint = '📅 促销期间：10月24日 至 10月31日';
+                    }
+                }
+                // 每月常规折扣（1号到10号）
+                else {
+                    const monthNamesEn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                    const monthNameEn = monthNamesEn[month];
+
+                    if (window.currentLang === 'en') {
+                        dateHint = `📅 Promotion Period: ${monthNameEn} 1st to ${monthNameEn} 10th`;
+                    } else if (window.currentLang === 'ja') {
+                        dateHint = `📅 キャンペーン期間：${monthNum}月1日 〜 ${monthNum}月10日`;
+                    } else {
+                        dateHint = `📅 促销期间：${monthNum}月1日 至 ${monthNum}月10日`;
+                    }
+                }
+
+                // 拼接打折价格
+                baseTitle += ` 
+                    <span style="text-decoration: line-through; opacity: 0.5; font-size: 14px;">$${promo.originalPrice}</span> 
+                    <span style="color: #ffc439; font-size: 22px;">$${promo.finalPrice}</span> 
+                    <span style="color: #ff4757; font-size: 12px; border: 1px solid #ff4757; padding: 2px 6px; border-radius: 10px; margin-left: 8px;">${discountText}</span>
+                    <div style="font-size: 12px; color: #00f2fe; margin-top: 8px; font-weight: 500;">${dateHint}</div>
+                `;
+            } else {
+                // 如果不是促销期，也要强行把原价拼上去！
+                baseTitle += ` <span style="color: #ffc439; font-size: 22px;">$${promo.originalPrice} USD</span>`;
             }
+
             modalTitle.innerHTML = baseTitle;
         }
 
@@ -6927,10 +6974,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     // 试用已过期
                     proBanner.innerHTML = `
-                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; text-align: center; padding: 10px 0;">
-                        <div class="pro-crown" style="font-size: 48px; line-height: 1; margin-bottom: 10px; filter: drop-shadow(0 0 15px rgba(255, 71, 87, 0.6));">🔒</div>
-                        <h2 style="color: #ff4757; margin: 0 0 10px 0; font-size: 20px;">${dict.pro_expired_title || '您的 PRO 免费试用已结束'}</h2>
-                        <p style="color: var(--text-main); margin: 0; font-size: 14px;">${dict.pro_expired_desc || '解锁 PRO 终身尊享版，继续享受高级功能。'}</p>
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; text-align: center; padding: 20px 10px; box-sizing: border-box; margin: 0 auto;">
+                        <div class="pro-crown" style="font-size: 48px; line-height: 1; margin-bottom: 15px; filter: drop-shadow(0 0 15px rgba(255, 71, 87, 0.6));">🔒</div>
+                        <h2 style="color: #ff4757; margin: 0 auto 12px auto; font-size: 20px; width: 100%; text-align: center; letter-spacing: 1px; display: block;">
+                            ${dict.pro_expired_title || '您的 PRO 免费试用已结束'}
+                        </h2>
+                        <p style="color: var(--text-main); margin: 0 auto; font-size: 14px; width: 100%; text-align: center; line-height: 1.6; display: block;">
+                            ${dict.pro_expired_desc || '解锁 PRO 终身尊享版，继续享受高级功能。'}
+                        </p>
                     </div>
                 `;
                 }
