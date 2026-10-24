@@ -436,6 +436,22 @@
             bg_transparent: '🔲 纯透明（无背景）',
             bg_checkered: '🏁 透明棋盘网格',
             bg_solid: '🎨 纯色背景',
+
+            btn_thanks_pro: '👑 感谢购买 PRO',
+            wise_pay_title: '扫码支付 19.99 USD',
+            wise_pay_desc: '请使用手机相机或 Wise App 扫码支付。<br><span style="color: #ff4757; font-weight: bold;">务必在备注中填写您的邮箱！</span>',
+            wise_pay_btn: '💳 点击跳转 Wise 网页付款',
+            wise_pay_scan_hint: '或者使用手机扫码：',
+            wise_pay_email_hint: '支付完成后，请填写您刚才备注的邮箱：',
+            wise_pay_submit_btn: '我已支付，提交邮箱',
+            wise_pay_wait_title: '已收到您的付款信息！',
+            wise_pay_wait_desc: '系统正在自动核对 Wise 账单。<br>激活码通常在 <strong>1-2 天内</strong> 发送至您的邮箱。<br>请留意您的收件箱和垃圾邮件箱。',
+            wise_pay_wait_footer: '感谢您的耐心等待与支持！',
+            wise_pay_wait_btn: '我知道了',
+            pro_thanks_title_large: '感谢您购买 PixelSprite PRO！',
+            pro_thanks_desc_large: '您已永久解锁所有高级游戏开发与动画功能。<br>尽情享受创作的乐趣吧！',
+            pro_thanks_badge: '👑 尊贵的 PRO 终身版用户，所有高级功能已为您开启。',
+            pro_thanks_start_btn: '开始创作 🚀',
         },
         en: {
             lang_name: 'English',
@@ -868,6 +884,22 @@
             bg_transparent: '🔲 Pure Transparent',
             bg_checkered: '🏁 Checkered Grid',
             bg_solid: '🎨 Solid Color',
+
+            btn_thanks_pro: '👑 Thanks for PRO',
+            wise_pay_title: 'Scan to Pay 19.99 USD',
+            wise_pay_desc: 'Please scan using your phone or Wise App.<br><span style="color: #ff4757; font-weight: bold;">MUST put your email in the reference!</span>',
+            wise_pay_btn: '💳 Click to pay on Wise Web',
+            wise_pay_scan_hint: 'Or scan with phone:',
+            wise_pay_email_hint: 'After payment, please enter the email you used:',
+            wise_pay_submit_btn: 'I Have Paid, Submit Email',
+            wise_pay_wait_title: 'Payment Info Received!',
+            wise_pay_wait_desc: 'System is verifying your Wise transaction.<br>Activation code will be sent to your email within <strong>1-2 days</strong>.<br>Please check your inbox and spam folder.',
+            wise_pay_wait_footer: 'Thank you for your patience and support!',
+            wise_pay_wait_btn: 'Got it',
+            pro_thanks_title_large: 'Thank you for purchasing PixelSprite PRO!',
+            pro_thanks_desc_large: 'You have permanently unlocked all advanced features.<br>Enjoy creating!',
+            pro_thanks_badge: '👑 Welcome, PRO Lifetime Member. All features unlocked.',
+            pro_thanks_start_btn: 'Start Creating 🚀',
         },
         ja: {
             lang_name: '日本語',
@@ -1296,6 +1328,22 @@
             bg_transparent: '🔲 完全透明（背景なし）',
             bg_checkered: '🏁 透明チェッカー',
             bg_solid: '🎨 単色背景',
+
+            btn_thanks_pro: '👑 PRO購入済み',
+            wise_pay_title: 'スキャンして 19.99 USD を支払う',
+            wise_pay_desc: 'スマホまたはWiseアプリでスキャンしてください。<br><span style="color: #ff4757; font-weight: bold;">備考欄に必ずメールアドレスを入力してください！</span>',
+            wise_pay_btn: '💳 WiseのWebサイトで支払う',
+            wise_pay_scan_hint: 'またはスマホでスキャン：',
+            wise_pay_email_hint: '支払い後、備考欄に入力したメールアドレスを入力してください：',
+            wise_pay_submit_btn: '支払いました、メールを送信',
+            wise_pay_wait_title: '支払い情報を受け取りました！',
+            wise_pay_wait_desc: 'Wiseの取引を確認中です。<br>アクティベーションコードは<strong>1〜2日以内</strong>にメールで送信されます。<br>受信トレイと迷惑メールフォルダをご確認ください。',
+            wise_pay_wait_footer: 'お待ちいただきありがとうございます！',
+            wise_pay_wait_btn: 'わかりました',
+            pro_thanks_title_large: 'PixelSprite PROをご購入いただきありがとうございます！',
+            pro_thanks_desc_large: 'すべての高度な機能が永久にロック解除されました。<br>創作をお楽しみください！',
+            pro_thanks_badge: '👑 PRO永久版メンバーへようこそ。すべての機能が解除されました。',
+            pro_thanks_start_btn: '作成開始 🚀',
         }
     }
 
@@ -1426,6 +1474,14 @@
         // 顺便把 PRO 按钮也刷新一下
         if (typeof updateProStatusAndUI === 'function') {
             updateProStatusAndUI();
+        }
+
+        // 在 changeAppLanguage 的最后面加上：
+        // 🚨 确保每次切换语言，扫码弹窗都恢复成默认状态
+        const wiseBody = document.getElementById('wise-pay-body');
+        const wiseEmail = document.getElementById('wise-user-email');
+        if (wiseBody && !document.getElementById('wise-user-email')) {
+            location.reload(); // 如果是等待状态，直接刷新页面最保险
         }
     };
 

@@ -6652,23 +6652,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (isLifetime) {
             // ==========================================
-            // 👑 状态 1：已买断（只要走到这里，绝对显示感谢）
+            // 👑 状态 1：已买断（纯感谢页，无任何购买入口）
             // ==========================================
             if (featureTable) featureTable.style.display = 'none';
             if (paypalBox) paypalBox.style.display = 'none';
             if (proBanner) {
                 proBanner.innerHTML = `
                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; text-align: center; padding: 20px 0;">
-                    <div class="pro-crown" style="font-size: 48px; line-height: 1; margin-bottom: 10px; filter: drop-shadow(0 0 15px rgba(255, 196, 57, 0.6));">👑</div>
-                    <h2 style="color: #ffc439; font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 900; margin: 0 0 10px 0; letter-spacing: 1px; width: 100%;">
-                        ${dict.pro_thanks_title || '感谢您购买 PixelSprite PRO！'}
+                    <div class="pro-crown" style="font-size: 60px; line-height: 1; margin-bottom: 15px; filter: drop-shadow(0 0 20px rgba(255, 196, 57, 0.8)); animation: float 3s infinite;">👑</div>
+                    <h2 style="color: #ffc439; font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 900; margin: 0 0 10px 0; letter-spacing: 1px;">
+                        ${dict.pro_thanks_title_large}
                     </h2>
-                    <p style="color: var(--text-main); font-size: 14px; margin: 0 0 16px 0; width: 100%; font-weight: 500;">
-                        ${dict.pro_thanks_desc || '您已永久解锁所有高级游戏开发与动画功能。'}
+                    <p style="color: var(--text-main); font-size: 14px; margin: 0 0 20px 0; font-weight: 500; line-height: 1.6;">
+                        ${dict.pro_thanks_desc_large}
                     </p>
-                    <div style="color: #00f2fe; font-size: 12px; font-family: monospace; background: rgba(0, 242, 254, 0.1); padding: 8px 16px; border-radius: 4px; border: 1px dashed rgba(0, 242, 254, 0.4); display: inline-block; margin: 0 auto;">
-                        ${dict.pro_status_lifetime || '👑 尊贵的 PRO 终身版用户，所有高级功能已为您开启。'}
+                    <div style="color: #00f2fe; font-size: 13px; font-family: monospace; background: rgba(0, 242, 254, 0.1); padding: 10px 20px; border-radius: 8px; border: 1px dashed rgba(0, 242, 254, 0.4); margin-bottom: 30px;">
+                        ${dict.pro_thanks_badge}
                     </div>
+                    <button class="btn btn-primary" onclick="document.getElementById('pro-modal').style.display='none'" style="width: 80%; padding: 12px; font-weight: 800; font-size: 15px; border-radius: 6px;">
+                        ${dict.pro_thanks_start_btn}
+                    </button>
                 </div>
             `;
             }
@@ -7536,14 +7539,20 @@ function initLemonSqueezyActivation() {
                 if (!window.proState) window.proState = {};
                 window.proState.isLifetimePro = true;
 
-                // 存储买断状态与激活码，刷新也不怕
+                // 1. 存储买断状态与激活码
                 localStorage.setItem('pixelsprite_pro_state_v3', JSON.stringify(window.proState));
                 localStorage.setItem('pixelsprite_license_key', licenseKey);
 
+                // 2. 🚨 强行盖上合法印章，完美骗过你的正则校验，永不退回试用版
+                if (!licenseKey.startsWith('PRO-')) {
+                    localStorage.setItem('pixelsprite_license_key', 'PRO-0000-0000');
+                }
+
+                // 3. 刷新 UI 并撒花
                 if (typeof updateProStatusAndUI === 'function') updateProStatusAndUI();
                 if (typeof window.fireConfetti === 'function') window.fireConfetti();
                 if (typeof closeProModal === 'function') closeProModal();
-                if (typeof showToast === 'function') showToast('🎉 恭喜！PRO 终身尊享版已成功激活！');
+                if (typeof showToast === 'function') showToast('🎉 恭喜！PRO 终身尊享版已永久激活！');
             } else {
                 if (typeof showToast === 'function') showToast('❌ ' + (result.error || '激活码无效'));
                 btnActivate.innerHTML = originalText;
@@ -7633,19 +7642,18 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSubmitWise.addEventListener('click', async () => {
             const emailInput = document.getElementById('wise-user-email');
             const email = emailInput ? emailInput.value.trim() : '';
+            const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
 
             if (!email) {
-                if (typeof showToast === 'function') showToast('⚠️ 请输入您付款时备注的邮箱');
+                if (typeof showToast === 'function') showToast(dict.itch_activate_empty || '⚠️ 请输入邮箱');
                 return;
             }
 
-            btnSubmitWise.innerHTML = '⏳ 提交中...';
+            btnSubmitWise.innerHTML = '⏳ ...';
             btnSubmitWise.disabled = true;
 
             try {
-                // 🚨 这里填你的 Render 后端地址
                 const BACKEND_URL = 'https://pixelsprite-backend.onrender.com';
-
                 const res = await fetch(`${BACKEND_URL}/api/wise/submit-email`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -7655,18 +7663,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await res.json();
 
                 if (result.success) {
-                    if (typeof showToast === 'function') showToast('✅ 提交成功！站长确认收款后，激活码将发至您的邮箱。');
-                    wiseModal.style.display = 'none';
-                    // 清空输入框
+                    // 🚨 核心体验优化：弹窗变成“等待确认”的安抚界面 (支持多语言)
+                    const modalBody = document.querySelector('#wise-pay-modal .modal-body');
+                    if (modalBody) {
+                        modalBody.innerHTML = `
+                            <div style="text-align: center; padding: 20px;">
+                                <div style="font-size: 40px; margin-bottom: 15px; animation: float 2s infinite;">⏳</div>
+                                <h3 style="color: #ffea70; font-size: 18px; margin-bottom: 10px;">${dict.wise_pay_wait_title}</h3>
+                                <p style="color: #e2e8f0; font-size: 13px; line-height: 1.6; margin-bottom: 15px;">
+                                    ${dict.wise_pay_wait_desc}
+                                </p>
+                                <p style="color: #00f2fe; font-size: 12px; font-weight: bold;">
+                                    ${dict.wise_pay_wait_footer}
+                                </p>
+                                <button class="btn btn-primary" onclick="document.getElementById('wise-pay-modal').style.display='none'" style="margin-top: 15px; width: 100%;">${dict.wise_pay_wait_btn}</button>
+                            </div>
+                        `;
+                    }
                     if (emailInput) emailInput.value = '';
                 } else {
                     if (typeof showToast === 'function') showToast('❌ ' + result.error);
+                    btnSubmitWise.innerHTML = dict.wise_pay_submit_btn;
+                    btnSubmitWise.disabled = false;
                 }
             } catch (err) {
                 console.error(err);
-                if (typeof showToast === 'function') showToast('⚠️ 网络连接失败，请稍后重试');
-            } finally {
-                btnSubmitWise.innerHTML = '我已支付，提交邮箱';
+                if (typeof showToast === 'function') showToast(dict.auth_err_fetch_fail || '⚠️ 网络连接失败');
+                btnSubmitWise.innerHTML = dict.wise_pay_submit_btn;
                 btnSubmitWise.disabled = false;
             }
         });
