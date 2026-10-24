@@ -33,7 +33,8 @@
         max-height: 70px !important;
         padding: 0 16px !important;
         box-sizing: border-box !important;
-        overflow: hidden !important;
+        overflow: visible !important;
+        /* 👈 把它改成 visible */
         /* 顶栏超出部分绝对裁切 */
     }
 
@@ -54,9 +55,9 @@
         /* 默认靠右对齐 */
         align-items: center !important;
         gap: 8px !important;
-        overflow-x: auto !important;
+        overflow-x: visible !important;
         /* 放不下时出现横向滚动条 */
-        overflow-y: hidden !important;
+        overflow-y: visible !important;
         padding-bottom: 2px !important;
     }
 
@@ -398,58 +399,121 @@
                         }
                     </style>
                     <div id="export-menu" class="export-menu"
-                        style="display: none; position: absolute; top: calc(100% + 6px); right: 0; background: rgba(20, 26, 38, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(0, 242, 254, 0.3); border-radius: var(--radius-md); padding: 6px; box-shadow: 0 12px 30px rgba(0,0,0,0.6); z-index: 1000; min-width: 220px; flex-direction: column; gap: 4px;">
+                        style="display: none; position: absolute; top: calc(100% + 6px); right: 0; background: rgba(10, 15, 25, 0.98); backdrop-filter: blur(16px); border: 1px solid rgba(0, 242, 254, 0.4); border-radius: var(--radius-md); padding: 8px; box-shadow: 0 12px 40px rgba(0,0,0,0.8), 0 0 20px rgba(0,242,254,0.15); z-index: 1000; min-width: 260px; flex-direction: column; gap: 6px;">
+
+                        <!-- 免费版：普通样式 -->
                         <button id="btn-export-png" class="btn btn-secondary"
-                            style="width: 100%; justify-content: flex-start; text-align: left; font-size: 13px; padding: 8px 12px; border: none; background: transparent;"
-                            data-i18n="export_png" title="导出单帧 PNG 图片" data-i18n-title="title_export_png">🖼️ 导出 PNG 单图
-                            (Free)</button>
-                        <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 2px 0;"></div>
-                        <!-- PRO Exporters -->
+                            style="width: 100%; justify-content: flex-start; text-align: left; font-size: 13px; padding: 10px 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); border-radius: 6px; color: #e2e8f0; transition: all 0.2s;"
+                            onmouseover="this.style.background='rgba(255,255,255,0.1)'"
+                            onmouseout="this.style.background='rgba(255,255,255,0.03)'" data-i18n="export_png"
+                            title="导出单帧 PNG 图片" data-i18n-title="title_export_png">🖼️ 导出 PNG 单图 (Free)</button>
+
+                        <div
+                            style="height: 1px; background: linear-gradient(90deg, transparent, rgba(0, 242, 254, 0.5), transparent); margin: 4px 0;">
+                        </div>
+
+                        <!-- 🚨 PRO 专属：赛博朋克霓虹按钮 (GIF) -->
                         <button id="btn-export-gif" class="btn btn-secondary pro-feature-element"
-                            style="width: 100%; justify-content: flex-start; text-align: left; font-size: 13px; padding: 8px 12px; border: none; background: transparent; color: #ffea70;"
-                            data-i18n="export_gif" title="导出多帧 GIF 动态动画 (PRO)" data-i18n-title="title_export_gif">🎞️ 导出
-                            GIF 动画 <span class="pro-tag-badge">PRO</span></button>
-                        <!-- GIF 背景填充选项 -->
-                        <div style="padding: 0 12px 8px 12px; margin-top: 4px;">
+                            style="width: 100%; justify-content: space-between; text-align: left; font-size: 13px; padding: 10px 12px; border: 1px solid rgba(255, 234, 112, 0.5); background: linear-gradient(90deg, rgba(255, 234, 112, 0.1) 0%, transparent 100%); border-radius: 6px; color: #ffea70; transition: all 0.2s; box-shadow: inset 0 0 10px rgba(255, 234, 112, 0.1); position: relative; overflow: hidden;"
+                            onmouseover="this.style.boxShadow='inset 0 0 15px rgba(255, 234, 112, 0.3), 0 0 15px rgba(255, 234, 112, 0.2)'; this.style.borderColor='#ffea70'"
+                            onmouseout="this.style.boxShadow='inset 0 0 10px rgba(255, 234, 112, 0.1)'; this.style.borderColor='rgba(255, 234, 112, 0.5)'"
+                            title="导出多帧 GIF 动态动画 (PRO)" data-i18n-title="title_export_gif">
+                            <div
+                                style="position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 234, 112, 0.3), transparent); animation: exportScan 3s infinite;">
+                            </div>
+                            <span data-i18n="export_gif">🎞️ 导出 GIF 动画</span>
+                            <span class="pro-tag-badge"
+                                style="background: #ffea70; color: #050b14; border: none; box-shadow: 0 0 8px #ffea70; font-weight: 900;">PRO</span>
+                        </button>
+
+                        <!-- GIF 背景填充与尺寸设置区 -->
+                        <div
+                            style="padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 6px; margin-bottom: 4px; border-left: 2px solid #ffea70;">
                             <label
-                                style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-main); cursor: pointer;">
-                                <input type="checkbox" id="check-gif-solid-bg">
+                                style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #e2e8f0; cursor: pointer; margin-bottom: 8px;">
+                                <input type="checkbox" id="check-gif-solid-bg" style="accent-color: #ffea70;">
                                 <span data-i18n="gif_solid_bg">🎨 填充纯色背景 (防黑边)</span>
                             </label>
+                            <label style="font-size: 12px; color: #e2e8f0; display: block; margin-bottom: 4px;"
+                                data-i18n="gif_scale_label">🔍 GIF 清晰度 (放大倍数):</label>
+                            <select id="select-gif-scale" class="select-input"
+                                style="width: 100%; padding: 6px; font-size: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255, 234, 112, 0.3); color: #ffea70;">
+                                <option value="1" data-i18n="gif_scale_1x">1x (原尺寸)</option>
+                                <option value="4" data-i18n="gif_scale_4x">4x 高清</option>
+                                <option value="8" selected data-i18n="gif_scale_8x">8x 超清 (推荐)</option>
+                                <option value="16" data-i18n="gif_scale_16x">16x 极致</option>
+                            </select>
                         </div>
-                        <!-- 🚨 替换开始 -->
+
+                        <!-- Sprite Sheet 参数设置与按钮 -->
                         <div
-                            style="padding: 8px 12px; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); margin: 4px 0;">
-                            <label style="font-size: 12px; color: var(--text-main); display: block; margin-bottom: 4px;"
-                                data-i18n="sheet_cols_label">📊 Sprite Sheet 每行帧数 (Columns):</label>
+                            style="padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 6px; margin-bottom: 4px; border-left: 2px solid #00f2fe;">
+                            <label style="font-size: 12px; color: #e2e8f0; display: block; margin-bottom: 4px;"
+                                data-i18n="sheet_cols_label">📊 Sprite Sheet 每行帧数:</label>
                             <input type="number" id="param-sheet-cols" value="0" min="0" max="64" class="select-input"
-                                style="width: 100%; padding: 6px; font-size: 12px;" placeholder="填 0 自动横向排满"
-                                data-i18n-placeholder="sheet_cols_placeholder">
+                                style="width: 100%; padding: 6px; font-size: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0, 242, 254, 0.3); color: #00f2fe;"
+                                placeholder="填 0 自动横向排满" data-i18n-placeholder="sheet_cols_placeholder">
                         </div>
+
                         <button id="btn-export-sheet" class="btn btn-secondary pro-feature-element"
-                            style="width: 100%; justify-content: flex-start; text-align: left; font-size: 13px; padding: 8px 12px; border: none; background: transparent; color: #ffea70;"
-                            data-i18n="export_sheet" title="导出游戏 Sprite Sheet 图集 (PRO)"
-                            data-i18n-title="title_export_sheet">📊
+                            style="width: 100%; justify-content: space-between; text-align: left; font-size: 13px; padding: 10px 12px; border: 1px solid rgba(0, 242, 254, 0.5); background: linear-gradient(90deg, rgba(0, 242, 254, 0.1) 0%, transparent 100%); border-radius: 6px; color: #00f2fe; transition: all 0.2s; box-shadow: inset 0 0 10px rgba(0, 242, 254, 0.1); position: relative; overflow: hidden;"
+                            onmouseover="this.style.boxShadow='inset 0 0 15px rgba(0, 242, 254, 0.3), 0 0 15px rgba(0, 242, 254, 0.2)'; this.style.borderColor='#00f2fe'"
+                            onmouseout="this.style.boxShadow='inset 0 0 10px rgba(0, 242, 254, 0.1)'; this.style.borderColor='rgba(0, 242, 254, 0.5)'"
+                            title="导出游戏 Sprite Sheet 图集 (PRO)" data-i18n-title="title_export_sheet">
+                            <div
+                                style="position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(0, 242, 254, 0.3), transparent); animation: exportScan 3s infinite;">
+                            </div>
+                            <span data-i18n="export_sheet">📊 导出 Sprite Sheet</span>
+                            <span class="pro-tag-badge"
+                                style="background: #00f2fe; color: #050b14; border: none; box-shadow: 0 0 8px #00f2fe; font-weight: 900;">PRO</span>
                         </button>
-                        <!-- 🚨 替换结束 -->
+
+                        <!-- JSON Atlas 按钮 -->
                         <button id="btn-export-json-atlas" class="btn btn-secondary pro-feature-element"
-                            style="width: 100%; justify-content: flex-start; text-align: left; font-size: 13px; padding: 8px 12px; border: none; background: transparent; color: #00f2fe;"
-                            data-i18n="export_json" title="导出 Cocos / Unity JSON 动画元数据 (PRO)"
-                            data-i18n-title="title_export_json">🎮 导出 JSON 动画 Atlas <span
-                                class="pro-tag-badge">PRO</span></button>
+                            style="width: 100%; justify-content: space-between; text-align: left; font-size: 13px; padding: 10px 12px; border: 1px solid rgba(168, 85, 247, 0.5); background: linear-gradient(90deg, rgba(168, 85, 247, 0.1) 0%, transparent 100%); border-radius: 6px; color: #a855f7; transition: all 0.2s; box-shadow: inset 0 0 10px rgba(168, 85, 247, 0.1); position: relative; overflow: hidden;"
+                            onmouseover="this.style.boxShadow='inset 0 0 15px rgba(168, 85, 247, 0.3), 0 0 15px rgba(168, 85, 247, 0.2)'; this.style.borderColor='#a855f7'"
+                            onmouseout="this.style.boxShadow='inset 0 0 10px rgba(168, 85, 247, 0.1)'; this.style.borderColor='rgba(168, 85, 247, 0.5)'"
+                            title="导出 Cocos / Unity JSON 动画元数据 (PRO)" data-i18n-title="title_export_json">
+                            <div
+                                style="position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.3), transparent); animation: exportScan 3s infinite;">
+                            </div>
+                            <span data-i18n="export_json">🎮 导出 JSON 动画 Atlas</span>
+                            <span class="pro-tag-badge"
+                                style="background: #a855f7; color: #050b14; border: none; box-shadow: 0 0 8px #a855f7; font-weight: 900;">PRO</span>
+                        </button>
+
+                        <!-- SVG 按钮 -->
                         <button id="btn-export-svg" class="btn btn-secondary pro-feature-element"
-                            style="width: 100%; justify-content: flex-start; text-align: left; font-size: 13px; padding: 8px 12px; border: none; background: transparent; color: #00f2fe;"
-                            data-i18n="export_svg" title="导出矢量 SVG 高清像素格式 (PRO)" data-i18n-title="title_export_svg">🎨
-                            导出矢量 SVG <span class="pro-tag-badge">PRO</span></button>
-                        <!-- 云端保存 -->
+                            style="width: 100%; justify-content: space-between; text-align: left; font-size: 13px; padding: 10px 12px; border: 1px solid rgba(255, 0, 127, 0.5); background: linear-gradient(90deg, rgba(255, 0, 127, 0.1) 0%, transparent 100%); border-radius: 6px; color: #ff007f; transition: all 0.2s; box-shadow: inset 0 0 10px rgba(255, 0, 127, 0.1); position: relative; overflow: hidden;"
+                            onmouseover="this.style.boxShadow='inset 0 0 15px rgba(255, 0, 127, 0.3), 0 0 15px rgba(255, 0, 127, 0.2)'; this.style.borderColor='#ff007f'"
+                            onmouseout="this.style.boxShadow='inset 0 0 10px rgba(255, 0, 127, 0.1)'; this.style.borderColor='rgba(255, 0, 127, 0.5)'"
+                            title="导出矢量 SVG 高清像素格式 (PRO)" data-i18n-title="title_export_svg">
+                            <div
+                                style="position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 0, 127, 0.3), transparent); animation: exportScan 3s infinite;">
+                            </div>
+                            <span data-i18n="export_svg">🎨 导出矢量 SVG</span>
+                            <span class="pro-tag-badge"
+                                style="background: #ff007f; color: #050b14; border: none; box-shadow: 0 0 8px #ff007f; font-weight: 900;">PRO</span>
+                        </button>
+
+                        <div
+                            style="height: 1px; background: linear-gradient(90deg, transparent, rgba(0, 242, 254, 0.5), transparent); margin: 4px 0;">
+                        </div>
+
+                        <!-- 云端保存/读取 -->
                         <button id="btn-cloud-save" class="btn btn-secondary" data-i18n="btn_cloud_save"
-                            title="保存到云端，在任何电脑凭提取码恢复">
+                            title="保存到云端，在任何电脑凭提取码恢复"
+                            style="width: 100%; justify-content: flex-start; text-align: left; font-size: 13px; padding: 10px 12px; border: none; background: transparent; color: #e2e8f0; border-radius: 6px;"
+                            onmouseover="this.style.background='rgba(255,255,255,0.1)'"
+                            onmouseout="this.style.background='transparent'">
                             ☁️ 云端保存
                         </button>
 
-                        <!-- 云端读取 -->
                         <button id="btn-cloud-load" class="btn btn-secondary" data-i18n="btn_cloud_load"
-                            title="输入提取码从云端恢复作品">
+                            title="输入提取码从云端恢复作品"
+                            style="width: 100%; justify-content: flex-start; text-align: left; font-size: 13px; padding: 10px 12px; border: none; background: transparent; color: #e2e8f0; border-radius: 6px;"
+                            onmouseover="this.style.background='rgba(255,255,255,0.1)'"
+                            onmouseout="this.style.background='transparent'">
                             📥 云端读取
                         </button>
                     </div>
@@ -672,7 +736,11 @@
                                 <div class="option-row">
                                     <label data-i18n="label_bg_mode">背景模式:</label>
                                     <select id="select-bg-mode" class="select-input" style="flex: 1;">
-                                        <option value="checkered" selected data-i18n="bg_checkered">🏁 透明棋盘网格</option>
+                                        <!-- 🚨 默认改成 transparent，让画布纯透明，只显示你画的像素 -->
+                                        <!-- 🚨 注意：class 里的 selected 保留，加上 data-i18n -->
+                                        <option value="transparent" selected data-i18n="bg_transparent">🔲 纯透明（无背景）
+                                        </option>
+                                        <option value="checkered" data-i18n="bg_checkered">🏁 透明棋盘格</option>
                                         <option value="solid" data-i18n="bg_solid">🎨 纯色背景</option>
                                     </select>
                                 </div>
@@ -722,8 +790,6 @@
                             </div>
 
                             <div class="tool-group">
-                                <button id="btn-toggle-grid" class="tool-btn active" data-i18n="btn_toggle_grid"
-                                    title="显示/隐藏像素网格" data-i18n-title="title_toggle_grid">🌐 网格</button>
                                 <button id="btn-zoom-out" class="tool-btn" title="缩小"
                                     data-i18n-title="title_zoom_out">➖</button>
                                 <div class="zoom-readout" id="btn-zoom-reset" title="点击重置缩放 (16x)"
@@ -782,6 +848,7 @@
                                             </select>
                                             <select id="select-tag-mode" class="select-input"
                                                 style="font-size: 11px; max-width: 120px;" title="选择播放的动画段落">
+                                                <!-- 🚨 加上 data-i18n="tag_play_all" -->
                                                 <option value="all" data-i18n="tag_play_all">▶ 播放全部帧</option>
                                             </select>
                                         </div>
@@ -1240,21 +1307,10 @@
                 <div
                     style="display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; max-width: 380px; margin: 20px auto 10px auto; padding: 20px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 12px; box-shadow: inset 0 0 20px rgba(0, 242, 254, 0.05);">
 
-                    <!-- Itch.io 购买按钮 -->
-                    <a href="https://kenmaster-q2x.itch.io/pixelsprite-pro" target="_blank" class="btn"
-                        style="width: 100%; padding: 14px; background: linear-gradient(135deg, #fa5c5c 0%, #ff4757 100%); color: #fff; font-weight: 800; border-radius: 6px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(250, 92, 92, 0.4);">
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="#ffffff">
-                            <path
-                                d="M2 5 a2 2 0 0 1 2 -2 h16 a2 2 0 0 1 2 2 v3 a2 2 0 0 1 -4 0 a2 2 0 0 1 -4 0 a2 2 0 0 1 -4 0 a2 2 0 0 1 -4 0 a2 2 0 0 1 -4 0 z" />
-                            <path
-                                d="M2 9 a2 2 0 0 0 4 0 a2 2 0 0 0 4 0 a2 2 0 0 0 4 0 a2 2 0 0 0 4 0 a2 2 0 0 0 4 0 v10 a2 2 0 0 1 -2 2 h-16 a2 2 0 0 1 -2 -2 z"
-                                fill-rule="evenodd" clip-rule="evenodd" fill="#ffffff" />
-                            <path
-                                d="M6 12 c-1.5 0 -2 1.5 -2 3 s1 5 2.5 5 s2 -2 2.5 -3.5 h6 c.5 1.5 1 3.5 2.5 3.5 s2.5 -3.5 2.5 -5 s-.5 -3 -2 -3 z"
-                                fill="#fa5c5c" />
-                            <path d="M12 12 l-3 3.5 h2 v2.5 h2 v-2.5 h2 z" fill="#ffffff" />
-                        </svg>
-                        <span data-i18n="itch_buy_btn">Buy PRO on Itch.io ($19.99)</span>
+                    <!-- 🚨 替换成你的 Lemon Squeezy 购买链接 -->
+                    <a href="https://你的店铺.lemonsqueezy.com/checkout/buy/xxxx-xxxx" target="_blank" class="btn"
+                        style="width: 100%; padding: 14px; background: linear-gradient(135deg, #ffc439 0%, #ff9800 100%); color: #003087; font-weight: 800; border-radius: 6px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(255, 196, 57, 0.4);">
+                        <span>💳 Buy PRO on Lemon Squeezy ($19.99)</span>
                     </a>
 
                     <!-- 分割线 -->

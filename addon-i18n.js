@@ -91,7 +91,6 @@
             btn_del_selection: '🗑️ 删除选区',
             btn_select_all: '🔲 全选',
             btn_deselect: '✖️ 取消选区',
-            btn_toggle_grid: '🌐 网格',
             zoom_label: '缩放:',
 
             // Timeline
@@ -271,7 +270,6 @@
             title_del_selection: '删除当前选区 (Delete)',
             title_select_all: '全选当前画布 (Ctrl + A)',
             title_deselect: '取消选区 (Ctrl + D / Esc)',
-            title_toggle_grid: '显示/隐藏像素网格',
             title_zoom_out: '缩小',
             title_zoom_reset: '点击重置缩放 (16x)',
             title_zoom_in: '放大',
@@ -420,6 +418,24 @@
             sheet_save_hint: '点击下方“保存到本地”即可下载。',
 
             tag_play_all: '▶ 播放全部帧',
+
+            pro_btn_upgrade_promo: "升级 PRO",
+            pro_btn_discount_tag: "5折",
+            pro_btn_upgrade_tooltip: "购买解锁 PRO 终身尊享版 (${price} USD，限时 5 折)",
+            pro_btn_upgrade_tooltip_normal: "购买解锁 PRO 终身尊享版 ($19.99 USD)",
+            pro_btn_buy_ls: "在 Lemon Squeezy 购买 PRO",
+            pro_modal_discount_tag: "限时 5 折",
+            pro_trial_promo_hint_en: "🔥 本月限时特惠！现在买断只需 ${price} 美金！",
+
+            gif_scale_label: "🔍 GIF 清晰度 (放大倍数):",
+            gif_scale_1x: "1x (原尺寸)",
+            gif_scale_4x: "4x 高清",
+            gif_scale_8x: "8x 超清 (推荐)",
+            gif_scale_16x: "16x 极致",
+
+            bg_transparent: '🔲 纯透明（无背景）',
+            bg_checkered: '🏁 透明棋盘网格',
+            bg_solid: '🎨 纯色背景',
         },
         en: {
             lang_name: 'English',
@@ -507,7 +523,6 @@
             btn_del_selection: '🗑️ Delete Selection',
             btn_select_all: '🔲 Select All',
             btn_deselect: '✖️ Deselect',
-            btn_toggle_grid: '🌐 Grid',
             zoom_label: 'Zoom:',
 
             // Timeline
@@ -687,7 +702,6 @@
             title_del_selection: 'Delete selection (Delete)',
             title_select_all: 'Select All (Ctrl + A)',
             title_deselect: 'Deselect (Ctrl + D / Esc)',
-            title_toggle_grid: 'Show / hide pixel grid',
             title_zoom_out: 'Zoom out',
             title_zoom_reset: 'Click to reset zoom (16x)',
             title_zoom_in: 'Zoom in',
@@ -836,6 +850,24 @@
             sheet_save_hint: "Click 'Save to Local' below to download.",
 
             tag_play_all: '▶ Play All Frames',
+
+            pro_btn_upgrade_promo: "Upgrade PRO",
+            pro_btn_discount_tag: "50% OFF",
+            pro_btn_upgrade_tooltip: "Buy PixelSprite PRO Lifetime (${price} USD, Limited Time Discount)",
+            pro_btn_upgrade_tooltip_normal: "Buy PixelSprite PRO Lifetime ($19.99 USD)",
+            pro_btn_buy_ls: "Buy PRO on Lemon Squeezy",
+            pro_modal_discount_tag: "50% OFF",
+            pro_trial_promo_hint_en: "🔥 Limited Time Offer! Buy now for only ${price} USD!",
+
+            gif_scale_label: "🔍 GIF Resolution (Scale):",
+            gif_scale_1x: "1x (Original)",
+            gif_scale_4x: "4x HD",
+            gif_scale_8x: "8x Ultra (Recommended)",
+            gif_scale_16x: "16x Extreme",
+
+            bg_transparent: '🔲 Pure Transparent',
+            bg_checkered: '🏁 Checkered Grid',
+            bg_solid: '🎨 Solid Color',
         },
         ja: {
             lang_name: '日本語',
@@ -923,7 +955,6 @@
             btn_del_selection: '🗑️ 選択削除',
             btn_select_all: '🔲 すべて選択',
             btn_deselect: '✖️ 選択解除',
-            btn_toggle_grid: '🌐 グリッド',
             zoom_label: 'ズーム:',
 
             // Timeline
@@ -1098,7 +1129,6 @@
             title_del_selection: '選択範囲を削除 (Delete)',
             title_select_all: 'すべて選択 (Ctrl + A)',
             title_deselect: '選択解除 (Ctrl + D / Esc)',
-            title_toggle_grid: 'ピクセルグリッドの表示 / 非表示',
             title_zoom_out: '縮小',
             title_zoom_reset: 'クリックでズームをリセット (16x)',
             title_zoom_in: '拡大',
@@ -1248,6 +1278,24 @@
             sheet_save_hint: '下の「ローカルに保存」をクリックしてダウンロードします。',
 
             tag_play_all: '▶ すべてのフレームを再生',
+
+            pro_btn_upgrade_promo: "PROにアップグレード",
+            pro_btn_discount_tag: "50% OFF",
+            pro_btn_upgrade_tooltip: "PixelSprite PRO 永久版を購入する (${price} USD、期間限定割引)",
+            pro_btn_upgrade_tooltip_normal: "PixelSprite PRO 永久版を購入する ($19.99 USD)",
+            pro_btn_buy_ls: "Lemon SqueezyでPROを購入",
+            pro_modal_discount_tag: "期間限定 50% OFF",
+            pro_trial_promo_hint_en: "🔥 期間限定キャンペーン！今ならわずか ${price} USD で買い切り！",
+
+            gif_scale_label: "🔍 GIF 解像度 (倍率):",
+            gif_scale_1x: "1x (オリジナル)",
+            gif_scale_4x: "4x 高画質",
+            gif_scale_8x: "8x 超高画質 (推奨)",
+            gif_scale_16x: "16x 極限",
+
+            bg_transparent: '🔲 完全透明（背景なし）',
+            bg_checkered: '🏁 透明チェッカー',
+            bg_solid: '🎨 単色背景',
         }
     }
 

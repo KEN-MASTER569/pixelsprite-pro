@@ -125,7 +125,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnSelectAll = document.getElementById('btn-select-all');
     const btnDeselect = document.getElementById('btn-deselect');
 
-    const btnGrid = document.getElementById('btn-toggle-grid');
     const btnZoomOut = document.getElementById('btn-zoom-out');
     const btnZoomIn = document.getElementById('btn-zoom-in');
     const btnZoomReset = document.getElementById('btn-zoom-reset');
@@ -1848,46 +1847,35 @@ document.addEventListener('DOMContentLoaded', () => {
         // ========================================================
         // 🚨 核心改造：绘制高级防眩光棋盘格
         // ========================================================
-        const isLightTheme = document.body.classList.contains('light-theme');
+        if (bgMode === 'transparent') {
+            ctx.clearRect(0, 0, pixelCanvas.width, pixelCanvas.height);
 
-        // 只有在透明模式（checkered）下，才画格子
-        // 只有在透明模式（checkered）下，才画底色
-        if (bgMode === 'checkered') {
-            // 1. 铺满高级哑光冷灰底色 (带有极微弱的蓝色调，非常护眼且高级)
+            // 🚨 纯透明模式下，如果需要网格，直接画在最底层（用极淡的颜色）
+            const gridSize = 8; // 这里写死 8，跟你之前的像素格子大小匹配
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)'; // 极淡的线，绝对不会挡住画
+            ctx.lineWidth = 1;
+            for (let x = 0; x <= pixelCanvas.width; x += gridSize) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, pixelCanvas.height); ctx.stroke();
+            }
+            for (let y = 0; y <= pixelCanvas.height; y += gridSize) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(pixelCanvas.width, y); ctx.stroke();
+            }
+
+        } else if (bgMode === 'checkered') {
+            // 棋盘格模式同理
             ctx.fillStyle = '#14161c';
             ctx.fillRect(0, 0, pixelCanvas.width, pixelCanvas.height);
 
-            // 2. 在底层画上极淡的辅助网格（每 16 个像素一格，冷灰白色）
-            const gridSize = 16 * 8; // 假设每个像素 8px，这里就是每 16 格画一条
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)'; // 极低的白色透明度
+            const gridSize = 8;
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
             ctx.lineWidth = 1;
-
-            // 画竖线
             for (let x = 0; x <= pixelCanvas.width; x += gridSize) {
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, pixelCanvas.height);
-                ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, pixelCanvas.height); ctx.stroke();
             }
-            // 画横线
             for (let y = 0; y <= pixelCanvas.height; y += gridSize) {
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(pixelCanvas.width, y);
-                ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(pixelCanvas.width, y); ctx.stroke();
             }
-
-            // 3. 在中心画一个极淡的十字准星
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-            ctx.beginPath();
-            ctx.moveTo(pixelCanvas.width / 2, 0);
-            ctx.lineTo(pixelCanvas.width / 2, pixelCanvas.height);
-            ctx.moveTo(0, pixelCanvas.height / 2);
-            ctx.lineTo(pixelCanvas.width, pixelCanvas.height / 2);
-            ctx.stroke();
-
         } else if (bgMode === 'solid') {
-            // 如果是纯色背景模式
             ctx.fillStyle = solidBgColor;
             ctx.fillRect(0, 0, pixelCanvas.width, pixelCanvas.height);
         }
@@ -1968,59 +1956,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function drawGridOverlay() {
         const ctx = gridCanvas.getContext('2d');
+
+        // 1. 清空顶层画布
         ctx.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
 
-        // 🚨 性能护盾：如果画布超过 128×128，隐藏密集的网格线（只保留最外层边框）
         const resX = engine.resX || 32;
         const resY = engine.resY || 32;
         const cellW = gridCanvas.width / resX;
         const cellH = gridCanvas.height / resY;
 
-        // 当格子非常小的时候，放弃绘制内部网格线（这一步能省去 80% 的性能消耗）
-        if (showGrid && resX <= 128 && resY <= 128) {
-            ctx.strokeStyle = 'rgba(0, 242, 254, 0.25)';
-            ctx.lineWidth = 1;
+        // 🚨 注意：关于“画背景网格线”的代码，这里全部删掉了！
+        // 因为网格线已经画在底层的 pixel-canvas 上了。
 
-            for (let i = 0; i <= resX; i++) {
-                ctx.beginPath(); ctx.moveTo(i * cellW, 0); ctx.lineTo(i * cellW, gridCanvas.height); ctx.stroke();
-            }
-            for (let i = 0; i <= resY; i++) {
-                ctx.beginPath(); ctx.moveTo(0, i * cellH); ctx.lineTo(gridCanvas.width, i * cellH); ctx.stroke();
-            }
-        }
-
-        if (showGrid) {
-            // 🚨 彻底移除尺寸限制！不管 32 还是 128，统统绘制精致网格
-            ctx.strokeStyle = 'rgba(0, 242, 254, 0.25)'; // 赛博青，透明度刚刚好，既清晰又不抢戏
-            ctx.lineWidth = 1;
-
-            // 画纵向网格
-            for (let i = 0; i <= resX; i++) {
-                ctx.beginPath();
-                ctx.moveTo(i * cellW, 0);
-                ctx.lineTo(i * cellW, gridCanvas.height);
-                ctx.stroke();
-            }
-            // 画横向网格
-            for (let i = 0; i <= resY; i++) {
-                ctx.beginPath();
-                ctx.moveTo(0, i * cellH);
-                ctx.lineTo(gridCanvas.width, i * cellH);
-                ctx.stroke();
-            }
-
-            // 🚨 画布中心加一根稍微亮一点的青色十字中心线
-            ctx.strokeStyle = 'rgba(0, 242, 254, 0.6)';
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.moveTo(gridCanvas.width / 2, 0);
-            ctx.lineTo(gridCanvas.width / 2, gridCanvas.height);
-            ctx.moveTo(0, gridCanvas.height / 2);
-            ctx.lineTo(gridCanvas.width, gridCanvas.height / 2);
-            ctx.stroke();
-        }
-
-        // Draw Active / Dragging Selection Box (Grid Mesh + Marching Ants + Anchor Handles + Badge)
+        // ========================================================
+        // 2. 画选区 (Selection Box)
+        // ========================================================
         let selBounds = null;
         if (selection) {
             selBounds = {
@@ -2049,111 +1999,75 @@ document.addEventListener('DOMContentLoaded', () => {
             const pw = sw * cellW;
             const ph = sh * cellH;
 
-            // 1. Semi-transparent cyan tint inside selected area
+            // 选区半透明底色
             ctx.fillStyle = 'rgba(0, 242, 254, 0.16)';
             ctx.fillRect(px, py, pw, ph);
 
-            // 2. High-Density Internal Pixel Line Grid Mesh (线条格子状)
+            // 选区内部网格
             ctx.save();
             ctx.strokeStyle = 'rgba(0, 242, 254, 0.55)';
             ctx.lineWidth = 1;
-            ctx.setLineDash([]); // Solid internal grid lines
-
+            ctx.setLineDash([]);
             for (let c = 0; c <= sw; c++) {
                 const gx = px + c * cellW;
-                ctx.beginPath();
-                ctx.moveTo(gx, py);
-                ctx.lineTo(gx, py + ph);
-                ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(gx, py); ctx.lineTo(gx, py + ph); ctx.stroke();
             }
             for (let r = 0; r <= sh; r++) {
                 const gy = py + r * cellH;
-                ctx.beginPath();
-                ctx.moveTo(px, gy);
-                ctx.lineTo(px + pw, gy);
-                ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(px, gy); ctx.lineTo(px + pw, gy); ctx.stroke();
             }
             ctx.restore();
 
-            // 3. High-Contrast Animated Marching Ants Outer Border
+            // 选区虚线动画边框
             ctx.save();
-            ctx.lineWidth = 1.5; // 变细一点，更锐利
-
-            // 暗红/品红底边（赛博朋克经典配色：青色+品红）
+            ctx.lineWidth = 1.5;
             ctx.strokeStyle = 'rgba(255, 0, 127, 0.7)';
             ctx.setLineDash([6, 6]);
             ctx.lineDashOffset = -selectionDashOffset;
             ctx.strokeRect(px, py, pw, ph);
 
-            // 荧光青边，产生错位感
             ctx.strokeStyle = '#00f2fe';
             ctx.shadowColor = '#00f2fe';
             ctx.shadowBlur = 4;
             ctx.setLineDash([6, 6]);
             ctx.lineDashOffset = -(selectionDashOffset + 6);
-            ctx.strokeRect(px - 1, py - 1, pw + 2, ph + 2); // 故意画偏 1px 制造故障感
+            ctx.strokeRect(px - 1, py - 1, pw + 2, ph + 2);
             ctx.restore();
 
-            // 4. Corner & Midpoint Anchor Handles (Nodes) - Show on active selection (not while dragging to create)
+            // 选区四角手柄
             if (selection && !isSelectionDragCreating && (activeTool === 'select' || selection.isFloating)) {
                 const handles = [
-                    { id: 'nw', x: px, y: py }, // top-left
-                    { id: 'n', x: px + pw / 2, y: py }, // top-mid
-                    { id: 'ne', x: px + pw, y: py }, // top-right
-                    { id: 'e', x: px + pw, y: py + ph / 2 }, // right-mid
-                    { id: 'se', x: px + pw, y: py + ph }, // bottom-right
-                    { id: 's', x: px + pw / 2, y: py + ph }, // bottom-mid
-                    { id: 'sw', x: px, y: py + ph }, // bottom-left
-                    { id: 'w', x: px, y: py + ph / 2 } // left-mid
+                    { x: px, y: py }, { x: px + pw / 2, y: py }, { x: px + pw, y: py },
+                    { x: px + pw, y: py + ph / 2 }, { x: px + pw, y: py + ph },
+                    { x: px + pw / 2, y: py + ph }, { x: px, y: py + ph }, { x: px, y: py + ph / 2 }
                 ];
-
-                // ========================================================
-                // 💠 赛博朋克风选区手柄 (多层光效 Pro Max 版)
-                // ========================================================
-                const nodeSize = 12; // 稍微放大一点，让光效有空间展示
+                const nodeSize = 12;
                 ctx.save();
-
                 handles.forEach(h => {
-                    const hx = h.x;
-                    const hy = h.y;
-
                     ctx.save();
-                    ctx.translate(hx, hy);
-                    ctx.rotate(Math.PI / 4); // 旋转 45 度，变成菱形
-
+                    ctx.translate(h.x, h.y);
+                    ctx.rotate(Math.PI / 4);
                     const size = nodeSize;
-
-                    // 🔮 第 1 层：外层弥散光晕 (Soft Glow)
-                    ctx.shadowColor = '#00f2fe'; // 青色泛光
-                    ctx.shadowBlur = 15;         // 大范围模糊
-                    ctx.fillStyle = 'rgba(0, 242, 254, 0.2)'; // 极低透明度的青色底
+                    ctx.shadowColor = '#00f2fe';
+                    ctx.shadowBlur = 15;
+                    ctx.fillStyle = 'rgba(0, 242, 254, 0.2)';
                     ctx.fillRect(-size / 2 - 2, -size / 2 - 2, size + 4, size + 4);
-
-                    // 🔷 第 2 层：中层科技边框 (Tech Border)
-                    ctx.shadowBlur = 6; // 减小模糊，让边框锐利
+                    ctx.shadowBlur = 6;
                     ctx.strokeStyle = '#00f2fe';
                     ctx.lineWidth = 1.5;
                     ctx.strokeRect(-size / 2, -size / 2, size, size);
-
-                    // ⬛ 第 3 层：内部暗色填充 (Dark Core)
-                    ctx.shadowBlur = 0; // 关掉阴影，保证暗部纯粹
+                    ctx.shadowBlur = 0;
                     ctx.fillStyle = 'rgba(5, 11, 20, 0.85)';
                     ctx.fillRect(-size / 2, -size / 2, size, size);
-
-                    // ✨ 第 4 层：中心十字高光 (Center Highlight)
                     ctx.strokeStyle = '#ffffff';
                     ctx.lineWidth = 1;
                     ctx.beginPath();
-                    // 画个小小的十字星
                     ctx.moveTo(-3, 0); ctx.lineTo(3, 0);
                     ctx.moveTo(0, -3); ctx.lineTo(0, 3);
                     ctx.stroke();
-
                     ctx.restore();
-
-                    // 🌟 第 5 层：绝对纯白点 (Sparkle Core) - 不随旋转
                     ctx.beginPath();
-                    ctx.arc(hx, hy, 1, 0, Math.PI * 2);
+                    ctx.arc(h.x, h.y, 1, 0, Math.PI * 2);
                     ctx.fillStyle = '#ffffff';
                     ctx.shadowColor = '#ffffff';
                     ctx.shadowBlur = 8;
@@ -2162,147 +2076,85 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.restore();
             }
 
-            // 5. Dimension & Coordinate Floating Badge Tooltip
+            // 悬浮尺寸提示
             let scaleInfo = '';
             if (selection && selection.origW && selection.origH) {
                 const scaleX = Math.round((sw / selection.origW) * 100);
                 const scaleY = Math.round((sh / selection.origH) * 100);
-                if (scaleX !== 100 || scaleY !== 100) {
-                    scaleInfo = ` (${scaleX}%×${scaleY}%)`;
-                }
+                if (scaleX !== 100 || scaleY !== 100) scaleInfo = ` (${scaleX}%×${scaleY}%)`;
             }
-
-            let badgeText = '';
-            if (selection && selection.isFloating) {
-                badgeText = `📐 ${sw}×${sh} px${scaleInfo} [${sx}, ${sy}] 浮动选区 (Enter 确认固定 / 拖动手柄缩放)`;
-            } else if (selection) {
-                badgeText = `📐 ${sw}×${sh} px [${sx}, ${sy}] 选区有效 (拖动内部移动，画笔仅在此生效)`;
-            } else {
-                badgeText = `📐 正在框选: ${sw}×${sh} px [${sx}, ${sy}]`;
-            }
+            let badgeText = selection ? `📐 ${sw}×${sh} px${scaleInfo} [${sx}, ${sy}]` : `📐 正在框选: ${sw}×${sh} px`;
             ctx.font = 'bold 11px sans-serif';
             const textWidth = ctx.measureText(badgeText).width;
             const badgeW = textWidth + 14;
             const badgeH = 22;
             const badgeX = Math.max(4, Math.min(gridCanvas.width - badgeW - 4, px));
             const badgeY = (py >= 26) ? py - 26 : py + ph + 6;
-
             ctx.fillStyle = 'rgba(5, 11, 20, 0.88)';
             ctx.strokeStyle = 'rgba(0, 242, 254, 0.6)';
             ctx.lineWidth = 1;
             ctx.beginPath();
             if (ctx.roundRect) ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 4);
             else ctx.rect(badgeX, badgeY, badgeW, badgeH);
-            ctx.fill();
-            ctx.stroke();
-
+            ctx.fill(); ctx.stroke();
             ctx.fillStyle = '#00f2fe';
             ctx.fillText(badgeText, badgeX + 7, badgeY + 15);
-
             startSelectionAnimation();
         }
 
-        // Draw Crop Tool Overlay (Dark Vignette + Amber Dashed Box + Anchor Nodes + Badge)
+        // ========================================================
+        // 3. 画裁剪框 (Crop Tool)
+        // ========================================================
         if (activeTool === 'crop' && cropBox && cropBox.w > 0 && cropBox.h > 0) {
             const { x: cx, y: cy, w: cw, h: ch } = cropBox;
-            const px = cx * cellW;
-            const py = cy * cellH;
-            const pw = cw * cellW;
-            const ph = ch * cellH;
-            const gw = gridCanvas.width;
-            const gh = gridCanvas.height;
+            const px = cx * cellW; const py = cy * cellH;
+            const pw = cw * cellW; const ph = ch * cellH;
+            const gw = gridCanvas.width; const gh = gridCanvas.height;
 
-            // 1. Darkened Vignette Outside Crop Area
             ctx.fillStyle = 'rgba(5, 11, 20, 0.68)';
-            ctx.fillRect(0, 0, gw, py); // Top
-            ctx.fillRect(0, py + ph, gw, gh - (py + ph)); // Bottom
-            ctx.fillRect(0, py, px, ph); // Left
-            ctx.fillRect(px + pw, py, gw - (px + pw), ph); // Right
+            ctx.fillRect(0, 0, gw, py);
+            ctx.fillRect(0, py + ph, gw, gh - (py + ph));
+            ctx.fillRect(0, py, px, ph);
+            ctx.fillRect(px + pw, py, gw - (px + pw), ph);
 
-            // 2. Glowing Amber Dashed Crop Box Border
             ctx.save();
-            ctx.strokeStyle = '#ff9f43';
-            ctx.lineWidth = 2.5;
-            ctx.setLineDash([8, 4]);
+            ctx.strokeStyle = '#ff9f43'; ctx.lineWidth = 2.5; ctx.setLineDash([8, 4]);
             ctx.strokeRect(px, py, pw, ph);
-
-            // Solid inner border line
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
-            ctx.lineWidth = 1;
-            ctx.setLineDash([]);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)'; ctx.lineWidth = 1; ctx.setLineDash([]);
             ctx.strokeRect(px, py, pw, ph);
             ctx.restore();
 
-            // 3. Corner Handles (Nodes)
-            const cropHandles = [
-                { x: px, y: py },
-                { x: px + pw, y: py },
-                { x: px, y: py + ph },
-                { x: px + pw, y: py + ph }
-            ];
+            const cropHandles = [{ x: px, y: py }, { x: px + pw, y: py }, { x: px, y: py + ph }, { x: px + pw, y: py + ph }];
             cropHandles.forEach(h => {
-                ctx.fillStyle = '#ff9f43';
-                ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 1.5;
-                ctx.fillRect(h.x - 4, h.y - 4, 8, 8);
-                ctx.strokeRect(h.x - 4, h.y - 4, 8, 8);
+                ctx.fillStyle = '#ff9f43'; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5;
+                ctx.fillRect(h.x - 4, h.y - 4, 8, 8); ctx.strokeRect(h.x - 4, h.y - 4, 8, 8);
             });
-
-            // 4. Floating Action Badge
-            const badgeText = `✂️ 双击或按 Enter 确认裁剪 (${cw}×${ch} px)`;
-            ctx.font = 'bold 11px sans-serif';
-            const textWidth = ctx.measureText(badgeText).width;
-            const badgeW = textWidth + 16;
-            const badgeH = 24;
-            const badgeX = Math.max(4, Math.min(gw - badgeW - 4, px + (pw - badgeW) / 2));
-            const badgeY = (py >= 28) ? py - 28 : py + ph + 6;
-
-            ctx.fillStyle = 'rgba(255, 159, 67, 0.95)';
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            if (ctx.roundRect) ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 4);
-            else ctx.rect(badgeX, badgeY, badgeW, badgeH);
-            ctx.fill();
-            ctx.stroke();
-
-            ctx.fillStyle = '#050b14';
-            ctx.fillText(badgeText, badgeX + 8, badgeY + 16);
         }
 
-        // Draw Hover Pixel Cursor Box (1px / 2px / 3px brush size indicator)
+        // ========================================================
+        // 4. 画鼠标悬停指示框 (Hover Box) - 也就是你丢失的那个！
+        // ========================================================
         if (currentHoverPixelX >= 0 && currentHoverPixelY >= 0 && activeTool !== 'move' && !isSpacePressed) {
             ctx.save();
-
-            // 1. 高亮当前格子 (半透明青色填充)
             const bx = currentHoverPixelX;
             const by = currentHoverPixelY;
             const bw = Math.min(brushSize, resX - bx);
             const bh = Math.min(brushSize, resY - by);
 
+            // 半透明青色填充
             ctx.fillStyle = 'rgba(0, 242, 254, 0.3)';
             ctx.fillRect(bx * cellW, by * cellH, bw * cellW, bh * cellH);
 
-            // 2. 绘制赛博狙击十字线 (哪怕格子只有 4px，这十字线也覆盖整个屏幕)
+            // 十字虚线
             ctx.strokeStyle = 'rgba(0, 242, 254, 0.6)';
             ctx.lineWidth = 1;
-            ctx.setLineDash([4, 4]); // 虚线
+            ctx.setLineDash([4, 4]);
 
-            const cx = bx * cellW + (bw * cellW) / 2; // 格子中心X
-            const cy = by * cellH + (bh * cellH) / 2; // 格子中心Y
+            const cx = bx * cellW + (bw * cellW) / 2;
+            const cy = by * cellH + (bh * cellH) / 2;
 
-            // 横线
-            ctx.beginPath();
-            ctx.moveTo(0, cy);
-            ctx.lineTo(gridCanvas.width, cy);
-            ctx.stroke();
-
-            // 竖线
-            ctx.beginPath();
-            ctx.moveTo(cx, 0);
-            ctx.lineTo(cx, gridCanvas.height);
-            ctx.stroke();
-
+            ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(gridCanvas.width, cy); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, gridCanvas.height); ctx.stroke();
             ctx.restore();
         }
     }
@@ -2527,10 +2379,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const canvas = document.createElement('canvas');
             canvas.className = 'frame-thumb-canvas';
-            // 👇 改成这样：统一用小尺寸渲染，再放大显示，保证缩略图清晰不糊
+
+            // 🚨 1. 缩小画布到 56px，给文字腾出绝对空间
             const thumbSize = 56;
             canvas.width = thumbSize;
             canvas.height = thumbSize;
+
+            // 🚨 2. 暴力内联样式：固定宽高、禁止被 flex 挤压
+            canvas.style.cssText = `
+                width: 56px !important;
+                height: 56px !important;
+                display: block !important;
+                flex-shrink: 0 !important;
+                border-radius: 4px;
+                object-fit: contain;
+            `;
 
             const buf = frameBuffers[f] || engine.createBuffer();
             engine.renderToCanvas(buf, canvas, true);
@@ -2540,6 +2403,28 @@ document.addEventListener('DOMContentLoaded', () => {
             label.className = 'frame-number-tag';
             label.setAttribute('data-frame-index', f + 1);
             label.textContent = `${dict.frame_label || 'Frame'} ${f + 1}`;
+
+            // 🚨 3. 暴力内联样式：文字绝对居中、高度撑开、字体精细
+            label.style.cssText = `
+                font-size: 10px !important;
+                font-weight: 700 !important;
+                color: #ffffff !important;
+                background: rgba(0, 242, 254, 0.15) !important;
+                border: 1px solid rgba(0, 242, 254, 0.3) !important;
+                margin-top: 6px !important;
+                padding: 2px 4px !important;
+                border-radius: 4px !important;
+                white-space: nowrap !important;
+                display: block !important;
+                width: 100% !important;
+                max-width: 56px !important;
+                text-align: center !important;
+                box-sizing: border-box !important;
+                flex-shrink: 0 !important;
+                line-height: 1.2 !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            `;
 
             card.appendChild(canvas);
             card.appendChild(label);
@@ -4230,9 +4115,31 @@ document.addEventListener('DOMContentLoaded', () => {
         if (resolutionSelect) {
             resolutionSelect.addEventListener('change', (e) => {
                 const val = e.target.value;
+                const customResGroup = document.getElementById('custom-res-group');
+
                 if (val !== 'custom') {
+                    // 如果是固定尺寸，应用并且隐藏自定义输入框
                     const num = parseInt(val);
                     applyCanvasResolution(num, num);
+                    if (customResGroup) {
+                        customResGroup.style.display = 'none';
+                    }
+                } else {
+                    // 🚨 核心：选自定义时，暴力强制显示并覆盖 DOM 样式！
+                    if (customResGroup) {
+                        customResGroup.style.cssText = `
+                            display: flex !important; 
+                            align-items: center !important; 
+                            gap: 4px !important; 
+                            margin-left: 10px !important; 
+                            background: rgba(0,0,0,0.5) !important; 
+                            border: 1px solid #00f2fe !important; 
+                            padding: 2px 8px !important; 
+                            border-radius: 4px !important;
+                        `;
+                        if (resCustomX) resCustomX.value = engine.resX || 32;
+                        if (resCustomY) resCustomY.value = engine.resY || 32;
+                    }
                 }
             });
         }
@@ -4293,8 +4200,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (selectBgMode) {
             selectBgMode.addEventListener('change', (e) => {
                 bgMode = e.target.value;
-                if (solidBgColorGroup) solidBgColorGroup.style.display = (bgMode === 'solid') ? 'flex' : 'none';
+
+                // 🚨 核心修复：只有选纯色时，才显示取色器
+                if (solidBgColorGroup) {
+                    solidBgColorGroup.style.display = (bgMode === 'solid') ? 'flex' : 'none';
+                }
+
+                // 🚨 核心修复：切换背景时，必须重新渲染整个画布和网格
                 renderMainCanvas();
+                // 如果你之前保留了 drawGridOverlay 的调用，也加上
+                // drawGridOverlay(); 
             });
         }
 
@@ -4330,15 +4245,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnDeleteSelection) btnDeleteSelection.addEventListener('click', deleteActiveSelection);
         if (btnSelectAll) btnSelectAll.addEventListener('click', selectAll);
         if (btnDeselect) btnDeselect.addEventListener('click', deselect);
-
-        // Zoom & Grid
-        if (btnGrid) {
-            btnGrid.addEventListener('click', () => {
-                showGrid = !showGrid;
-                btnGrid.classList.toggle('active', showGrid);
-                drawGridOverlay();
-            });
-        }
         if (btnZoomOut) btnZoomOut.addEventListener('click', () => zoomOut());
         if (btnZoomIn) btnZoomIn.addEventListener('click', () => zoomIn());
         if (btnZoomReset) btnZoomReset.addEventListener('click', resetZoom);
@@ -4409,10 +4315,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 strokeCurrentX = coords.x;
                 strokeCurrentY = coords.y;
             }
+
+            // 🚨 只要坐标变了，就重新画指示框
             if (coords.x !== currentHoverPixelX || coords.y !== currentHoverPixelY) {
                 currentHoverPixelX = coords.x;
                 currentHoverPixelY = coords.y;
+
+                // 🚨 加这句！鼠标移动时刷新悬停框！
+                drawGridOverlay();
             }
+
             if (activeTool === 'select') {
                 updateSelectionCursor(e.clientX, e.clientY);
             }
@@ -4421,7 +4333,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 const now = Date.now();
                 if (now - lastGridDraw > 30) {
-                    drawGridOverlay();
+                    drawGridOverlay(); // 这里原本就有，保留
                     lastGridDraw = now;
                 }
             }
@@ -4778,17 +4690,35 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Export Dropdown
+        // Export Dropdown (赛博朋克版 - 清理了样式注入干扰)
         if (btnExportMain && exportMenu) {
+            // 确保菜单有绝对的层级
+            exportMenu.style.zIndex = '2147483647';
+
             btnExportMain.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const isOpen = exportMenu.style.display === 'flex';
-                exportMenu.style.display = isOpen ? 'none' : 'flex';
-                if (exportArrow) exportArrow.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+
+                if (isOpen) {
+                    exportMenu.style.display = 'none';
+                    if (exportArrow) exportArrow.style.transform = 'rotate(0deg)';
+                } else {
+                    exportMenu.style.display = 'flex';
+
+                    // 🚨 核心魔法：直接根据按钮位置计算，用 fixed 焊死坐标，无视一切父级布局！
+                    const rect = btnExportMain.getBoundingClientRect();
+                    exportMenu.style.position = 'fixed';
+                    exportMenu.style.top = (rect.bottom + 8) + 'px';
+                    exportMenu.style.right = Math.max(10, window.innerWidth - rect.right) + 'px';
+
+                    if (exportArrow) exportArrow.style.transform = 'rotate(180deg)';
+                }
             });
 
             document.addEventListener('click', (e) => {
-                if (exportMenu && !exportMenu.contains(e.target) && e.target !== btnExportMain) {
+                if (exportMenu.style.display === 'flex' &&
+                    !exportMenu.contains(e.target) &&
+                    !btnExportMain.contains(e.target)) {
                     exportMenu.style.display = 'none';
                     if (exportArrow) exportArrow.style.transform = 'rotate(0deg)';
                 }
@@ -5428,7 +5358,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // 🚨 唯一真理：全局统一的下拉菜单点击逻辑
+        // 🚨 唯一真理：全局统一的下拉菜单点击逻辑 (突破裁切版)
         const pill = document.getElementById('user-profile-pill');
         const dropdown = document.getElementById('user-profile-dropdown');
 
@@ -5442,11 +5372,23 @@ document.addEventListener('DOMContentLoaded', () => {
             pill.onclick = function (e) {
                 e.preventDefault();
                 e.stopPropagation();
+
+                // 如果当前是显示的，直接关闭
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                    return;
+                }
+
+                // 计算头像在屏幕上的真实位置
+                const rect = pill.getBoundingClientRect();
+
+                // 🚨 核心魔法：用 fixed 定位，直接焊死在屏幕上的坐标，无视任何父级 overflow: hidden！
+                dropdown.style.position = 'fixed';
+                dropdown.style.top = (rect.bottom + 8) + 'px';
+                dropdown.style.right = (window.innerWidth - rect.right) + 'px';
                 dropdown.style.zIndex = '2147483647';
-                dropdown.style.position = 'absolute';
-                dropdown.style.right = '0';
-                dropdown.style.top = '100%';
-                dropdown.classList.toggle('show');
+
+                dropdown.classList.add('show');
             };
 
             // 点击菜单内不关闭
@@ -5455,8 +5397,10 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             // 点击页面空白处关闭
-            document.addEventListener('click', function () {
-                dropdown.classList.remove('show');
+            document.addEventListener('click', function (e) {
+                if (dropdown.classList.contains('show') && !pill.contains(e.target)) {
+                    dropdown.classList.remove('show');
+                }
             });
         }
     }
@@ -5507,6 +5451,7 @@ document.addEventListener('DOMContentLoaded', () => {
             pixelCanvas.height = displayH;
         }
         if (gridCanvas) {
+            // 🚨 这里要强制和底层画布一模一样大，否则网格会画偏/溢出
             gridCanvas.width = displayW;
             gridCanvas.height = displayH;
         }
@@ -5517,6 +5462,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (canvasWrapper) {
             canvasWrapper.style.width = displayW + 'px';
             canvasWrapper.style.height = displayH + 'px';
+            // 如果用了 mix-blend-mode 会导致层级背景互相干扰，加一下排除
+            canvasWrapper.style.isolation = 'isolate';
         }
 
         const zoomValueSpan = document.getElementById('zoom-value');
@@ -5674,66 +5621,100 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!checkIsProActive()) { openProModal(); return; }
         commitSelection();
 
-        // 1. 显示全局 Loading 遮罩，避免用户乱点
+        // 1. 显示全局 Loading 遮罩
         const loader = document.getElementById('global-loader');
         if (loader) loader.style.display = 'flex';
 
         const resX = engine.resX || 32;
         const resY = engine.resY || 32;
 
-        // 🚨 核心优化 1：GIF 只需要 256 色，且原尺寸已经足够。
-        // 我们放弃 8x 放大！直接使用 1x 的原生分辨率生成 Canvas。
-        // 这能让 getImageData 和 LZW 计算量暴降 64 倍！
-        const size = Math.max(resX, resY);
+        // 获取用户选择的倍数
+        const scaleSelect = document.getElementById('select-gif-scale');
+        const gifScale = scaleSelect ? parseInt(scaleSelect.value) : 1;
+
+        const sizeX = resX * gifScale;
+        const sizeY = resY * gifScale;
+
+        // 🚨 性能优化：GIF 不需要超大正方形，只取真实分辨率，避免黑色或透明边角浪费计算
+        const width = sizeX;
+        const height = sizeY;
+
         const framesCanvas = [];
 
         for (let f = 0; f < frameBuffers.length; f++) {
             const fc = document.createElement('canvas');
-            fc.width = size;
-            fc.height = size;
+            fc.width = width;
+            fc.height = height;
             const fctx = fc.getContext('2d');
 
-            // 🚨 核心：检测是否勾选了纯色背景
+            // 🚨 关键优化 1：关闭平滑插值（必须关闭，否则像素会模糊，且极度耗性能）
+            fctx.imageSmoothingEnabled = false;
+
+            // 检测纯色背景
             const solidBgCheck = document.getElementById('check-gif-solid-bg');
             if (solidBgCheck && solidBgCheck.checked) {
-                // 如果勾选了，铺一层白色（你也可以让他选颜色，这里默认白色）
                 fctx.fillStyle = '#FFFFFF';
-                fctx.fillRect(0, 0, size, size);
+                fctx.fillRect(0, 0, width, height);
             }
 
+            // 🚨 关键优化 2：直接把原始像素矩阵画到放大后的 canvas 上（跳过临时 canvas 的创建）
+            // engine.renderToCanvas 在底层实际上是对每个像素进行 fillRect
+            // 所以我们用一个临时 canvas 作为中转，但尺寸用原始的，避免填满大 canvas 的坐标
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = resX;
+            tempCanvas.height = resY;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.imageSmoothingEnabled = false;
+
             const buf = frameBuffers[f] || engine.createBuffer(resX, resY);
-            engine.renderToCanvas(buf, fc, false);
+            engine.renderToCanvas(buf, tempCanvas, false);
+
+            // 直接缩放绘制
+            fctx.drawImage(tempCanvas, 0, 0, resX, resY, 0, 0, width, height);
+
+            // 销毁临时画布释放内存
+            tempCanvas.width = 0;
+            tempCanvas.height = 0;
+
             framesCanvas.push(fc);
         }
 
         const delayMs = Math.round(1000 / fps);
 
-        // 2. 交给你的底层编码器（此时因为数据变小了，它算起来会飞快）
-        // 用 setTimeout 延迟 50ms 执行，让浏览器的 Loading 动画能先渲染出来，否则 JS 阻塞会导致画面直接白屏
+        // 延迟执行，让 Loading 渲染出来
         setTimeout(async () => {
-            const gifBlob = encodeGIF(framesCanvas, delayMs);
+            try {
+                // 🚨 如果编码器支持，这里可以降低颜色量化（通常 GIF 最多 256 色）
+                const gifBlob = encodeGIF(framesCanvas, delayMs);
 
-            // 3. 立刻释放临时 Canvas 内存
-            framesCanvas.forEach(canvas => {
-                canvas.width = 0;
-                canvas.height = 0;
-            });
+                // 立刻释放大画布内存
+                framesCanvas.forEach(canvas => {
+                    canvas.width = 0;
+                    canvas.height = 0;
+                });
 
-            if (loader) loader.style.display = 'none';
+                if (loader) loader.style.display = 'none';
 
-            if (gifBlob) {
-                const gifUrl = URL.createObjectURL(gifBlob);
-                const filename = `animated_${fps}fps.gif`;
+                if (gifBlob) {
+                    const gifUrl = URL.createObjectURL(gifBlob);
+                    const filename = `animated_${fps}fps_${gifScale}x.gif`;
 
-                const status = await promptSaveFilePicker(gifBlob, filename, [{ description: 'GIF Animated Image', accept: { 'image/gif': ['.gif'] } }]);
+                    const status = await promptSaveFilePicker(gifBlob, filename, [{ description: 'GIF Animated Image', accept: { 'image/gif': ['.gif'] } }]);
 
-                if (status === 'cancel') return;
+                    if (status === 'cancel') return;
 
-                showExportModal(gifUrl, filename, `GIF 动态图 | ${fps} FPS`, '✨ GIF 动态动画导出成功！');
-            } else {
-                alert('❌ GIF 生成失败，请重试');
+                    // 获取当前语言字典用于弹窗
+                    const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
+                    showExportModal(gifUrl, filename, `GIF | ${fps} FPS | ${gifScale}x`, dict.toast_gif_success || '✨ GIF 动态动画导出成功！');
+                } else {
+                    alert('❌ GIF 生成失败，请重试');
+                }
+            } catch (err) {
+                console.error('GIF编码失败:', err);
+                if (loader) loader.style.display = 'none';
+                alert('❌ GIF 生成超时或内存不足，请尝试降低导出倍数。');
             }
-        }, 50); // 延迟 50ms，拯救主线程假死
+        }, 100); // 稍微加长一点延迟，确保 UI 线程完全空闲后再执行最耗时的计算
     }
 
     async function exportSpritesheet() {
@@ -6658,8 +6639,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modalTitle) {
             let baseTitle = dict.pro_modal_title || '👑 PixelSprite PRO 终身尊享版解锁 ($19.99 USD)';
             if (promo.isPromo) {
-                // 把原本的 $19.99 替换成 划线原价 + 打折红字
-                baseTitle = baseTitle.replace('$19.99', `<span style="text-decoration: line-through; opacity: 0.5; font-size: 14px;">$${promo.originalPrice}</span> <span style="color: #ffc439; font-size: 22px;">$${promo.finalPrice}</span> <span style="color: #ff4757; font-size: 12px; border: 1px solid #ff4757; padding: 2px 6px; border-radius: 10px; margin-left: 8px;">限时 ${promo.discount} 折</span>`);
+                // 🚨 核心修复：根据语言显示不同的折扣标签
+                const discountText = dict.pro_modal_discount_tag || (window.currentLang === 'en' ? `${promo.discount * 10}% OFF` : `限时 ${promo.discount} 折`);
+                baseTitle = baseTitle.replace('$19.99', `<span style="text-decoration: line-through; opacity: 0.5; font-size: 14px;">$${promo.originalPrice}</span> <span style="color: #ffc439; font-size: 22px;">$${promo.finalPrice}</span> <span style="color: #ff4757; font-size: 12px; border: 1px solid #ff4757; padding: 2px 6px; border-radius: 10px; margin-left: 8px;">${discountText}</span>`);
             }
             modalTitle.innerHTML = baseTitle;
         }
@@ -6712,8 +6694,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         <h2 style="color: #00f2fe; margin: 0 0 10px 0; font-size: 20px;">${dict.pro_trial_banner_title || '您的 24 小时 PRO 免费试用正在进行中！'}</h2>
                         <p style="color: var(--text-main); margin: 0 0 10px 0; font-size: 14px;">${dict.pro_trial_banner_desc || '体验结束倒计时：'} <strong id="pro-trial-countdown" style="color: #ff4757; font-size: 22px; font-family: monospace;">${timeStr}</strong></p>
                         <p style="color: var(--text-muted); font-size: 12px; margin: 0; line-height: 1.5;">
-                            ${promo.isPromo ? `🔥 本月限时特惠！现在买断只需 <strong style="color: #ffc439;">$${promo.finalPrice}</strong> 美金！` : (dict.pro_trial_banner_hint || '试用期结束后将恢复标准版功能。现在买断只需 $19.99！')}
-                        </p>
+    ${promo.isPromo ?
+                            (window.currentLang === 'en' ? `🔥 Limited Time Offer! Buy now for only $${promo.finalPrice} USD!` :
+                                window.currentLang === 'ja' ? `🔥 期間限定キャンペーン！今ならわずか ${promo.finalPrice} USD で買い切り！` :
+                                    `🔥 本月限时特惠！现在买断只需 $${promo.finalPrice} 美金！`) :
+                            (dict.pro_trial_banner_hint || '试用期结束后将恢复标准版功能。现在买断只需 $19.99！')}
+</p>
                     </div>
                 `;
                 } else {
@@ -7284,28 +7270,32 @@ document.addEventListener('DOMContentLoaded', () => {
     function applyGlobalPromotion() {
         const promo = window.getDynamicPrice();
         const displayPrice = promo.finalPrice;
+        const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
 
         // ---------- 1. 顶栏 PRO 按钮 ----------
         const btnHeaderBuyPro = document.getElementById('btn-header-buy-pro');
         if (btnHeaderBuyPro) {
             if (promo.isPromo) {
+                // 🚨 核心修复：根据语言动态显示文字
+                const upgradeText = dict.pro_btn_upgrade_promo || (window.currentLang === 'en' ? 'Upgrade PRO' : '升级 PRO');
+                const offText = dict.pro_btn_discount_tag || (window.currentLang === 'en' ? `${promo.discount * 10}% OFF` : `${promo.discount}折`);
+
                 btnHeaderBuyPro.innerHTML = `
                 👑 <span style="text-decoration: line-through; opacity: 0.6; font-size: 11px; margin-right: 4px;">$${promo.originalPrice}</span>
-                <span style="color: #ff4757; font-weight: 900;">升级 PRO ($${promo.finalPrice})</span>
-                <span style="position: absolute; top: -8px; right: -8px; background: #ff4757; color: #fff; font-size: 9px; padding: 2px 4px; border-radius: 4px; border: 1px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.3); animation: pulseDot 1s infinite alternate;">${promo.discount}折</span>
+                <span style="color: #ff4757; font-weight: 900;">${upgradeText} ($${promo.finalPrice})</span>
+                <span style="position: absolute; top: -8px; right: -8px; background: #ff4757; color: #fff; font-size: 9px; padding: 2px 4px; border-radius: 4px; border: 1px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.3); animation: pulseDot 1s infinite alternate;">${offText}</span>
             `;
                 btnHeaderBuyPro.style.overflow = 'visible';
                 btnHeaderBuyPro.style.position = 'relative';
-                btnHeaderBuyPro.title = `通过 Lemon Squeezy 购买解锁 PRO 终身尊享版 ($${promo.finalPrice} USD，限时 ${promo.discount} 折)`;
+                btnHeaderBuyPro.title = dict.pro_btn_upgrade_tooltip || `购买解锁 PRO 终身尊享版 ($${promo.finalPrice} USD，限时 ${promo.discount} 折)`;
             } else {
-                btnHeaderBuyPro.title = `通过 Lemon Squeezy 购买解锁 PRO 终身尊享版 ($19.99 USD)`;
+                btnHeaderBuyPro.title = dict.pro_btn_upgrade_tooltip_normal || `购买解锁 PRO 终身尊享版 ($19.99 USD)`;
             }
         }
 
         // ---------- 2. 下拉菜单里的 PRO 按钮 ----------
         const btnDropdownPro = document.getElementById('btn-dropdown-pro-upgrade');
         if (btnDropdownPro) {
-            const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
             const upgradeText = (dict.btn_dropdown_pro_upgrade || '👑 Unlock PRO Lifetime ($19.99)').replace('$19.99', '$' + displayPrice);
             btnDropdownPro.innerHTML = `<span>${upgradeText}</span><span class="btn-shine-sparkle">✨</span>`;
         }
@@ -7318,9 +7308,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const btnText = document.getElementById('ls-buy-btn-text');
             if (btnText) {
-                btnText.textContent = promo.isPromo
-                    ? `Buy PRO on Lemon Squeezy ($${promo.finalPrice} · ${promo.discount}折)`
-                    : `Buy PRO on Lemon Squeezy ($19.99)`;
+                const buyText = dict.pro_btn_buy_ls || (window.currentLang === 'en' ? 'Buy PRO on Lemon Squeezy' : '在 Lemon Squeezy 购买 PRO');
+                const offSuffix = promo.isPromo ? ` · ${window.currentLang === 'en' ? (promo.discount * 10) + '% OFF' : promo.discount + '折'}` : '';
+                btnText.textContent = `${buyText} ($${promo.finalPrice}${offSuffix})`;
             }
         }
 
@@ -7510,36 +7500,33 @@ window.showLoginWelcome = function (userName) {
 };
 
 // ============================================================
-// 🔑 真正的 Itch.io 激活逻辑 (连接你的本地/云端后端)
+// 🔑 Lemon Squeezy 激活逻辑
 // ============================================================
-function initItchActivation() {
+function initLemonSqueezyActivation() {
     const btnActivate = document.getElementById('btn-activate-itch');
     const inputCode = document.getElementById('itch-activation-input');
     if (!btnActivate || !inputCode) return;
 
-    // 先把旧的事件监听全部清空，防止叠加
     btnActivate.onclick = null;
 
     btnActivate.onclick = async () => {
         const licenseKey = inputCode.value.trim();
         if (!licenseKey) {
-            if (typeof showToast === 'function') showToast('⚠️ 请输入激活码或完整链接');
+            if (typeof showToast === 'function') showToast('⚠️ 请输入您的 Lemon Squeezy 激活码');
             return;
         }
 
         const originalText = btnActivate.innerHTML;
-        btnActivate.innerHTML = '⏳ ...';
+        btnActivate.innerHTML = '⏳ 验证中...';
         btnActivate.disabled = true;
 
         try {
-            // 🚨 确保这里是你部署的 Render 地址！
+            // 🚨 确保这里是你 Render 后端地址！
             const BACKEND_URL = 'https://pixelsprite-backend.onrender.com';
 
             const response = await fetch(`${BACKEND_URL}/api/verify-license`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ licenseKey })
             });
 
@@ -7549,20 +7536,21 @@ function initItchActivation() {
                 if (!window.proState) window.proState = {};
                 window.proState.isLifetimePro = true;
 
-                // 存储状态
+                // 存储买断状态与激活码，刷新也不怕
                 localStorage.setItem('pixelsprite_pro_state_v3', JSON.stringify(window.proState));
+                localStorage.setItem('pixelsprite_license_key', licenseKey);
 
                 if (typeof updateProStatusAndUI === 'function') updateProStatusAndUI();
                 if (typeof window.fireConfetti === 'function') window.fireConfetti();
                 if (typeof closeProModal === 'function') closeProModal();
-                if (typeof showToast === 'function') showToast('🎉 恭喜！PRO 终身尊享版已激活！');
+                if (typeof showToast === 'function') showToast('🎉 恭喜！PRO 终身尊享版已成功激活！');
             } else {
                 if (typeof showToast === 'function') showToast('❌ ' + (result.error || '激活码无效'));
                 btnActivate.innerHTML = originalText;
                 btnActivate.disabled = false;
             }
         } catch (err) {
-            console.error('后端验证请求失败:', err);
+            console.error('激活请求失败:', err);
             if (typeof showToast === 'function') showToast('⚠️ 网络连接失败，请稍后重试');
             btnActivate.innerHTML = originalText;
             btnActivate.disabled = false;
@@ -7570,8 +7558,8 @@ function initItchActivation() {
     };
 }
 
-// 延迟一秒加载，确保 DOM 准备好了
-setTimeout(initItchActivation, 1000);
+// 替换掉原来的定时器，确保 DOM 加载完再绑定
+setTimeout(initLemonSqueezyActivation, 1000);
 
 // ============================================================
 // 🎯 全球统一月度动态促销 (每月前 10 天，5-9 折随机)

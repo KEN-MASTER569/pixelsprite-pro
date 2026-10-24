@@ -4550,3 +4550,75 @@ body.logged-in #mandatory-auth-gate {
     backdrop-filter: blur(10px) !important;
     font-size: 14px !important;
 }
+
+/* 彻底重写卡片样式 */
+.frame-thumb-card {
+    flex-shrink: 0 !important;
+    width: 76px !important;
+    /* 卡片宽度稍大于 64px 缩略图 + padding */
+    min-width: 76px !important;
+    height: auto !important;
+    /* 🚨 关键：不要写死高度 */
+    min-height: 100px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    background: var(--bg-card, #151a25) !important;
+    border: 2px solid var(--border-color, #2a3441) !important;
+    border-radius: 8px !important;
+    padding: 8px 4px !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+}
+
+/* 强制文字标签缩小并限制在卡片内 */
+.frame-number-tag {
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    color: #8a99ad !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    padding: 2px 4px !important;
+    border-radius: 4px !important;
+    margin-top: 6px !important;
+    text-align: center !important;
+    width: 100% !important;
+    max-width: 64px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    box-sizing: border-box !important;
+    line-height: 1.4 !important;
+    flex-shrink: 0 !important;
+}
+
+/* 选中状态的文字和卡片 */
+.frame-thumb-card.active {
+    border-color: #00f2fe !important;
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.4) !important;
+}
+
+.frame-thumb-card.active .frame-number-tag {
+    background: #00f2fe !important;
+    color: #050b14 !important;
+    border-color: #00f2fe;
+}
+
+/* ============================================================ */
+/* 🚨 终极修复：网格层作为半透明底纹，绝不遮挡底层像素 */
+/* ============================================================ */
+
+.canvas-wrapper {
+    position: relative !important;
+    background: transparent !important;
+    /* 移除画布外层的实色背景，防止边缘看不清 */
+}
+
+/* 如果原来有对 overlay 尺寸的强制 100% 设定，这里保留，但是取消边框 */
+#grid-overlay {
+    width: 100% !important;
+    height: 100% !important;
+    border: none !important;
+}
