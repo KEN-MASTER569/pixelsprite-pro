@@ -95,12 +95,15 @@
         // 🚨 去掉了所有 remove() 的逻辑！
         // 不要在这里删 DOM！千万不要！
 
+        // 🚨 核心修复：确保登录大闸彻底消失，并且主界面加载后，再启动教程
         if (!localStorage.getItem('pixelsprite_has_seen_guide')) {
             setTimeout(() => {
-                if (typeof window.startCyberTour === 'function') {
+                const gate = document.getElementById('mandatory-auth-gate');
+                // 如果大闸已经被隐藏了，才允许启动教程
+                if (gate && gate.style.display === 'none' && typeof window.startCyberTour === 'function') {
                     window.startCyberTour(false);
                 }
-            }, 1500);
+            }, 2000); // 稍微延长一点时间，确保一切都加载完毕
         }
 
         if (typeof window.showLoginWelcome === 'function') {
