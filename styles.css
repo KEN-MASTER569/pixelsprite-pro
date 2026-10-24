@@ -4622,3 +4622,22 @@ body.logged-in #mandatory-auth-gate {
     height: 100% !important;
     border: none !important;
 }
+
+/* ============================================================ */
+/* 🧱 终极无缝瓷砖模式视觉预览 (3x3 铺满背景) */
+/* ============================================================ */
+/* 🧱 无缝平铺模式：给整个画布容器加上 3x3 平铺背景 */
+body.tile-mode-active .canvas-container-box {
+    background-image: var(--tile-bg) !important;
+    background-repeat: repeat !important;
+    /* 🚨 核心：把背景放大，露出更多瓷砖 */
+    background-size: 25% !important;
+    /* 加上一点发光和网格感，让画面更高级 */
+    box-shadow: inset 0 0 100px rgba(0, 242, 254, 0.2) !important;
+}
+
+/* 开启平铺时，主画布半透明，让背景透出来 */
+body.tile-mode-active #pixel-canvas {
+    opacity: 0.6 !important;
+    transition: opacity 0.3s ease;
+}

@@ -895,13 +895,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             continue;
                         }
                         if (buf[targetY]) {
-                            if (isTileMode) {
-                                const tx = ((targetX % resX) + resX) % resX;
-                                const ty = ((targetY % resY) + resY) % resY;
-                                if (buf[ty]) buf[ty][tx] = color;
-                            } else {
-                                buf[targetY][targetX] = color;
-                            }
+                            // 简单直接地画上去，平铺效果交给 CSS 处理
+                            buf[targetY][targetX] = color;
                         }
                     }
                 }
@@ -1852,6 +1847,38 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderMainCanvas() {
         const ctx = pixelCanvas.getContext('2d');
         ctx.clearRect(0, 0, pixelCanvas.width, pixelCanvas.height);
+
+        // ========================================================
+        // 🚨 强行视觉平铺：只要开启瓷砖模式，周围直接铺满半透明的分身！
+        // ========================================================
+        if (isTileMode) {
+            const activeBuf = getCompositedFrameBuffer(currentFrame);
+            const resX = engine.resX || 32;
+            const resY = engine.resY || 32;
+            const cellW = pixelCanvas.width / resX;
+            const cellH = pixelCanvas.height / resY;
+
+            ctx.globalAlpha = 0.3; // 半透明，突出中心
+            for (let row = 0; row < 3; row++) {
+                for (let col = 0; col < 3; col++) {
+                    if (row === 1 && col === 1) continue; // 中心留给主图层
+
+                    const offsetX = (col - 1) * pixelCanvas.width;
+                    const offsetY = (row - 1) * pixelCanvas.height;
+
+                    for (let y = 0; y < resY; y++) {
+                        for (let x = 0; x < resX; x++) {
+                            const color = activeBuf[y] && activeBuf[y][x];
+                            if (color) {
+                                ctx.fillStyle = color;
+                                ctx.fillRect(offsetX + x * cellW, offsetY + y * cellH, cellW, cellH);
+                            }
+                        }
+                    }
+                }
+            }
+            ctx.globalAlpha = 1.0; // 恢复
+        }
 
         // ========================================================
         // 🚨 核心改造：绘制高级防眩光棋盘格
@@ -5090,12 +5117,49 @@ document.addEventListener('DOMContentLoaded', () => {
         bindProFeature('btn-open-advanced-palette', openAdvancedPaletteModal);
 
         // Tile 模式特殊处理
-        bindProFeature('btn-toggle-tile-mode', () => {
-            isTileMode = !isTileMode;
-            const b = document.getElementById('btn-toggle-tile-mode');
-            if (b) b.classList.toggle('active', isTileMode);
-            showToast(t(isTileMode ? 'toast_tile_on' : 'toast_tile_off'));
-        });
+        // ============================================================
+        // 🚨 终极强制平铺开关
+        // ============================================================
+        const tileBtn = document.getElementById('btn-toggle-tile-mode');
+        if (tileBtn) {
+            tileBtn.onclick = function () {
+                // 1. 权限拦截
+                if (typeof checkIsProActive === 'function' && !checkIsProActive()) {
+                    if (typeof openProModal === 'function') openProModal();
+                    return;
+                }
+
+                // 2. 状态切换
+                window.isTileMode = !window.isTileMode;
+                tileBtn.classList.toggle('active', window.isTileMode);
+
+                // 3. 语言提示
+                const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
+                if (typeof showToast === 'function') {
+                    showToast(window.isTileMode ? (dict.toast_tile_on || '🧱 Seamless ON') : (dict.toast_tile_off || '🧱 Seamless OFF'));
+                }
+
+                // 4. 纯视觉爆炸特效！
+                const box = document.querySelector('.canvas-container-box');
+                if (window.isTileMode) {
+                    // 截取当前画布
+                    const dataUrl = document.getElementById('pixel-canvas').toDataURL();
+                    // 暴力注入背景，大号平铺
+                    box.style.backgroundImage = `url(${dataUrl})`;
+                    box.style.backgroundRepeat = 'repeat';
+                    box.style.backgroundSize = '128px 128px'; // 铺满小瓷砖
+                    box.style.boxShadow = 'inset 0 0 100px rgba(0, 242, 254, 0.4)';
+                    document.getElementById('pixel-canvas').style.opacity = '0.5';
+                } else {
+                    // 恢复原状
+                    box.style.backgroundImage = '';
+                    box.style.backgroundRepeat = '';
+                    box.style.backgroundSize = '';
+                    box.style.boxShadow = '';
+                    document.getElementById('pixel-canvas').style.opacity = '1';
+                }
+            };
+        }
         // ============================================================
 
         // PRO Tool Buttons
@@ -5103,9 +5167,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnToggleTileMode) {
             btnToggleTileMode.addEventListener('click', () => {
                 if (!checkIsProActive()) { openProModal(); return; }
+
                 isTileMode = !isTileMode;
                 btnToggleTileMode.classList.toggle('active', isTileMode);
-                showToast(t(isTileMode ? 'toast_tile_on' : 'toast_tile_off'));
+
+                const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
+
+                if (isTileMode) {
+                    // 🚨 终极魔法：把当前画布变成平铺背景
+                    const dataUrl = pixelCanvas.toDataURL();
+                    document.body.style.setProperty('--tile-bg', `url(${dataUrl})`);
+                    document.body.classList.add('tile-mode-active');
+                    showToast(dict.toast_tile_on || '🧱 Seamless Mode ON');
+                } else {
+                    document.body.classList.remove('tile-mode-active');
+                    showToast(dict.toast_tile_off || '🧱 Seamless Mode OFF');
+                }
             });
         }
         if (btnOpenPixelate) btnOpenPixelate.addEventListener('click', openPixelateConverter);

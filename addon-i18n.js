@@ -1537,6 +1537,13 @@
         '替换为': { en: 'with', ja: 'から' },
         '个像素': { en: 'pixels', ja: 'ピクセル' },
         '请在画布上点击要替换的颜色（按 Esc 取消）': { en: 'Click color on canvas to replace (Esc to cancel)', ja: '置換する色をキャンバス上でクリック (Escでキャンセル)' },
+
+        // ===== 无缝瓷砖、图层操作等补充提示 =====
+        '🧱 已开启 Seamless Tile 无缝瓷砖平铺模式！': { en: '🧱 Seamless Tile Mode enabled!', ja: '🧱 シームレスタイルモードON！' },
+        '🧱 已关闭 Seamless Tile 模式': { en: '🧱 Seamless Tile Mode disabled', ja: '🧱 シームレスタイルモードOFF' },
+        '🧱 已开启 3x3 无缝平铺预览！': { en: '🧱 3x3 Seamless Preview enabled!', ja: '🧱 3x3 シームレスプレビューON！' },
+        '已成功撤销': { en: 'Undo successful', ja: '元に戻しました' },
+        '已成功重做': { en: 'Redo successful', ja: 'やり直しました' }
     };
 
     // 当前语言状态
