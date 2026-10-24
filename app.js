@@ -7611,3 +7611,64 @@ function applyGlobalPromotion() {
 
 // 页面加载后自动执行打折
 setTimeout(applyGlobalPromotion, 1000)
+
+// ============================================================
+// 🚀 Wise 扫码支付流程 (弹窗 + 提交邮箱)
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+    const btnOpenWise = document.getElementById('btn-open-wise-modal');
+    const wiseModal = document.getElementById('wise-pay-modal');
+    const btnSubmitWise = document.getElementById('btn-submit-wise-email');
+
+    // 1. 打开扫码弹窗
+    if (btnOpenWise && wiseModal) {
+        btnOpenWise.addEventListener('click', (e) => {
+            e.preventDefault();
+            wiseModal.style.display = 'flex';
+        });
+    }
+
+    // 2. 提交邮箱到你的 Supabase 后端
+    if (btnSubmitWise) {
+        btnSubmitWise.addEventListener('click', async () => {
+            const emailInput = document.getElementById('wise-user-email');
+            const email = emailInput ? emailInput.value.trim() : '';
+
+            if (!email) {
+                if (typeof showToast === 'function') showToast('⚠️ 请输入您付款时备注的邮箱');
+                return;
+            }
+
+            btnSubmitWise.innerHTML = '⏳ 提交中...';
+            btnSubmitWise.disabled = true;
+
+            try {
+                // 🚨 这里填你的 Render 后端地址
+                const BACKEND_URL = 'https://pixelsprite-backend.onrender.com';
+
+                const res = await fetch(`${BACKEND_URL}/api/wise/submit-email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const result = await res.json();
+
+                if (result.success) {
+                    if (typeof showToast === 'function') showToast('✅ 提交成功！站长确认收款后，激活码将发至您的邮箱。');
+                    wiseModal.style.display = 'none';
+                    // 清空输入框
+                    if (emailInput) emailInput.value = '';
+                } else {
+                    if (typeof showToast === 'function') showToast('❌ ' + result.error);
+                }
+            } catch (err) {
+                console.error(err);
+                if (typeof showToast === 'function') showToast('⚠️ 网络连接失败，请稍后重试');
+            } finally {
+                btnSubmitWise.innerHTML = '我已支付，提交邮箱';
+                btnSubmitWise.disabled = false;
+            }
+        });
+    }
+});
