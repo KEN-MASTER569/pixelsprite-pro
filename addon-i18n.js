@@ -426,6 +426,7 @@
             pro_btn_buy_ls: "在 Lemon Squeezy 购买 PRO",
             pro_modal_discount_tag: "限时 5 折",
             pro_trial_promo_hint_en: "🔥 本月限时特惠！现在买断只需 ${price} 美金！",
+            upgrade_pro_scan_btn: '💳 扫码支付 $19.99 升级 PRO',
 
             gif_scale_label: "🔍 GIF 清晰度 (放大倍数):",
             gif_scale_1x: "1x (原尺寸)",
@@ -448,10 +449,35 @@
             wise_pay_wait_desc: '系统正在自动核对 Wise 账单。<br>激活码通常在 <strong>1-2 天内</strong> 发送至您的邮箱。<br>请留意您的收件箱和垃圾邮件箱。',
             wise_pay_wait_footer: '感谢您的耐心等待与支持！',
             wise_pay_wait_btn: '我知道了',
+            wise_user_email_placeholder: '请输入您的邮箱',
             pro_thanks_title_large: '感谢您购买 PixelSprite PRO！',
             pro_thanks_desc_large: '您已永久解锁所有高级游戏开发与动画功能。<br>尽情享受创作的乐趣吧！',
             pro_thanks_badge: '👑 尊贵的 PRO 终身版用户，所有高级功能已为您开启。',
             pro_thanks_start_btn: '开始创作 🚀',
+
+            // 动态 Toast 提示
+            toast_undo_success: '↩️ 已成功撤销上一步画布操作',
+            toast_redo_success: '↪️ 已成功重做上一步画布操作',
+            toast_no_undo: '⚠️ 没有可撤销的历史记录',
+            toast_no_redo: '⚠️ 没有可重做的历史记录',
+            toast_rotate_90: '🔄 已顺时针旋转 90°',
+            toast_rotate_rotsprite: '🔄 已应用 RotSprite 高精像素无损旋转',
+            toast_flip_h: '↔️ 已水平翻转',
+            toast_flip_v: '↕️ 已垂直翻转',
+            toast_clear_layer: '🧹 已清空当前图层',
+            toast_shading_lighten: '☀️ 已应用高光加亮',
+            toast_shading_darken: '🌙 已应用阴影加深',
+            toast_tile_on: '🧱 已开启 Seamless Tile 无缝瓷砖平铺模式！',
+            toast_tile_off: '🧱 已关闭 Seamless Tile 模式',
+            toast_dither: '░ 抖动网格: {mode}',
+            toast_slicer_success: '✨ 成功将 Sprite Sheet 切割为 {n} 帧动画！',
+            toast_pixelate_success: '✨ 成功将图片转换为像素画载入画布！',
+            toast_palette_loaded: '🎨 已成功载入【{name}】调色板 ({n} 色)！',
+            toast_mirror_on: '↔️ 镜像对称模式: {mode}',
+            toast_brush_size: '🖌️ 画笔粗细设为: {size}px',
+            toast_deselect: '✖️ 已取消选区',
+            toast_commit_selection: '✔️ 已确认固定选区',
+            toast_moved_layer: '🖐️ 已移动图层像素 ({dx}, {dy})',
         },
         en: {
             lang_name: 'English',
@@ -874,6 +900,7 @@
             pro_btn_buy_ls: "Buy PRO on Lemon Squeezy",
             pro_modal_discount_tag: "50% OFF",
             pro_trial_promo_hint_en: "🔥 Limited Time Offer! Buy now for only ${price} USD!",
+            upgrade_pro_scan_btn: '💳 Scan to Pay $19.99 for PRO',
 
             gif_scale_label: "🔍 GIF Resolution (Scale):",
             gif_scale_1x: "1x (Original)",
@@ -900,6 +927,30 @@
             pro_thanks_desc_large: 'You have permanently unlocked all advanced features.<br>Enjoy creating!',
             pro_thanks_badge: '👑 Welcome, PRO Lifetime Member. All features unlocked.',
             pro_thanks_start_btn: 'Start Creating 🚀',
+            wise_user_email_placeholder: 'Enter your email',
+
+            toast_undo_success: '↩️ Undo successful',
+            toast_redo_success: '↪️ Redo successful',
+            toast_no_undo: '⚠️ No undo history',
+            toast_no_redo: '⚠️ No redo history',
+            toast_rotate_90: '🔄 Rotated 90° clockwise',
+            toast_rotate_rotsprite: '🔄 RotSprite lossless rotation applied',
+            toast_flip_h: '↔️ Flipped horizontally',
+            toast_flip_v: '↕️ Flipped vertically',
+            toast_clear_layer: '🧹 Current layer cleared',
+            toast_shading_lighten: '☀️ Lighten applied',
+            toast_shading_darken: '🌙 Darken applied',
+            toast_tile_on: '🧱 Seamless Tile Mode enabled!',
+            toast_tile_off: '🧱 Seamless Tile Mode disabled',
+            toast_dither: '░ Dithering: {mode}',
+            toast_slicer_success: '✨ Successfully sliced into {n} frames!',
+            toast_pixelate_success: '✨ Image converted to pixel art!',
+            toast_palette_loaded: '🎨 Loaded {name} palette ({n} colors)!',
+            toast_mirror_on: '↔️ Mirror mode: {mode}',
+            toast_brush_size: '🖌️ Brush size: {size}px',
+            toast_deselect: '✖️ Deselected',
+            toast_commit_selection: '✔️ Selection committed',
+            toast_moved_layer: '🖐️ Layer pixels moved ({dx}, {dy})',
         },
         ja: {
             lang_name: '日本語',
@@ -1318,6 +1369,7 @@
             pro_btn_buy_ls: "Lemon SqueezyでPROを購入",
             pro_modal_discount_tag: "期間限定 50% OFF",
             pro_trial_promo_hint_en: "🔥 期間限定キャンペーン！今ならわずか ${price} USD で買い切り！",
+            upgrade_pro_scan_btn: '💳 スキャンして $19.99 でPROにアップグレード',
 
             gif_scale_label: "🔍 GIF 解像度 (倍率):",
             gif_scale_1x: "1x (オリジナル)",
@@ -1344,8 +1396,148 @@
             pro_thanks_desc_large: 'すべての高度な機能が永久にロック解除されました。<br>創作をお楽しみください！',
             pro_thanks_badge: '👑 PRO永久版メンバーへようこそ。すべての機能が解除されました。',
             pro_thanks_start_btn: '作成開始 🚀',
+            wise_user_email_placeholder: 'メールアドレスを入力',
+
+            toast_undo_success: '↩️ 元に戻しました',
+            toast_redo_success: '↪️ やり直しました',
+            toast_no_undo: '⚠️ 元に戻す履歴がありません',
+            toast_no_redo: '⚠️ やり直す履歴がありません',
+            toast_rotate_90: '🔄 時計回りに90°回転しました',
+            toast_rotate_rotsprite: '🔄 RotSprite回転を適用しました',
+            toast_flip_h: '↔️ 左右反転しました',
+            toast_flip_v: '↕️ 上下反転しました',
+            toast_clear_layer: '🧹 現在のレイヤーをクリアしました',
+            toast_shading_lighten: '☀️ ハイライトを適用しました',
+            toast_shading_darken: '🌙 シャドウを適用しました',
+            toast_tile_on: '🧱 シームレスタイルモードON！',
+            toast_tile_off: '🧱 シームレスタイルモードOFF',
+            toast_dither: '░ ディザリング: {mode}',
+            toast_slicer_success: '✨ {n}フレームに切断しました！',
+            toast_pixelate_success: '✨ 画像をドット絵に変換しました！',
+            toast_palette_loaded: '🎨 {name} パレットを読み込みました ({n} 色)！',
+            toast_mirror_on: '↔️ ミラーモード: {mode}',
+            toast_brush_size: '🖌️ ブラシサイズ: {size}px',
+            toast_deselect: '✖️ 選択解除しました',
+            toast_commit_selection: '✔️ 選択を確定しました',
+            toast_moved_layer: '🖐️ レイヤーを移動しました ({dx}, {dy})',
         }
     }
+
+    // ============================================================
+    // 🚨 魔法：全局 Toast 自动翻译映射表
+    // ============================================================
+    window.TOAST_TRANSLATIONS = {
+        // ===== 中文 -> 英文 / 日文 =====
+        '已成功撤销上一步画布操作': { en: 'Undo successful', ja: '元に戻しました' },
+        '没有可撤销的历史记录': { en: 'No undo history', ja: '元に戻す履歴がありません' },
+        '已成功重做上一步画布操作': { en: 'Redo successful', ja: 'やり直しました' },
+        '没有可重做的历史记录': { en: 'No redo history', ja: 'やり直す履歴がありません' },
+        '已顺时针旋转 90°': { en: 'Rotated 90° clockwise', ja: '時計回りに90°回転しました' },
+        '已应用 RotSprite 高精像素无损旋转': { en: 'RotSprite lossless rotation applied', ja: 'RotSprite回転を適用しました' },
+        '已水平翻转': { en: 'Flipped horizontally', ja: '左右反転しました' },
+        '已垂直翻转': { en: 'Flipped vertically', ja: '上下反転しました' },
+        '已清空当前图层': { en: 'Current layer cleared', ja: '現在のレイヤーをクリアしました' },
+        '已应用高光加亮': { en: 'Lighten applied', ja: 'ハイライトを適用しました' },
+        '已应用阴影加深': { en: 'Darken applied', ja: 'シャドウを適用しました' },
+        '已开启 Seamless Tile 无缝瓷砖平铺模式！': { en: 'Seamless Tile Mode enabled!', ja: 'シームレスタイルモードON！' },
+        '已关闭 Seamless Tile 模式': { en: 'Seamless Tile Mode disabled', ja: 'シームレスタイルモードOFF' },
+        '已成功将 Sprite Sheet 切割为': { en: 'Successfully sliced into', ja: 'フレームに切断しました：' }, // 后面跟数字
+        '帧动画！': { en: 'frames!', ja: '' },
+        '成功将图片转换为像素画载入画布！': { en: 'Image converted to pixel art!', ja: '画像をドット絵に変換しました！' },
+        '已成功载入': { en: 'Loaded', ja: '読み込みました：' },
+        '调色板': { en: 'palette', ja: 'パレット' },
+        '色！': { en: 'colors!', ja: '色！' },
+        '镜像对称模式:': { en: 'Mirror mode:', ja: 'ミラーモード:' },
+        '画笔粗细设为:': { en: 'Brush size:', ja: 'ブラシサイズ:' },
+        '已取消选区': { en: 'Deselected', ja: '選択解除しました' },
+        '已确认固定选区': { en: 'Selection committed', ja: '選択を確定しました' },
+        '已移动图层像素': { en: 'Layer pixels moved', ja: 'レイヤーを移動しました' },
+        '已复制': { en: 'Copied', ja: 'コピーしました' },
+        '已剪切选区到剪贴板': { en: 'Cut to clipboard', ja: 'クリップボードに切り取りました' },
+        '剪贴板为空！请先复制像素内容': { en: 'Clipboard is empty!', ja: 'クリップボードが空です！' },
+        '已粘贴像素内容': { en: 'Pasted pixels', ja: 'ピクセルを貼り付けました' },
+        '已全选画布': { en: 'Selected all', ja: 'すべて選択しました' },
+        '已删除选区像素': { en: 'Deleted selection', ja: '選択範囲を削除しました' },
+        '至少保留一帧！': { en: 'Keep at least 1 frame!', ja: '少なくとも1フレーム必要です！' },
+        '已删除': { en: 'Deleted', ja: '削除しました' },
+        '帧！': { en: 'frames!', ja: 'フレーム！' },
+        '已添加色块到调色板:': { en: 'Added color to palette:', ja: 'パレットに色を追加:' },
+        '已删除颜色:': { en: 'Deleted color:', ja: '色を削除:' },
+        '无法从这张图片提取颜色': { en: 'Cannot extract colors', ja: '色を抽出できません' },
+        '已从图片提取': { en: 'Extracted', ja: '抽出しました' },
+        '种颜色到调色板': { en: 'colors to palette', ja: '色をパレットに追加' },
+        '已根据当前颜色添加': { en: 'Added harmonies based on current color', ja: '現在の色からハーモニーを追加しました' },
+        '个和谐配色': { en: 'harmony colors', ja: '色' },
+        '抖动网格:': { en: 'Dithering:', ja: 'ディザリング:' },
+        '该位置在当前图层没有颜色，已取消替换': { en: 'No color at this spot', ja: 'その位置に色がありません' },
+        '选中的颜色与画笔颜色相同，已取消替换': { en: 'Same as brush color', ja: 'ブラシ色と同じです' },
+        '已取消颜色替换': { en: 'Color swap cancelled', ja: '色の置換をキャンセルしました' },
+        '已将': { en: 'Replaced', ja: '置換しました' },
+        '替换为': { en: 'with', ja: 'から' },
+        '个像素': { en: 'pixels', ja: 'ピクセル' },
+        '请输入提取码：': { en: 'Enter PIN code:', ja: 'PINコードを入力:' },
+        '保存成功！': { en: 'Saved successfully!', ja: '保存に成功しました！' },
+        '已安全存入云端！': { en: 'saved to cloud!', ja: 'クラウドに保存しました！' },
+        '读取失败:': { en: 'Load failed:', ja: '読み込み失敗:' },
+        '云端画作恢复成功！': { en: 'Cloud project restored!', ja: 'プロジェクトを復元しました！' },
+        '网络请求失败': { en: 'Network request failed', ja: 'ネットワークリクエスト失敗' },
+        '网络错误': { en: 'Network error', ja: 'ネットワークエラー' },
+        '无法获取 Google 信息': { en: 'Cannot get Google info', ja: 'Google情報を取得できません' },
+        '获取信息失败': { en: 'Fetch info failed', ja: '情報の取得に失敗しました' },
+        '已取消 Google 登录': { en: 'Google login cancelled', ja: 'Googleログインをキャンセルしました' },
+        '昵称不能为空！': { en: 'Nickname cannot be empty!', ja: 'ニックネームは空にできません！' },
+        '图片过大，保存失败': { en: 'Image too large, save failed', ja: '画像が大きすぎます' },
+        '资料修改成功！': { en: 'Profile updated successfully!', ja: 'プロフィールを更新しました！' },
+        '缩放已重置为 16x': { en: 'Zoom reset to 16x', ja: 'ズームを16xにリセットしました' },
+        '未找到该邮箱的待确认订单': { en: 'Order not found for this email', ja: 'このメールの注文が見つかりません' },
+        '请输入邮箱': { en: 'Please enter email', ja: 'メールアドレスを入力してください' },
+        '提交成功！站长确认收款后，激活码将发至您的邮箱。': { en: 'Submitted! Activation code will be sent after verification.', ja: '送信しました！確認後、コードが届きます。' },
+        '请输入您付款时备注的邮箱': { en: 'Enter the email you used for payment', ja: '支払い時のメールアドレスを入力' },
+        '网络连接失败，请稍后重试': { en: 'Network failed, retry later', ja: 'ネットワークエラー、後で再試行' },
+        '动画播放中禁止编辑！': { en: 'Cannot edit while playing!', ja: '再生中は編集できません！' },
+        '至少需要保留一个图层！': { en: 'Keep at least 1 layer!', ja: '少なくとも1レイヤー必要です！' },
+        '已经是最底层，无法向下合并！': { en: 'Already the bottom layer!', ja: 'すでに最下層です！' },
+        '已调整画布与图层尺寸:': { en: 'Canvas resized:', ja: 'キャンバスサイズ変更:' },
+        '像素': { en: 'px', ja: 'px' },
+        '图层重命名为': { en: 'Layer renamed to', ja: 'レイヤー名変更:' },
+        '已切换工具:': { en: 'Switched tool:', ja: 'ツール切替:' },
+        '已创建': { en: 'Created', ja: '作成しました：' },
+        '已复制': { en: 'Duplicated', ja: '複製しました：' },
+        '已删除': { en: 'Deleted', ja: '削除しました：' },
+        '已将': { en: 'Merged', ja: '結合しました：' },
+        '向下合并！': { en: 'down!', ja: 'を下に結合！' },
+        '已将第': { en: 'Moved frame', ja: 'フレームを移動' },
+        '帧移动至第': { en: 'to frame', ja: 'から' },
+        '帧位置': { en: 'position', ja: 'へ' },
+        '没有可撤销的历史记录': { en: 'No undo history', ja: '履歴がありません' },
+        '双击或按 Enter 确认裁剪': { en: 'Double click or Enter to crop', ja: 'ダブルクリックまたはEnterでトリミング' },
+        '裁剪区域已确认并应用！': { en: 'Crop applied!', ja: 'トリミングを適用しました！' },
+        '所有图层已合并并居中': { en: 'All layers merged', ja: 'すべてのレイヤーを結合しました' },
+        '请先登录 Google 账号以解锁 PRO 功能': { en: 'Login to unlock PRO', ja: 'PROを解除するにはログインしてください' },
+        '此功能为 PRO 专属，请先解锁！': { en: 'PRO feature! Unlock first.', ja: 'PRO限定機能です！' },
+        '此功能为 PRO 专属，请先解锁！': { en: 'PRO feature! Unlock first.', ja: 'PRO限定機能です！' },
+        '已登录': { en: 'Logged in', ja: 'ログインしました' },
+        '已退出登录': { en: 'Logged out', ja: 'ログアウトしました' },
+        '草稿已安全存入 IndexedDB': { en: 'Draft saved', ja: '下書きを保存しました' },
+        '已成功载入': { en: 'Loaded', ja: '読み込みました' },
+        '工程文件': { en: 'project file', ja: 'プロジェクトファイル' },
+        '成功导入图片！': { en: 'Image imported!', ja: '画像をインポートしました！' },
+        '完美切片！成功导入': { en: 'Sliced perfectly! Imported', ja: '完璧にスライス！インポート:' },
+        '帧！': { en: 'frames!', ja: 'フレーム！' },
+
+        // 调色板与双色工作台提示
+        '右键色已设为:': { en: 'Secondary color set to:', ja: '右クリックの色を設定しました:' },
+        '左键色已设为:': { en: 'Primary color set to:', ja: '左クリックの色を設定しました:' },
+        '已互换: 左键': { en: 'Swapped: Primary', ja: '入れ替えました: 左クリック' },
+        '右键': { en: 'Secondary', ja: '右クリック' },
+        '已选择画笔颜色:': { en: 'Brush color selected:', ja: 'ブラシ色を選択しました:' },
+        '已选择画笔颜色:': { en: 'Brush color selected:', ja: 'ブラシ色を選択しました:' },
+        '已从图片提取调色板': { en: 'Palette extracted from image', ja: '画像からパレットを抽出しました' },
+        '已将': { en: 'Replaced', ja: '置換しました' },
+        '替换为': { en: 'with', ja: 'から' },
+        '个像素': { en: 'pixels', ja: 'ピクセル' },
+        '请在画布上点击要替换的颜色（按 Esc 取消）': { en: 'Click color on canvas to replace (Esc to cancel)', ja: '置換する色をキャンバス上でクリック (Escでキャンセル)' },
+    };
 
     // 当前语言状态
     window.currentLang = 'en';
@@ -1500,4 +1692,65 @@
         return str;
     };
 
+})();
+
+// ============================================================
+// 🚨 终极魔法：完全劫持原生的 showToast
+// ============================================================
+(function hijackShowToast() {
+    // 保存原生函数（如果有的话）
+    const originalShowToast = window.showToast;
+
+    window.showToast = function (message) {
+        if (!message) return;
+
+        // 如果当前是中文，直接走原生逻辑
+        if (window.currentLang === 'zh') {
+            if (typeof originalShowToast === 'function') return originalShowToast(message);
+            return fallbackToast(message);
+        }
+
+        // 如果是英文/日文，去翻译表里找
+        if (window.TOAST_TRANSLATIONS) {
+            // 1. 完全匹配（针对无变量的死句子）
+            if (window.TOAST_TRANSLATIONS[message]) {
+                message = window.TOAST_TRANSLATIONS[message][window.currentLang] || message;
+            } else {
+                // 2. 模糊替换（针对带变量的长句子）
+                for (const zhKey in window.TOAST_TRANSLATIONS) {
+                    if (message.includes(zhKey)) {
+                        const translated = window.TOAST_TRANSLATIONS[zhKey][window.currentLang];
+                        if (translated !== undefined) {
+                            message = message.replace(zhKey, translated);
+                        }
+                    }
+                }
+            }
+        }
+
+        // 如果原生函数被覆盖了，用这个备用函数弹提示
+        if (typeof originalShowToast === 'function' && originalShowToast !== window.showToast) {
+            originalShowToast(message);
+        } else {
+            fallbackToast(message);
+        }
+    };
+
+    // 终极备用弹窗器（纯 DOM 操作，绝对不可能失效）
+    function fallbackToast(msg) {
+        let container = document.querySelector('.toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'toast-container';
+            // 加上 CSS 保证它能看见
+            container.style.cssText = 'position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:2147483647; display:flex; flex-direction:column; align-items:center; gap:10px; pointer-events:none;';
+            document.body.appendChild(container);
+        }
+        const toast = document.createElement('div');
+        toast.className = 'toast-message';
+        toast.textContent = msg;
+        toast.style.cssText = 'background:rgba(5,11,20,0.95); border:1px solid #00f2fe; color:#00f2fe; padding:12px 24px; border-radius:8px; font-weight:800; box-shadow:0 8px 30px rgba(0,242,254,0.4); font-size:14px;';
+        container.appendChild(toast);
+        setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 3000);
+    }
 })();

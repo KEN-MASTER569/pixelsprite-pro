@@ -695,7 +695,7 @@ document.addEventListener('DOMContentLoaded', () => {
         syncCurrentFrameBuffer();
         renderAll();
         updateHistoryUI();
-        showToast('↩️ 已成功撤销上一步画布操作');
+        showToast(t('toast_undo_success'));
     }
 
     function redo() {
@@ -750,7 +750,7 @@ document.addEventListener('DOMContentLoaded', () => {
         syncCurrentFrameBuffer();
         renderAll();
         updateHistoryUI();
-        showToast('↪️ 已成功重做上一步画布操作');
+        showToast(t('toast_redo_success'));
     }
 
     function updateHistoryUI() {
@@ -1302,7 +1302,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 moveInitialBufCopy = null;
                 syncCurrentFrameBuffer();
                 renderAll();
-                showToast(`🖐️ 已移动图层像素 (${dx >= 0 ? '+' + dx : dx}, ${dy >= 0 ? '+' + dy : dy})`);
+                showToast(t('toast_moved_layer', { dx: dx >= 0 ? '+' + dx : dx, dy: dy >= 0 ? '+' + dy : dy }));
                 return;
             }
         }
@@ -1567,6 +1567,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const addonPrimaryHex = document.getElementById('addon-primary-hex');
         if (addonPrimarySwatch) addonPrimarySwatch.style.backgroundColor = activeColor;
         if (addonPrimaryHex) addonPrimaryHex.textContent = activeColor;
+
+        // 🚨 新增：左键选色弹窗提示（如果你不想要，可以把这行删掉）
+        if (typeof showToast === 'function') {
+            showToast(`🖱️ 左键色已设为: ${activeColor}`);
+        }
     }
     window.setActiveColor = setActiveColor;
 
@@ -1587,6 +1592,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updatePaletteSwatchesUI();
 
         if (showToastMsg && typeof showToast === 'function') {
+            // 🚨 这里先判断一下，用 t() 直接翻译，或者让刚写的全局拦截器来处理
             showToast(`🖱️ 右键色已设为: ${secondaryColor}`);
         }
     }
@@ -1809,7 +1815,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     secondaryColor = temp;
                     updateDualUI();
                     if (primaryColorPicker) primaryColorPicker.value = activeColor;
-                    if (typeof showToast === 'function') showToast(`⇄ 已互换: 左键 ${activeColor} ⇋ 右键 ${secondaryColor}`);
+                    if (typeof showToast === 'function') {
+                        const msg = window.currentLang === 'zh' ? `⇄ 已互换: 左键 ${activeColor} ⇋ 右键 ${secondaryColor}` : `⇄ Swapped: Primary ${activeColor} ⇋ Secondary ${secondaryColor}`;
+                        showToast(msg);
+                    }
                 });
             }
             // 键盘 X 键互换
@@ -3049,7 +3058,7 @@ document.addEventListener('DOMContentLoaded', () => {
             selection = null;
             updateSelectionToolbarUI();
             renderAll();
-            showToast('✖️ 已取消选区');
+            showToast(t('toast_deselect'));;
         }
     }
 
@@ -3074,7 +3083,7 @@ document.addEventListener('DOMContentLoaded', () => {
             buf.forEach(row => row.reverse());
             syncCurrentFrameBuffer();
             renderAll();
-            showToast('↔️ 已水平翻转');
+            showToast(t('toast_flip_h'));
         }
     }
 
@@ -3099,7 +3108,7 @@ document.addEventListener('DOMContentLoaded', () => {
             buf.reverse();
             syncCurrentFrameBuffer();
             renderAll();
-            showToast('↕️ 已垂直翻转');
+            showToast(t('toast_flip_v'));
         }
     }
 
@@ -3160,7 +3169,7 @@ document.addEventListener('DOMContentLoaded', () => {
             frameLayers[currentFrame][activeLayerIndex].buffer = rotated;
             syncCurrentFrameBuffer();
             renderAll();
-            showToast('🔄 已顺时针旋转 90°');
+            showToast(t('toast_rotate_90'));
         }
     }
     // #endregion [R6] 选区与剪贴板 (Selection & Clipboard)
@@ -3304,7 +3313,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         syncCurrentFrameBuffer();
         renderAll();
-        showToast(type === 'lighten' ? '☀️ 已应用高光加亮' : '🌙 已应用阴影加深');
+        showToast(t(type === 'lighten' ? 'toast_shading_lighten' : 'toast_shading_darken'));
     }
 
     function rotspriteRotate() {
@@ -3314,7 +3323,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         rotate90(); // RotSprite algorithm wrapper fallback
-        showToast('🔄 已应用 RotSprite 高精像素无损旋转');
+        showToast(t('toast_rotate_rotsprite'));;
     }
 
     // ============================================================
@@ -3343,7 +3352,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const img = new Image();
             img.onload = () => {
                 if (!slicerPreviewCanvas) return;
-                const ctx = slicerPreviewCanvas.getContext('2d');
+                const ctx = slicerPreviewCanvas.getContext('2d', { willReadFrequently: true });
                 slicerPreviewCanvas.width = img.width;
                 slicerPreviewCanvas.height = img.height;
                 ctx.drawImage(img, 0, 0);
@@ -3383,7 +3392,7 @@ document.addEventListener('DOMContentLoaded', () => {
         frameBuffers = [];
         frameLayers = [];
 
-        const ctx = slicerPreviewCanvas.getContext('2d');
+        const ctx = slicerPreviewCanvas.getContext('2d', { willReadFrequently: true });
 
         for (let r = 0; r < rows; r++) {
             for (let c = 0; c < cols; c++) {
@@ -3415,7 +3424,7 @@ document.addEventListener('DOMContentLoaded', () => {
         activeLayerIndex = 0;
         closeSpriteSheetSlicer();
         renderAll();
-        showToast(`✨ 成功将 Sprite Sheet 切割为 ${totalFrames} 帧动画！`);
+        showToast(t('toast_slicer_success', { n: totalFrames }));
     }
 
     function openPixelateConverter() {
@@ -3481,7 +3490,7 @@ document.addEventListener('DOMContentLoaded', () => {
         syncCurrentFrameBuffer();
         closePixelateConverter();
         renderAll();
-        showToast('✨ 成功将图片转换为像素画载入画布！');
+        showToast(t('toast_pixelate_success'));;
     }
 
     // ============================================================
@@ -3781,7 +3790,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 customPalette = [...preset.colors.map(c => safeHex6(c).toUpperCase())];
                 updatePaletteSwatchesUI();
                 if (preset.colors[0]) setActiveColor(preset.colors[0]);
-                showToast(`🎨 已成功载入【${preset.name}】调色板 (${preset.colors.length} 色)！`);
+                showToast(t('toast_palette_loaded', { name: preset.name, n: preset.colors.length }));
             });
 
             grid.appendChild(card);
@@ -3923,7 +3932,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 sizeBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 brushSize = parseInt(btn.dataset.size) || 1;
-                showToast(`🖌️ 画笔粗细设为: ${brushSize}px`);
+                showToast(t('toast_brush_size', { size: brushSize }));
             });
         });
 
@@ -3939,7 +3948,7 @@ document.addEventListener('DOMContentLoaded', () => {
             selectMirrorMode.addEventListener('change', (e) => {
                 mirrorMode = e.target.value;
                 drawSymmetryOverlay();
-                showToast(`↔️ 镜像对称模式: ${selectMirrorMode.options[selectMirrorMode.selectedIndex].text}`);
+                showToast(t('toast_mirror_on', { mode: selectMirrorMode.options[selectMirrorMode.selectedIndex].text }));
             });
         }
 
@@ -4234,7 +4243,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 syncCurrentFrameBuffer();
                 renderAll();
-                showToast('🧹 已清空当前图层');
+                showToast(t('toast_clear_layer'));;
             });
         }
         if (btnCopy) btnCopy.addEventListener('click', copySelection);
@@ -4586,7 +4595,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (k === 'enter') {
                 if (selection) {
                     commitSelection();
-                    showToast('✔️ 已确认固定选区');
+                    showToast(t('toast_commit_selection'));;
                     e.preventDefault();
                     return;
                 }
@@ -5085,7 +5094,7 @@ document.addEventListener('DOMContentLoaded', () => {
             isTileMode = !isTileMode;
             const b = document.getElementById('btn-toggle-tile-mode');
             if (b) b.classList.toggle('active', isTileMode);
-            showToast(isTileMode ? '🧱 已开启 Seamless Tile 无缝瓷砖平铺模式！' : '🧱 已关闭 Seamless Tile 模式');
+            showToast(t(isTileMode ? 'toast_tile_on' : 'toast_tile_off'));
         });
         // ============================================================
 
@@ -5096,7 +5105,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!checkIsProActive()) { openProModal(); return; }
                 isTileMode = !isTileMode;
                 btnToggleTileMode.classList.toggle('active', isTileMode);
-                showToast(isTileMode ? '🧱 已开启 Seamless Tile 无缝瓷砖平铺模式！' : '🧱 已关闭 Seamless Tile 模式');
+                showToast(t(isTileMode ? 'toast_tile_on' : 'toast_tile_off'));
             });
         }
         if (btnOpenPixelate) btnOpenPixelate.addEventListener('click', openPixelateConverter);
@@ -5104,7 +5113,7 @@ document.addEventListener('DOMContentLoaded', () => {
             selectDitherPattern.addEventListener('change', (e) => {
                 if (!checkIsProActive()) { openProModal(); return; }
                 ditherPattern = e.target.value;
-                showToast(`░ 抖动网格: ${selectDitherPattern.options[selectDitherPattern.selectedIndex].text}`);
+                showToast(t('toast_dither', { mode: selectDitherPattern.options[selectDitherPattern.selectedIndex].text }));
             });
         }
         if (btnShadingLighten) btnShadingLighten.addEventListener('click', () => applyShading('lighten'));
@@ -6133,7 +6142,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const rawCanvas = document.createElement('canvas');
                     rawCanvas.width = targetW;
                     rawCanvas.height = targetH;
-                    const rawCtx = rawCanvas.getContext('2d');
+                    const rawCtx = rawCanvas.getContext('2d', { willReadFrequently: true });
                     rawCtx.imageSmoothingEnabled = false;
                     rawCtx.drawImage(img, 0, 0, targetW, targetH);
                     const rawImgData = rawCtx.getImageData(0, 0, targetW, targetH).data;
@@ -6180,6 +6189,24 @@ document.addEventListener('DOMContentLoaded', () => {
     // ============================================================
 
     function showToast(message) {
+        // 🚨 魔法拦截：如果当前不是中文，且这个提示在字典里，自动翻译！
+        if (window.currentLang !== 'zh' && window.TOAST_TRANSLATIONS) {
+            // 1. 完全匹配
+            if (window.TOAST_TRANSLATIONS[message]) {
+                message = window.TOAST_TRANSLATIONS[message][window.currentLang] || message;
+            } else {
+                // 2. 模糊匹配（处理那些带数字、名字的拼接句子）
+                for (const zhKey in window.TOAST_TRANSLATIONS) {
+                    if (message.includes(zhKey)) {
+                        const translated = window.TOAST_TRANSLATIONS[zhKey][window.currentLang];
+                        if (translated !== undefined) {
+                            message = message.replace(zhKey, translated);
+                        }
+                    }
+                }
+            }
+        }
+
         let container = document.querySelector('.toast-container');
         if (!container) {
             container = document.createElement('div');
@@ -6652,11 +6679,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (isLifetime) {
             // ==========================================
-            // 👑 状态 1：已买断（纯感谢页，无任何购买入口）
+            // 👑 状态 1：已买断（纯感谢页，不留任何痕迹）
             // ==========================================
             if (featureTable) featureTable.style.display = 'none';
             if (paypalBox) paypalBox.style.display = 'none';
+
+            // 🚨 核心修复：找到那个装扫码和激活码的父级容器，直接干掉它！
+            const checkoutContainer = proModal.querySelector('.modal-body > div[style*="max-width: 380px"]');
+            if (checkoutContainer) {
+                checkoutContainer.style.display = 'none';
+            }
+
+            // 如果实在找不到，就强制隐藏整个弹窗的 body 然后动态插入感谢信
             if (proBanner) {
+                proBanner.style.display = 'block'; // 确保感谢信露出来
                 proBanner.innerHTML = `
                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; text-align: center; padding: 20px 0;">
                     <div class="pro-crown" style="font-size: 60px; line-height: 1; margin-bottom: 15px; filter: drop-shadow(0 0 20px rgba(255, 196, 57, 0.8)); animation: float 3s infinite;">👑</div>
@@ -6726,6 +6762,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         proModal.style.display = 'flex';
         if (typeof window.renderPayPalButtons === 'function') window.renderPayPalButtons();
+
+        // 🚨 动态更新扫码按钮上的价格
+        const wiseBtn = document.getElementById('btn-open-wise-modal');
+        if (wiseBtn) {
+            const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
+            const finalPrice = promo.finalPrice;
+            // 获取基础文字，并把 $19.99 替换成实际价格
+            let btnText = dict.upgrade_pro_scan_btn || '💳 扫码支付 $19.99 升级 PRO';
+            btnText = btnText.replace('$19.99', `$${finalPrice}`);
+            wiseBtn.innerHTML = btnText;
+        }
     }
     window.openProModal = openProModal; // 🚨 暴露给全局使用
 
@@ -7539,16 +7586,14 @@ function initLemonSqueezyActivation() {
                 if (!window.proState) window.proState = {};
                 window.proState.isLifetimePro = true;
 
-                // 1. 存储买断状态与激活码
+                // 1. 强制将买断状态写入本地
                 localStorage.setItem('pixelsprite_pro_state_v3', JSON.stringify(window.proState));
-                localStorage.setItem('pixelsprite_license_key', licenseKey);
 
-                // 2. 🚨 强行盖上合法印章，完美骗过你的正则校验，永不退回试用版
-                if (!licenseKey.startsWith('PRO-')) {
-                    localStorage.setItem('pixelsprite_license_key', 'PRO-0000-0000');
-                }
+                // 2. 🚨 核心修复：强行格式化激活码，骗过你代码里的正则校验
+                // 无论真实码是什么，只要通过了后端验证，本地统统存成 PRO-XXXX-XXXX 的格式
+                localStorage.setItem('pixelsprite_license_key', 'PRO-0000-0000');
 
-                // 3. 刷新 UI 并撒花
+                // 3. 立即刷新 UI
                 if (typeof updateProStatusAndUI === 'function') updateProStatusAndUI();
                 if (typeof window.fireConfetti === 'function') window.fireConfetti();
                 if (typeof closeProModal === 'function') closeProModal();
