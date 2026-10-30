@@ -1348,37 +1348,24 @@
                 <div
                     style="display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; max-width: 380px; margin: 20px auto 10px auto; padding: 20px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 12px; box-shadow: inset 0 0 20px rgba(0, 242, 254, 0.05);">
 
-                    <!-- 点击这个按钮打开扫码弹窗 -->
-                    <button id="btn-open-wise-modal" class="btn"
-                        style="width: 100%; padding: 14px; background: linear-gradient(135deg, #ffc439 0%, #ff9800 100%); color: #003087; font-weight: 800; border-radius: 6px;"
-                        data-i18n="upgrade_pro_scan_btn">
-                        💳 扫码支付 $19.99 升级 PRO
-                    </button>
+                    <!-- 🚨 新增支付按钮 -->
+                    <div style="width: 100%; display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px;">
+                        <button id="btn-stripe-pay" class="btn"
+                            style="width: 100%; padding: 14px; background: #635bff; color: #ffffff; font-weight: 800; border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                                <path
+                                    d="M13.9 10.1c-.8-.2-1.3-.3-1.9-.3-1.3 0-2.1.5-2.1 1.3 0 .8.7 1.1 1.8 1.4 1.6.4 2.8 1 2.8 2.7 0 1.8-1.5 3-3.9 3-1.6 0-3.1-.4-4.2-1v-2.7c1 .5 2.2.9 3.5.9 1.4 0 2.2-.5 2.2-1.4 0-.7-.6-1.1-1.8-1.4-1.5-.4-2.7-1-2.7-2.6 0-1.7 1.4-2.8 3.7-2.8 1.3 0 2.5.3 3.3.7v2.2zM9.3 6h3.4v11.7H9.3V6zm6.3 0h3.4v11.7h-3.4V6z" />
+                            </svg>
+                            信用卡支付 (Stripe)
+                        </button>
+                        <div id="paypal-button-container" style="width: 100%; z-index: 9999;"></div>
+                    </div>
 
                     <!-- 分割线 -->
                     <div style="display: flex; align-items: center; width: 100%; gap: 10px;">
                         <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></div>
                         <span style="font-size: 11px; color: var(--text-muted); font-family: monospace;">OR</span>
                         <div style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></div>
-                    </div>
-
-                    <!-- 激活码区域 -->
-                    <div style="width: 100%; display: flex; flex-direction: column; gap: 8px;">
-                        <p data-i18n="itch_activate_title"
-                            style="color: #00f2fe; font-size: 12px; font-weight: 600; margin: 0; text-align: center;">
-                            请在下方粘贴 Itch.io 购买邮件中的完整下载链接或激活码
-                        </p>
-                        <div style="display: flex; gap: 8px; width: 100%;">
-                            <input type="text" id="itch-activation-input"
-                                data-i18n-placeholder="itch_activate_placeholder" placeholder="请粘贴 Itch.io 发送给您的完整下载链接"
-                                style="flex: 1; background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 10px 12px; border-radius: 6px; font-family: monospace; font-size: 13px; outline: none; transition: border 0.2s;"
-                                onfocus="this.style.borderColor='#00f2fe'"
-                                onblur="this.style.borderColor='rgba(255,255,255,0.2)'">
-                            <button id="btn-activate-itch" class="btn btn-primary"
-                                style="padding: 0 20px; font-weight: 800; font-size: 13px; border-radius: 6px; white-space: nowrap;">
-                                <span data-i18n="itch_activate_btn">Activate</span>
-                            </button>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1936,12 +1923,16 @@
                 </style>
 
                 <div style="display: flex; flex-direction: column; gap: 10px; width: 100%; margin-bottom: 10px;">
-                    <!-- Itch.io -->
-                    <a href="https://kenmaster-q2x.itch.io" target="_blank" class="cyber-social-btn"
-                        style="color: #fa5c5c; border-color: rgba(250, 92, 92, 0.4);">
+                    <!-- Itch.io (红色发光版) -->
+                    <a href="https://tiny-world-king-master.itch.io/pixelsprite-pro" target="_blank"
+                        class="cyber-social-btn"
+                        style="color: #fa5c5c; border-color: rgba(250, 92, 92, 0.4); box-shadow: 0 0 15px rgba(250, 92, 92, 0.1); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);"
+                        onmouseover="this.style.background='rgba(250, 92, 92, 0.1)'; this.style.transform='translateX(4px)'; this.style.boxShadow='0 0 25px rgba(250, 92, 92, 0.4)'; this.style.borderColor='#fa5c5c';"
+                        onmouseout="this.style.background='rgba(0, 0, 0, 0.4)'; this.style.transform='translateX(0)'; this.style.boxShadow='0 0 15px rgba(250, 92, 92, 0.1)'; this.style.borderColor='rgba(250, 92, 92, 0.4)';">
                         <div style="display: flex; align-items: center;">
+                            <!-- 红色图标框 -->
                             <div class="social-icon-box"
-                                style="background: #fa5c5c; border: none; box-shadow: 0 0 10px rgba(250, 92, 92, 0.4); padding: 4px;">
+                                style="background: #fa5c5c; border: none; box-shadow: 0 0 10px rgba(250, 92, 92, 0.6); padding: 4px;">
                                 <svg viewBox="0 0 24 24" width="100%" height="100%" fill="#ffffff"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -1957,13 +1948,13 @@
                             </div>
                             <div style="display: flex; flex-direction: column; text-align: left; margin-left: 12px;">
                                 <span data-i18n="link_itch_title"
-                                    style="font-family: 'Outfit'; font-size: 14px; font-weight: 800; color: #fff;">ITCH.IO</span>
+                                    style="font-family: 'Outfit'; font-size: 14px; font-weight: 800; color: #ffffff; letter-spacing: 1px;">ITCH.IO</span>
                                 <span data-i18n="link_itch_desc"
                                     style="font-size: 11px; color: var(--text-muted);">进入官方软件入口页</span>
                             </div>
                         </div>
                         <span data-i18n="link_action_launch"
-                            style="font-size: 12px; font-weight: bold; opacity: 0.6;">启动 ➔</span>
+                            style="font-size: 12px; font-weight: bold; color: #fa5c5c; opacity: 0.8;">启动 ➔</span>
                     </a>
 
                     <!-- Discord -->
@@ -2049,18 +2040,30 @@
                     <h4 style="color: #fff; font-size: 14px; margin-bottom: 12px; font-weight: 700;">🌐 加入我们的创作者社区</h4>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
                         <!-- Itch.io -->
-                        <a href="https://你的itchio用户名.itch.io" target="_blank"
-                            style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: rgba(250, 92, 92, 0.1); border: 1px solid rgba(250, 92, 92, 0.4); border-radius: 8px; text-decoration: none; color: #fff; transition: all 0.2s;"
-                            onmouseover="this.style.background='rgba(250,92,92,0.2)'"
-                            onmouseout="this.style.background='rgba(250,92,92,0.1)'">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <span style="font-size: 20px;">🎮</span>
+                        <a href="https://tiny-world-king-master.itch.io/pixelsprite-pro" target="_blank"
+                            style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: rgba(0, 242, 254, 0.08); border: 1px solid rgba(0, 242, 254, 0.4); border-radius: 8px; text-decoration: none; color: #fff; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 10px rgba(0, 242, 254, 0.1);"
+                            onmouseover="this.style.background='rgba(0,242,254,0.2)'; this.style.borderColor='#00f2fe'; this.style.boxShadow='0 0 20px rgba(0, 242, 254, 0.4)'; this.style.transform='translateX(4px)';"
+                            onmouseout="this.style.background='rgba(0, 242, 254, 0.08)'; this.style.borderColor='rgba(0, 242, 254, 0.4)'; this.style.boxShadow='0 0 10px rgba(0, 242, 254, 0.1)'; this.style.transform='translateX(0)';">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <!-- 换成你的发光 Logo，或者保留游戏手柄 -->
+                                <div
+                                    style="width: 36px; height: 36px; background: rgba(0, 242, 254, 0.15); border-radius: 6px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 242, 254, 0.3);">
+                                    <span style="font-size: 20px; filter: drop-shadow(0 0 5px #00f2fe);">🎮</span>
+                                </div>
                                 <div>
-                                    <div style="font-weight: 700; font-size: 13px;">Itch.io</div>
-                                    <div style="font-size: 11px; color: var(--text-muted);">在此下载、支持并关注最新版本</div>
+                                    <div
+                                        style="font-weight: 800; font-size: 14px; color: #00f2fe; letter-spacing: 0.5px; font-family: 'Outfit', sans-serif;">
+                                        ITCH.IO
+                                    </div>
+                                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;"
+                                        data-i18n="link_itch_desc">
+                                        进入官方软件入口页
+                                    </div>
                                 </div>
                             </div>
-                            <span style="color: #fa5c5c;">➔</span>
+                            <!-- 右侧箭头 -->
+                            <span
+                                style="color: #00f2fe; font-weight: bold; font-size: 14px; filter: drop-shadow(0 0 5px rgba(0,242,254,0.5));">➔</span>
                         </a>
 
                         <!-- Discord -->
@@ -2107,7 +2110,10 @@
     <script src="gif-decoder.js"></script>
 
     <!-- 🧩 模块化外挂插槽 (保留仍在使用的独立功能) -->
-    <script src="addon-paypal.js?v=1.0"></script>
+    <!-- 引入 PayPal SDK -->
+    <script src="https://www.paypal.com/sdk/js?client-id=你的_PAYPAL_LIVE_CLIENT_ID&currency=USD"></script>
+    <!-- 引入我们的前端支付逻辑 -->
+    <script src="addon-payment.js?v=1.0"></script>
     <script src="addon-login-system.js?v=1.0"></script>
     <script src="addon-export-system.js?v=1.0"></script>
 
@@ -2139,42 +2145,6 @@
             }, 100);
         });
     </script>
-
-    <!-- Wise 扫码支付弹窗 -->
-    <div id="wise-pay-modal" class="modal-backdrop" style="display: none; z-index: 999999;">
-        <div class="modal-card" style="width: 380px; text-align: center;">
-            <div class="modal-header">
-                <h3 id="wise-title" data-i18n="wise_pay_title" style="color: #00f2fe;">扫码支付 19.99 USD</h3>
-                <button class="modal-close-btn"
-                    onclick="document.getElementById('wise-pay-modal').style.display='none'">&times;</button>
-            </div>
-            <div class="modal-body" id="wise-pay-body">
-                <p id="wise-desc" data-i18n="wise_pay_desc"
-                    style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">
-                    请使用手机相机或 Wise App 扫码支付。<br>
-                    <span style="color: #ff4757; font-weight: bold;">务必在备注中填写您的邮箱！</span>
-                </p>
-
-                <a id="wise-link" href="https://wise.com/pay/me/takhwal?utm_source=request_flow" target="_blank"
-                    data-i18n="wise_pay_btn" class="btn"
-                    style="width: 100%; background: #9fe870; color: #050b14; font-weight: 800; margin-bottom: 15px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                    💳 点击跳转 Wise 网页付款
-                </a>
-
-                <p id="wise-scan-hint" data-i18n="wise_pay_scan_hint"
-                    style="font-size: 11px; color: var(--text-muted); margin: 5px 0;">或者使用手机扫码：</p>
-                <img src="wise-qr.png"
-                    style="width: 220px !important; height: 220px !important; max-width: 220px !important; max-height: 220px !important; object-fit: contain !important; border-radius: 8px !important; border: 2px solid #fff !important; margin: 0 auto 15px auto !important; display: block !important;">
-
-                <p id="wise-email-hint" data-i18n="wise_pay_email_hint"
-                    style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">支付完成后，请填写您刚才备注的邮箱：</p>
-                <input type="email" id="wise-user-email" class="select-input" style="width: 100%; margin-bottom: 10px;"
-                    data-i18n-placeholder="wise_user_email_placeholder" placeholder="请输入您的邮箱">
-                <button id="btn-submit-wise-email" data-i18n="wise_pay_submit_btn" class="btn btn-primary"
-                    style="width: 100%;">我已支付，提交邮箱</button>
-            </div>
-        </div>
-    </div>
 </body>
 
 </html>
