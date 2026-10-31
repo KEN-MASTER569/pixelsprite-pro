@@ -4691,3 +4691,148 @@ body.tile-mode-active #pixel-canvas {
 .logo-area:hover .logo-icon-wrapper svg {
     animation: neonPulse 1.5s infinite;
 }
+
+/* ============================================================
+   🌌 终极赛博朋克支付按钮 (Cyberpunk Payment Buttons)
+   ============================================================ */
+
+/* 1. 基础容器：防止布局崩坏 */
+.cyber-pay-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+/* ============================================================
+   💳 Stripe 按钮 (紫蓝全息)
+   ============================================================ */
+#btn-stripe-pay {
+    position: relative !important;
+    width: 100% !important;
+    padding: 16px 20px !important;
+    background: linear-gradient(135deg, rgba(99, 91, 255, 0.15), rgba(0, 242, 254, 0.15)) !important;
+    border: 2px solid #635bff !important;
+    border-radius: 8px !important;
+    color: #ffffff !important;
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
+    cursor: pointer !important;
+    overflow: hidden !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 0 15px rgba(99, 91, 255, 0.3), inset 0 0 15px rgba(0, 242, 254, 0.1) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+}
+
+/* Stripe 按钮的扫光特效 */
+#btn-stripe-pay::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: -100% !important;
+    width: 50% !important;
+    height: 100% !important;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent) !important;
+    transform: skewX(-25deg) !important;
+    animation: cyberStripeScan 3s infinite !important;
+}
+
+/* Stripe 悬浮效果 */
+#btn-stripe-pay:hover {
+    background: linear-gradient(135deg, rgba(99, 91, 255, 0.3), rgba(0, 242, 254, 0.3)) !important;
+    box-shadow: 0 0 25px rgba(99, 91, 255, 0.6), inset 0 0 20px rgba(0, 242, 254, 0.3) !important;
+    transform: translateY(-2px) !important;
+    text-shadow: 0 0 8px #ffffff !important;
+}
+
+#btn-stripe-pay:active {
+    transform: scale(0.97) translateY(1px) !important;
+    box-shadow: 0 0 10px rgba(99, 91, 255, 0.4) !important;
+}
+
+@keyframes cyberStripeScan {
+    0% {
+        left: -100%;
+    }
+
+    20%,
+    100% {
+        left: 200%;
+    }
+}
+
+/* ============================================================
+   🟡 PayPal 按钮容器 (金色光环)
+   ============================================================ */
+#paypal-button-container {
+    position: relative !important;
+    width: 100% !important;
+    border-radius: 8px !important;
+    /* 给外层加一个金色呼吸灯 */
+    box-shadow: 0 0 20px rgba(255, 196, 57, 0.2) !important;
+    transition: all 0.3s ease !important;
+    z-index: 1 !important;
+}
+
+#paypal-button-container:hover {
+    box-shadow: 0 0 30px rgba(255, 196, 57, 0.5) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* 强制去掉 PayPal 默认 iframe 的边框，无缝融入 */
+#paypal-button-container iframe {
+    border-radius: 8px !important;
+    border: 1px solid rgba(255, 196, 57, 0.4) !important;
+    transition: border-color 0.3s ease !important;
+}
+
+#paypal-button-container:hover iframe {
+    border-color: #ffc439 !important;
+}
+
+/* 如果 PayPal 按钮加载失败，给个赛博提示 */
+#paypal-button-container:empty::after {
+    content: '⚠️ PayPal 初始化中...' !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 48px !important;
+    background: rgba(255, 196, 57, 0.1) !important;
+    border: 1px dashed rgba(255, 196, 57, 0.5) !important;
+    color: #ffc439 !important;
+    border-radius: 8px !important;
+    font-weight: bold !important;
+}
+
+/* ============================================================
+   ✨ 分割线：--- 或者用扫码支付 ---
+   ============================================================ */
+.cyber-divider {
+    display: flex !important;
+    align-items: center !important;
+    gap: 15px !important;
+    margin: 10px 0 !important;
+    width: 100% !important;
+}
+
+.cyber-divider-line {
+    flex: 1 !important;
+    height: 1px !important;
+    background: linear-gradient(90deg, transparent, rgba(0, 242, 254, 0.5), transparent) !important;
+}
+
+.cyber-divider-text {
+    font-size: 11px !important;
+    color: #8a99ad !important;
+    font-weight: 700 !important;
+    letter-spacing: 2px !important;
+    text-transform: uppercase !important;
+    font-family: monospace !important;
+}

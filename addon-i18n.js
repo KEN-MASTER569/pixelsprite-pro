@@ -480,6 +480,19 @@
             toast_moved_layer: '🖐️ 已移动图层像素 ({dx}, {dy})',
 
             promo_month_range: '📅 促销期间：{month}月1日 至 {month}月10日',
+
+            // 💳 支付系统
+            pay_stripe_btn: '信用卡支付 (Stripe)',
+            pay_paypal_btn: 'PayPal',
+            pay_prompt_email: '请输入您的邮箱（用于接收激活码）：',
+            pay_verifying: '⏳ 正在验证支付结果...',
+            pay_success_unlock: '🎉 支付成功！已为您永久解锁 PRO！',
+            pay_verify_fail: '⚠️ 支付验证失败，请查看邮箱是否收到激活码',
+            pay_network_error: '网络错误，请稍后再试',
+            pay_need_email: '需要邮箱才能支付',
+            pay_paypal_cancel: '❌ PayPal 支付失败或取消',
+            pay_stripe_redirect: '⏳ 正在跳转 Stripe...',
+            pay_create_fail: '创建订单失败: ',
         },
         en: {
             lang_name: 'English',
@@ -955,6 +968,19 @@
             toast_moved_layer: '🖐️ Layer pixels moved ({dx}, {dy})',
 
             promo_month_range: '📅 Promotion Period: {month} 1st to {month} 10th',
+
+            // 💳 payment system
+            pay_stripe_btn: 'Pay with Card (Stripe)',
+            pay_paypal_btn: 'PayPal',
+            pay_prompt_email: 'Please enter your email (to receive activation code):',
+            pay_verifying: '⏳ Verifying payment...',
+            pay_success_unlock: '🎉 Payment successful! PRO unlocked forever!',
+            pay_verify_fail: '⚠️ Verification failed. Please check your email for the code.',
+            pay_network_error: 'Network error, please try again later',
+            pay_need_email: 'Email is required to process payment',
+            pay_paypal_cancel: '❌ PayPal payment failed or cancelled',
+            pay_stripe_redirect: '⏳ Redirecting to Stripe...',
+            pay_create_fail: 'Failed to create order: ',
         },
         ja: {
             lang_name: '日本語',
@@ -1426,6 +1452,19 @@
             toast_moved_layer: '🖐️ レイヤーを移動しました ({dx}, {dy})',
 
             promo_month_range: '📅 キャンペーン期間：{month}月1日 〜 {month}月10日',
+
+            // 💳 支付系统
+            pay_stripe_btn: 'クレジットカード決済 (Stripe)',
+            pay_paypal_btn: 'PayPal',
+            pay_prompt_email: 'メールアドレスを入力してください（アクティベーションコードを受け取るため）：',
+            pay_verifying: '⏳ 支払いを確認中...',
+            pay_success_unlock: '🎉 支払い成功！PROが永久に解除されました！',
+            pay_verify_fail: '⚠️ 確認に失敗しました。メールをご確認ください。',
+            pay_network_error: 'ネットワークエラー、後でもう一度お試しください',
+            pay_need_email: '支払いにはメールアドレスが必要です',
+            pay_paypal_cancel: '❌ PayPalの支払いが失敗またはキャンセルされました',
+            pay_stripe_redirect: '⏳ Stripeへリダイレクト中...',
+            pay_create_fail: '注文の作成に失敗しました: ',
         }
     }
 

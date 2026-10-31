@@ -6864,20 +6864,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 let dateHint = '';
 
-                // 首发特惠（2026年10月24日-31日）
-                if (year === 2026 && month === 9 && day >= 24 && day <= 31) {
-                    if (window.currentLang === 'en') {
-                        dateHint = '📅 Promotion Period: Oct 24 to Oct 31';
-                    } else if (window.currentLang === 'ja') {
-                        dateHint = '📅 キャンペーン期間：10月24日 〜 10月31日';
-                    } else {
-                        dateHint = '📅 促销期间：10月24日 至 10月31日';
-                    }
-                }
-                // 每月常规折扣（1号到10号）
-                else {
+                // 获取当前的动态折扣价格
+                const promo = typeof window.getDynamicPrice === 'function' ? window.getDynamicPrice() : { isPromo: false, finalPrice: 19.99, originalPrice: 19.99, discount: 10 };
+
+                // 如果是打折期，显示日期提示
+                if (promo.isPromo) {
                     const monthNamesEn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
                     const monthNameEn = monthNamesEn[month];
+                    const monthNum = month + 1;
 
                     if (window.currentLang === 'en') {
                         dateHint = `📅 Promotion Period: ${monthNameEn} 1st to ${monthNameEn} 10th`;
@@ -7476,18 +7470,11 @@ document.addEventListener('DOMContentLoaded', () => {
         let discount = 10;
         let isPromo = false;
 
-        // 🚨 核心修改：设定首发特别促销期（例如 2026年10月24日 到 10月31日）
-        // 把这里的年份和月份换成你明天发布的真实时间
-        if (year === 2026 && month === 10 && day >= 24 && day <= 31) {
-            isPromo = true;
-            discount = 5; // 首发直接打 5 折
-            finalPrice = 9.99;
-        }
-        // 原本的常规促销（每月 1-10 号）
-        else if (day >= 1 && day <= 10) {
+        // 常规促销：每月 1-10 号，5-9 折随机
+        if (day >= 1 && day <= 10) {
             isPromo = true;
             const seed = (year * month) % 5;
-            discount = seed + 5;
+            discount = seed + 5; // 算出 5 到 9 的折扣
             finalPrice = Number((originalPrice * (discount / 10)).toFixed(2));
         }
 

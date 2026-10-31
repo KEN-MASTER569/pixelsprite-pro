@@ -1348,17 +1348,24 @@
                 <div
                     style="display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; max-width: 380px; margin: 20px auto 10px auto; padding: 20px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 12px; box-shadow: inset 0 0 20px rgba(0, 242, 254, 0.05);">
 
-                    <!-- 🚨 新增支付按钮 -->
-                    <div style="width: 100%; display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px;">
-                        <button id="btn-stripe-pay" class="btn"
-                            style="width: 100%; padding: 14px; background: #635bff; color: #ffffff; font-weight: 800; border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <!-- 🚨 赛博朋克支付按钮组 -->
+                    <div class="cyber-pay-container">
+                        <button id="btn-stripe-pay">
                             <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
                                 <path
                                     d="M13.9 10.1c-.8-.2-1.3-.3-1.9-.3-1.3 0-2.1.5-2.1 1.3 0 .8.7 1.1 1.8 1.4 1.6.4 2.8 1 2.8 2.7 0 1.8-1.5 3-3.9 3-1.6 0-3.1-.4-4.2-1v-2.7c1 .5 2.2.9 3.5.9 1.4 0 2.2-.5 2.2-1.4 0-.7-.6-1.1-1.8-1.4-1.5-.4-2.7-1-2.7-2.6 0-1.7 1.4-2.8 3.7-2.8 1.3 0 2.5.3 3.3.7v2.2zM9.3 6h3.4v11.7H9.3V6zm6.3 0h3.4v11.7h-3.4V6z" />
                             </svg>
-                            信用卡支付 (Stripe)
+                            <span data-i18n="pay_stripe_btn">信用卡支付 (Stripe)</span>
                         </button>
-                        <div id="paypal-button-container" style="width: 100%; z-index: 9999;"></div>
+
+                        <div id="paypal-button-container"></div>
+
+                        <!-- 赛博朋克发光分割线 -->
+                        <div class="cyber-divider">
+                            <div class="cyber-divider-line"></div>
+                            <span class="cyber-divider-text" data-i18n="pay_or_scan">OR SCAN TO PAY</span>
+                            <div class="cyber-divider-line"></div>
+                        </div>
                     </div>
 
                     <!-- 分割线 -->
@@ -2111,7 +2118,8 @@
 
     <!-- 🧩 模块化外挂插槽 (保留仍在使用的独立功能) -->
     <!-- 引入 PayPal SDK -->
-    <script src="https://www.paypal.com/sdk/js?client-id=BAAW9_mssbctubXguTNdOVWJTW9F_ERoMkB3rZ5um1sE_W4hMYJ9a4KvEmcuxfuSIceLZaFhaL4X5wNxXA&currency=USD"></script>
+    <script
+        src="https://www.paypal.com/sdk/js?client-id=BAAW9_mssbctubXguTNdOVWJTW9F_ERoMkB3rZ5um1sE_W4hMYJ9a4KvEmcuxfuSIceLZaFhaL4X5wNxXA&currency=USD"></script>
     <!-- 引入我们的前端支付逻辑 -->
     <script src="addon-payment.js?v=1.0"></script>
     <script src="addon-login-system.js?v=1.0"></script>
