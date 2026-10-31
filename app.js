@@ -6434,8 +6434,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const saved = localStorage.getItem('pixelsprite_pro_state_v3');
             const validLicense = localStorage.getItem('pixelsprite_license_key');
 
-            // 校验买断激活码（和之前一样）
-            const isValidKeyFormat = validLicense && /^PRO-[A-F0-9]{4}-[A-F0-9]{4}$/.test(validLicense);
+            // 🚨 修复：只要存在激活码（无论格式如何，后端已验证过），就认为是有效
+            const isValidKeyFormat = validLicense && validLicense.startsWith('PRO-');
 
             if (saved) {
                 const parsed = JSON.parse(saved);

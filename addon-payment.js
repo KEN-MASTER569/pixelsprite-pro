@@ -32,6 +32,10 @@
                     .then(data => {
                         if (data.success && data.licenseKey) {
                             if (typeof window.showToast === 'function') window.showToast(t('pay_success_unlock'));
+
+                            // 🚨 核心修复：保存真实的激活码
+                            localStorage.setItem('pixelsprite_license_key', data.licenseKey);
+
                             if (typeof window.activateLifetimePro === 'function') {
                                 window.activateLifetimePro();
                             }
@@ -124,6 +128,10 @@
 
                                 if (result.success && result.licenseKey) {
                                     if (typeof window.showToast === 'function') window.showToast(t('pay_success_unlock'));
+
+                                    // 🚨 核心修复：保存真实的激活码
+                                    localStorage.setItem('pixelsprite_license_key', result.licenseKey);
+
                                     if (typeof window.activateLifetimePro === 'function') {
                                         window.activateLifetimePro();
                                     } else {
