@@ -7820,3 +7820,56 @@ function applyGlobalPromotion() {
 
 // 页面加载后自动执行打折
 setTimeout(applyGlobalPromotion, 1000)
+
+// ============================================================
+// 🔑 手动激活码校验逻辑
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+    const btnActivate = document.getElementById('btn-activate-itch');
+    const inputKey = document.getElementById('itch-activation-input');
+
+    if (btnActivate && inputKey) {
+        btnActivate.addEventListener('click', async () => {
+            const key = inputKey.value.trim().toUpperCase();
+            if (!key) {
+                if (typeof showToast === 'function') showToast(window.t('itch_activate_empty') || '请输入激活码');
+                return;
+            }
+
+            const originalText = btnActivate.innerHTML;
+            btnActivate.innerHTML = '⏳ ...';
+            btnActivate.disabled = true;
+
+            try {
+                // 去后端验证这个码是不是真的
+                const res = await fetch(`${API_BASE_URL}/api/verify-license`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ licenseKey: key })
+                });
+                const result = await res.json();
+
+                if (result.success) {
+                    // 验证通过，存入 localStorage 并解锁！
+                    localStorage.setItem('pixelsprite_license_key', key);
+                    if (typeof showToast === 'function') showToast(window.t('itch_activate_success') || '🎉 激活成功！');
+
+                    if (typeof window.activateLifetimePro === 'function') {
+                        window.activateLifetimePro();
+                    }
+                    // 关掉弹窗
+                    document.getElementById('pro-modal').style.display = 'none';
+                } else {
+                    if (typeof showToast === 'function') showToast(result.error || '无效的激活码');
+                    btnActivate.innerHTML = originalText;
+                    btnActivate.disabled = false;
+                }
+            } catch (err) {
+                console.error(err);
+                if (typeof showToast === 'function') showToast('网络错误');
+                btnActivate.innerHTML = originalText;
+                btnActivate.disabled = false;
+            }
+        });
+    }
+});

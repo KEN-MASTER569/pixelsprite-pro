@@ -94,6 +94,7 @@
             zoom_label: '缩放:',
 
             // Timeline
+            timeline_locked_text: "👑 帧动画时间轴 (Timeline) 与洋葱皮为 PRO 专属功能",
             toast_pro_timeline_locked: "👑 动画时间轴为 PRO 专属功能！",
             btn_unlock_timeline: '解锁 PRO 尊享版 ($19.99)',
             btn_anim_play: '▶ 播放动画',
@@ -493,6 +494,9 @@
             pay_paypal_cancel: '❌ PayPal 支付失败或取消',
             pay_stripe_redirect: '⏳ 正在跳转 Stripe...',
             pay_create_fail: '创建订单失败: ',
+            have_license: '已经拥有激活码？点击输入',
+            license_placeholder: '输入您的 PRO 激活码',
+            btn_activate: '立即激活',
         },
         en: {
             lang_name: 'English',
@@ -583,6 +587,7 @@
             zoom_label: 'Zoom:',
 
             // Timeline
+            timeline_locked_text: "👑 Frame Animation Timeline & Onion Skin are PRO features",
             toast_pro_timeline_locked: "👑 Timeline is a PRO feature!",
             btn_unlock_timeline: 'Unlock PRO ($19.99)',
             btn_anim_play: '▶ Play',
@@ -981,6 +986,10 @@
             pay_paypal_cancel: '❌ PayPal payment failed or cancelled',
             pay_stripe_redirect: '⏳ Redirecting to Stripe...',
             pay_create_fail: 'Failed to create order: ',
+            have_license: 'Already have a license key? Click to enter',
+            license_placeholder: 'Enter your PRO license key',
+            btn_activate: 'Activate',
+
         },
         ja: {
             lang_name: '日本語',
@@ -1465,6 +1474,9 @@
             pay_paypal_cancel: '❌ PayPalの支払いが失敗またはキャンセルされました',
             pay_stripe_redirect: '⏳ Stripeへリダイレクト中...',
             pay_create_fail: '注文の作成に失敗しました: ',
+            have_license: 'すでにライセンスをお持ちですか？ここをクリック',
+            license_placeholder: 'PROライセンスキーを入力',
+            btn_activate: '認証する',
         }
     }
 
