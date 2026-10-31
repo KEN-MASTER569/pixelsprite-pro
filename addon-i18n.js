@@ -1709,6 +1709,11 @@
         if (wiseBody && !document.getElementById('wise-user-email')) {
             location.reload(); // 如果是等待状态，直接刷新页面最保险
         }
+
+        // 🚨 核心修复：切完语言，立刻重新执行折扣计算，防止价格变回原价！
+        if (typeof window.applyGlobalPromotion === 'function') {
+            window.applyGlobalPromotion();
+        }
     };
 
     // 初始化语言
