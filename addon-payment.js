@@ -51,10 +51,17 @@
                 btnStripe.disabled = true;
 
                 try {
+                    // 🚨 新增：获取当前的动态促销信息（你之前写的 getDynamicPrice 会返回折扣力度）
+                    const promo = typeof window.getDynamicPrice === 'function' ? window.getDynamicPrice() : { discount: 10 };
+                    const discountValue = promo.discount; // 比如 5 代表 5 折
+
                     const res = await fetch(`${BACKEND_URL}/api/stripe/create-checkout-session`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email })
+                        body: JSON.stringify({
+                            email: email,
+                            discount: discountValue // 🚨 把折扣力度传给后端
+                        })
                     });
                     const data = await res.json();
 
@@ -81,13 +88,16 @@
                 style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
 
                 createOrder: async () => {
-                    let email = window.userState?.email || prompt('请输入您的邮箱（用于接收激活码）：');
+                    let email = window.userState?.email || prompt('请输入您的邮箱：');
                     if (!email) throw new Error('需要邮箱才能支付');
+
+                    // 🚨 算出最终需要支付的金额
+                    const finalPrice = getPrice();
 
                     const res = await fetch(`${BACKEND_URL}/api/paypal/create-order`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email })
+                        body: JSON.stringify({ email: email, price: finalPrice }) // 🚨 传价格给后端
                     });
                     const data = await res.json();
                     if (!data.success) throw new Error(data.error);
