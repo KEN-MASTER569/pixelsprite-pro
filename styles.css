@@ -4836,3 +4836,521 @@ body.tile-mode-active #pixel-canvas {
     text-transform: uppercase !important;
     font-family: monospace !important;
 }
+
+/* ============================================================
+   🌆 PRO 弹窗 · 赛博朋克主题 (Cyberpunk Night City Theme)
+   全部作用域限定在 #pro-modal，不影响其它弹窗
+   ============================================================ */
+#pro-modal {
+    --cp-yellow: #fcee0a;
+    --cp-cyan: #00f0ff;
+    --cp-magenta: #ff2a6d;
+    --cp-purple: #7b2ff7;
+    --cp-bg: #0a0612;
+    --cp-mono: 'Share Tech Mono', ui-monospace, monospace;
+    --cp-display: 'Orbitron', 'Outfit', sans-serif;
+    background:
+        radial-gradient(ellipse at 50% 120%, rgba(255, 42, 109, 0.25), transparent 60%),
+        rgba(4, 2, 10, 0.88) !important;
+    backdrop-filter: blur(10px) saturate(140%);
+}
+
+#pro-modal .pro-modal-card {
+    position: relative;
+    width: 640px;
+    max-width: 96vw;
+    max-height: 92vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background:
+        linear-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px) 0 0 / 100% 3px,
+        linear-gradient(160deg, #120a22 0%, var(--cp-bg) 55%, #1a0614 100%) !important;
+    border: none !important;
+    border-radius: 0 !important;
+    clip-path: polygon(0 0, calc(100% - 28px) 0, 100% 28px, 100% 100%, 28px 100%, 0 calc(100% - 28px));
+    box-shadow: none !important;
+    animation: cpBoot 0.45s cubic-bezier(.2, .9, .3, 1.2);
+    scrollbar-width: thin;
+    scrollbar-color: var(--cp-magenta) transparent;
+}
+
+/* 霓虹描边（clip-path 会裁掉 border，用伪元素画） */
+#pro-modal .pro-modal-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 2px;
+    background: linear-gradient(135deg, var(--cp-cyan), var(--cp-purple) 45%, var(--cp-magenta) 70%, var(--cp-yellow));
+    clip-path: inherit;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* 扫描光带 */
+#pro-modal .pro-modal-card::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 120px;
+    top: -120px;
+    background: linear-gradient(180deg, transparent, rgba(0, 240, 255, 0.07), transparent);
+    animation: cpScan 5s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes cpBoot {
+    0% { opacity: 0; transform: scale(0.94) skewX(-4deg); filter: hue-rotate(90deg) brightness(2); }
+    60% { opacity: 1; transform: scale(1.01) skewX(1deg); filter: none; }
+    100% { transform: none; }
+}
+
+@keyframes cpScan {
+    to { top: 110%; }
+}
+
+/* ---------- 头部 ---------- */
+#pro-modal .modal-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--cp-magenta) transparent;
+}
+#pro-modal .modal-header {
+    position: relative;
+    background: linear-gradient(90deg, rgba(252, 238, 10, 0.08), transparent 70%);
+    border-bottom: 1px solid rgba(252, 238, 10, 0.25) !important;
+    padding-right: 56px;
+}
+
+#pro-modal .modal-header h3 {
+    font-family: var(--cp-display);
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--cp-yellow) !important;
+    text-shadow: 0 0 12px rgba(252, 238, 10, 0.45), 2px 0 var(--cp-magenta);
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+#pro-modal .modal-close-btn {
+    position: absolute !important;
+    top: 12px;
+    right: 16px;
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    background: transparent !important;
+    border: 1px solid var(--cp-magenta) !important;
+    color: var(--cp-magenta) !important;
+    font-size: 20px;
+    border-radius: 0 !important;
+    clip-path: polygon(0 0, 100% 0, 100% 70%, 70% 100%, 0 100%);
+    transition: all 0.2s;
+}
+
+#pro-modal .modal-close-btn:hover {
+    background: var(--cp-magenta) !important;
+    color: #000 !important;
+    box-shadow: 0 0 16px var(--cp-magenta);
+}
+
+/* ---------- Banner ---------- */
+#pro-modal .pro-banner {
+    position: relative;
+    background:
+        linear-gradient(rgba(255, 42, 109, 0.12) 1px, transparent 1px) 0 0 / 22px 22px,
+        linear-gradient(90deg, rgba(255, 42, 109, 0.12) 1px, transparent 1px) 0 0 / 22px 22px,
+        linear-gradient(180deg, rgba(123, 47, 247, 0.18), rgba(255, 42, 109, 0.08)) !important;
+    border: 1px solid rgba(0, 240, 255, 0.35) !important;
+    border-radius: 0 !important;
+    clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+}
+
+#pro-modal .pro-banner h2 {
+    font-family: var(--cp-display);
+    letter-spacing: 1px;
+    color: var(--cp-cyan) !important;
+    text-shadow: 0 0 14px rgba(0, 240, 255, 0.6);
+}
+
+#pro-modal .pro-banner p {
+    font-family: var(--cp-mono);
+    color: #c9b8ff !important;
+}
+
+/* ---------- 对比表 ---------- */
+#pro-modal .pro-table {
+    font-family: var(--cp-mono);
+    font-size: 12.5px;
+    border: 1px solid rgba(0, 240, 255, 0.2);
+}
+
+#pro-modal .pro-table thead th {
+    background: rgba(0, 240, 255, 0.08);
+    color: var(--cp-cyan) !important;
+    font-family: var(--cp-display);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    position: sticky;
+    top: 0;
+}
+
+#pro-modal .pro-table thead th.pro-col {
+    background: linear-gradient(180deg, rgba(252, 238, 10, 0.2), rgba(252, 238, 10, 0.05));
+    color: var(--cp-yellow) !important;
+}
+
+#pro-modal .pro-table td {
+    border-bottom: 1px dashed rgba(123, 47, 247, 0.25) !important;
+    color: #d6d0e8;
+}
+
+#pro-modal .pro-table tbody tr {
+    transition: background 0.15s;
+}
+
+#pro-modal .pro-table tbody tr:hover {
+    background: linear-gradient(90deg, rgba(255, 42, 109, 0.12), transparent);
+}
+
+#pro-modal .pro-table td.pro-col {
+    color: var(--cp-yellow) !important;
+    background: rgba(252, 238, 10, 0.04);
+    border-left: 1px solid rgba(252, 238, 10, 0.2);
+}
+
+/* ---------- 结账终端 ---------- */
+#pro-modal .cyber-checkout {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    max-width: 420px;
+    margin: 18px auto 6px;
+    padding: 22px 20px 16px;
+    background: linear-gradient(180deg, rgba(0, 240, 255, 0.05), rgba(255, 42, 109, 0.05));
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    box-shadow: inset 0 0 30px rgba(123, 47, 247, 0.15), 0 0 30px rgba(255, 42, 109, 0.08);
+}
+
+#pro-modal .cyber-corner {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--cp-yellow);
+    pointer-events: none;
+}
+
+#pro-modal .cyber-corner.tl { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
+#pro-modal .cyber-corner.br { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
+
+/* 价格 */
+#pro-modal .cyber-price-display { text-align: center; }
+
+#pro-modal .cp-tag {
+    font-family: var(--cp-mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--cp-magenta);
+    text-transform: uppercase;
+}
+
+#pro-modal .cp-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 12px;
+    margin: 4px 0 2px;
+}
+
+#pro-modal .cp-old {
+    font-family: var(--cp-mono);
+    font-size: 16px;
+    color: #6f6690;
+    text-decoration: line-through;
+    text-decoration-color: var(--cp-magenta);
+}
+
+#pro-modal .cp-now {
+    position: relative;
+    font-family: var(--cp-display);
+    font-weight: 900;
+    font-size: 44px;
+    line-height: 1;
+    color: var(--cp-yellow);
+    text-shadow: 0 0 18px rgba(252, 238, 10, 0.55);
+}
+
+/* 价格故障闪烁 */
+#pro-modal .cp-now::before,
+#pro-modal .cp-now::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    opacity: 0.8;
+}
+
+#pro-modal .cp-now::before { color: var(--cp-cyan); animation: cpGlitch 3.2s infinite steps(1); }
+#pro-modal .cp-now::after { color: var(--cp-magenta); animation: cpGlitch 3.2s infinite steps(1) reverse; }
+
+@keyframes cpGlitch {
+    0%, 88%, 100% { clip-path: inset(0 0 100% 0); transform: none; }
+    90% { clip-path: inset(10% 0 55% 0); transform: translate(-3px, 0); }
+    93% { clip-path: inset(60% 0 8% 0); transform: translate(3px, 0); }
+    96% { clip-path: inset(35% 0 35% 0); transform: translate(-2px, 0); }
+}
+
+#pro-modal .cp-off {
+    font-family: var(--cp-display);
+    font-size: 12px;
+    font-weight: 800;
+    padding: 4px 8px;
+    background: var(--cp-magenta);
+    color: #000;
+    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+    box-shadow: 0 0 14px var(--cp-magenta);
+}
+
+#pro-modal .cp-cur {
+    font-family: var(--cp-mono);
+    color: var(--cp-cyan);
+}
+
+#pro-modal .cp-sub {
+    font-family: var(--cp-mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: #9d93c4;
+}
+
+/* 邮箱输入 */
+#pro-modal .cyber-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    cursor: text;
+}
+
+#pro-modal .cyber-field-label {
+    font-family: var(--cp-mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--cp-cyan);
+    text-transform: uppercase;
+}
+
+#pro-modal #pay-email-input {
+    width: 100%;
+    padding: 12px 14px;
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(0, 240, 255, 0.35);
+    border-left: 3px solid var(--cp-cyan);
+    color: #fff;
+    font-family: var(--cp-mono);
+    font-size: 15px;
+    outline: none;
+    caret-color: var(--cp-yellow);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#pro-modal #pay-email-input:focus {
+    border-color: var(--cp-yellow);
+    box-shadow: 0 0 0 1px var(--cp-yellow), 0 0 18px rgba(252, 238, 10, 0.25);
+}
+
+#pro-modal #pay-email-input.invalid {
+    border-color: var(--cp-magenta);
+    box-shadow: 0 0 16px rgba(255, 42, 109, 0.4);
+    animation: cpShake 0.35s;
+}
+
+@keyframes cpShake {
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+}
+
+#pro-modal .cyber-field-hint {
+    min-height: 14px;
+    font-family: var(--cp-mono);
+    font-size: 11px;
+    color: var(--cp-magenta);
+}
+
+/* Stripe 按钮 → 霓虹黄主按钮 */
+#pro-modal #btn-stripe-pay {
+    background: var(--cp-yellow) !important;
+    color: #0a0612 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    font-family: var(--cp-display) !important;
+    font-weight: 900 !important;
+    letter-spacing: 2px !important;
+    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+    box-shadow: none !important;
+    min-height: 52px;
+}
+
+#pro-modal #btn-stripe-pay:hover:not(:disabled) {
+    background: #fff94d !important;
+    text-shadow: none !important;
+    filter: drop-shadow(0 0 14px rgba(252, 238, 10, 0.7));
+    transform: translateY(-2px) !important;
+}
+
+#pro-modal #btn-stripe-pay:disabled {
+    cursor: wait !important;
+    opacity: 0.85;
+}
+
+#pro-modal #btn-stripe-pay:focus-visible {
+    outline: 2px solid var(--cp-cyan);
+    outline-offset: 3px;
+}
+
+#pro-modal .cyber-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(0, 0, 0, 0.25);
+    border-top-color: #0a0612;
+    border-radius: 50%;
+    animation: cpSpin 0.7s linear infinite;
+}
+
+@keyframes cpSpin { to { transform: rotate(360deg); } }
+
+/* OR 分割 */
+#pro-modal .cyber-or {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--cp-mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: #6f6690;
+}
+
+#pro-modal .cyber-or::before,
+#pro-modal .cyber-or::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 42, 109, 0.6), transparent);
+}
+
+#pro-modal #paypal-button-container {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+}
+
+#pro-modal #paypal-button-container:hover { transform: none !important; }
+#pro-modal #paypal-button-container iframe { border: none !important; }
+
+#pro-modal #paypal-button-container:empty::after {
+    content: '> LOADING PAYPAL_' !important;
+    background: rgba(0, 240, 255, 0.05) !important;
+    border: 1px dashed rgba(0, 240, 255, 0.4) !important;
+    color: var(--cp-cyan) !important;
+    font-family: var(--cp-mono) !important;
+    border-radius: 0 !important;
+    animation: cpBlink 1s steps(2) infinite;
+}
+
+@keyframes cpBlink { 50% { opacity: 0.4; } }
+
+#pro-modal .paypal-fallback {
+    padding: 12px;
+    border: 1px dashed var(--cp-magenta);
+    color: var(--cp-magenta);
+    font-family: var(--cp-mono);
+    font-size: 12px;
+    text-align: center;
+}
+
+/* 状态行 */
+#pro-modal .cyber-pay-status {
+    display: none;
+    padding: 10px 12px;
+    font-family: var(--cp-mono);
+    font-size: 12px;
+    border-left: 3px solid var(--cp-cyan);
+    background: rgba(0, 240, 255, 0.07);
+    color: var(--cp-cyan);
+}
+
+#pro-modal .cyber-pay-status.show { display: block; animation: cpBoot 0.3s; }
+#pro-modal .cyber-pay-status[data-type="error"] { border-color: var(--cp-magenta); background: rgba(255, 42, 109, 0.1); color: #ff7aa2; }
+#pro-modal .cyber-pay-status[data-type="success"] { border-color: var(--cp-yellow); background: rgba(252, 238, 10, 0.08); color: var(--cp-yellow); }
+
+/* 信任徽章 */
+#pro-modal .cyber-trust-row {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px 14px;
+    font-family: var(--cp-mono);
+    font-size: 10.5px;
+    letter-spacing: 1px;
+    color: #9d93c4;
+}
+
+/* 激活码区域 */
+#pro-modal details summary {
+    font-family: var(--cp-mono);
+    letter-spacing: 1px;
+    transition: color 0.2s;
+}
+
+#pro-modal details summary:hover { color: var(--cp-cyan) !important; }
+
+#pro-modal #itch-activation-input {
+    background: rgba(0, 0, 0, 0.55) !important;
+    border: 1px solid rgba(123, 47, 247, 0.5) !important;
+    border-radius: 0 !important;
+    color: var(--cp-yellow) !important;
+    font-family: var(--cp-mono) !important;
+    letter-spacing: 2px;
+}
+
+#pro-modal #btn-activate-itch {
+    background: transparent !important;
+    border: 1px solid var(--cp-cyan) !important;
+    color: var(--cp-cyan) !important;
+    border-radius: 0 !important;
+    font-family: var(--cp-display);
+    letter-spacing: 1px;
+}
+
+#pro-modal #btn-activate-itch:hover {
+    background: var(--cp-cyan) !important;
+    color: #000 !important;
+    box-shadow: 0 0 14px var(--cp-cyan);
+}
+
+/* 移动端 */
+@media (max-width: 560px) {
+    #pro-modal .pro-modal-card { clip-path: none; }
+    #pro-modal .pro-table th:first-child,
+    #pro-modal .pro-table td:first-child { max-width: 150px; }
+    #pro-modal .pro-table th, #pro-modal .pro-table td { padding: 8px 6px; font-size: 11px; }
+    #pro-modal .cp-now { font-size: 36px; }
+}
+
+/* 尊重"减少动态效果"系统设置 */
+@media (prefers-reduced-motion: reduce) {
+    #pro-modal *,
+    #pro-modal .pro-modal-card,
+    #pro-modal .pro-modal-card::after { animation: none !important; }
+}

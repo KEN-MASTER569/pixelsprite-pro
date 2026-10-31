@@ -6856,29 +6856,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (promo.isPromo) {
                 const discountText = dict.pro_modal_discount_tag || (window.currentLang === 'en' ? `${promo.discount * 10}% OFF` : `限时 ${promo.discount} 折`);
 
-                const now = new Date();
-                const year = now.getFullYear();
-                const month = now.getMonth(); // 0-11
-                const day = now.getDate();
-                const monthNum = month + 1;
-
                 let dateHint = '';
 
-                // 获取当前的动态折扣价格
-                const promo = typeof window.getDynamicPrice === 'function' ? window.getDynamicPrice() : { isPromo: false, finalPrice: 19.99, originalPrice: 19.99, discount: 10 };
-
-                // 如果是打折期，显示日期提示
-                if (promo.isPromo) {
-                    const monthNamesEn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-                    const monthNameEn = monthNamesEn[month];
-                    const monthNum = month + 1;
+                // 如果是打折期，显示日期提示（使用促销真实起止日，而不是写死 1-10 号）
+                // ⚠️ 注意：这里原先又声明了一次 const promo，会造成暂时性死区 (TDZ)，导致上一行 promo.discount 直接报错
+                if (promo.promoStart && promo.promoEnd) {
+                    const mEn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                    const s = promo.promoStart, e = promo.promoEnd;
 
                     if (window.currentLang === 'en') {
-                        dateHint = `📅 Promotion Period: ${monthNameEn} 1st to ${monthNameEn} 10th`;
+                        dateHint = `📅 Promotion Period: ${mEn[s.m - 1]} ${s.d} – ${mEn[e.m - 1]} ${e.d}`;
                     } else if (window.currentLang === 'ja') {
-                        dateHint = `📅 キャンペーン期間：${monthNum}月1日 〜 ${monthNum}月10日`;
+                        dateHint = `📅 キャンペーン期間：${s.m}月${s.d}日 〜 ${e.m}月${e.d}日`;
                     } else {
-                        dateHint = `📅 促销期间：${monthNum}月1日 至 ${monthNum}月10日`;
+                        dateHint = `📅 促销期间：${s.m}月${s.d}日 至 ${e.m}月${e.d}日`;
                     }
                 }
 
@@ -6909,7 +6900,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (paypalBox) paypalBox.style.display = 'none';
 
             // 🚨 核心修复：找到那个装扫码和激活码的父级容器，直接干掉它！
-            const checkoutContainer = proModal.querySelector('.modal-body > div[style*="max-width: 380px"]');
+            const checkoutContainer = proModal.querySelector('.cyber-checkout');
             if (checkoutContainer) {
                 checkoutContainer.style.display = 'none';
             }
@@ -7457,7 +7448,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 500);
 
     // ============================================================
-    // 🎯 全球统一月度动态促销 (每月前 10 天，5-9 折随机)
+    // 🎯 全球统一月度动态促销 (每月前 10 天，5-9 折随机) - 唯一定义
+    // ⚠️ 仅用于展示！后端必须自己按同样规则计算价格，绝不能信任前端传的 price/discount
     // ============================================================
     window.getDynamicPrice = function () {
         const now = new Date();
@@ -7469,37 +7461,14 @@ document.addEventListener('DOMContentLoaded', () => {
         let finalPrice = originalPrice;
         let discount = 10;
         let isPromo = false;
-
-        // 常规促销：每月 1-10 号，5-9 折随机
-        if (day >= 1 && day <= 10) {
-            isPromo = true;
-            const seed = (year * month) % 5;
-            discount = seed + 5; // 算出 5 到 9 的折扣
-            finalPrice = Number((originalPrice * (discount / 10)).toFixed(2));
-        }
-
-        return { isPromo, discount, finalPrice, originalPrice };
-    };
-
-    // ============================================================
-    // 🎯 全球统一月度动态促销 (每月前 10 天，5-9 折随机) - Lemon Squeezy 版
-    // ============================================================
-    window.getDynamicPrice = function () {
-        const now = new Date();
-        const day = now.getDate();
-        const month = now.getMonth() + 1;
-        const year = now.getFullYear();
-
-        const originalPrice = 19.99;
-        let finalPrice = originalPrice;
-        let discount = 10;
-        let isPromo = false;
+        let promoStart = null, promoEnd = null; // { m, d }
 
         // 首发特别促销期（按你实际情况改年份/月份/日期）
         if (year === 2026 && month === 10 && day >= 24 && day <= 31) {
             isPromo = true;
             discount = 5;
             finalPrice = 9.99;
+            promoStart = { m: 10, d: 24 }; promoEnd = { m: 10, d: 31 };
         }
         // 常规促销：每月 1-10 号，5-9 折随机（按年月做种子，同一个月内所有人看到同一个折扣）
         else if (day >= 1 && day <= 10) {
@@ -7507,9 +7476,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const seed = (year * month) % 5;
             discount = seed + 5;
             finalPrice = Number((originalPrice * (discount / 10)).toFixed(2));
+            promoStart = { m: month, d: 1 }; promoEnd = { m: month, d: 10 };
         }
 
-        return { isPromo, discount, finalPrice, originalPrice };
+        return { isPromo, discount, finalPrice, originalPrice, promoStart, promoEnd };
     };
 
     // 🚨 折扣力度 → Lemon Squeezy 折扣码 的映射
@@ -7770,56 +7740,8 @@ window.showLoginWelcome = function (userName) {
     }, 3500); // 整个动画持续 3.5 秒
 };
 
-// ============================================================
-// 🎯 全球统一月度动态促销 (每月前 10 天，5-9 折随机)
-// ============================================================
-window.getDynamicPrice = function () {
-    const now = new Date();
-    const day = now.getDate();
-    const month = now.getMonth() + 1;
-    const year = now.getFullYear();
-
-    const originalPrice = 19.99;
-    let finalPrice = originalPrice;
-    let discount = 10;
-    let isPromo = false;
-
-    // 首发特别促销期（按实际情况改日期）
-    if (year === 2026 && month === 10 && day >= 24 && day <= 31) {
-        isPromo = true;
-        discount = 5;
-        finalPrice = 9.99;
-    }
-    else if (day >= 1 && day <= 10) {
-        isPromo = true;
-        const seed = (year * month) % 5;
-        discount = seed + 5;
-        finalPrice = Number((originalPrice * (discount / 10)).toFixed(2));
-    }
-
-    return { isPromo, discount, finalPrice, originalPrice };
-};
-
-function applyGlobalPromotion() {
-    const promo = window.getDynamicPrice();
-    if (!promo.isPromo) return;
-
-    const btnHeaderBuyPro = document.getElementById('btn-header-buy-pro');
-    if (btnHeaderBuyPro) {
-        btnHeaderBuyPro.innerHTML = `
-            👑 <span style="text-decoration: line-through; opacity: 0.6; font-size: 11px; margin-right: 4px;">$${promo.originalPrice}</span> 
-            <span style="color: #ff4757; font-weight: 900;">升级 PRO ($${promo.finalPrice})</span>
-            <span style="position: absolute; top: -8px; right: -8px; background: #ff4757; color: #fff; font-size: 9px; padding: 2px 4px; border-radius: 4px; border: 1px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.3); animation: pulseDot 1s infinite alternate;">${promo.discount}折</span>
-        `;
-        btnHeaderBuyPro.style.overflow = 'visible';
-        btnHeaderBuyPro.style.position = 'relative';
-    }
-
-    window.currentCheckoutPrice = promo.finalPrice.toString();
-}
-
-// 页面加载后自动执行打折
-setTimeout(applyGlobalPromotion, 1000)
+// (已删除：此处曾有一份重复的 getDynamicPrice / applyGlobalPromotion，
+//  它会在 1 秒后把顶栏按钮强制覆盖成中文，并导致打折逻辑两处分叉。唯一定义见 DOMContentLoaded 内。)
 
 // ============================================================
 // 🔑 手动激活码校验逻辑
