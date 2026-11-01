@@ -4904,13 +4904,27 @@ body.tile-mode-active #pixel-canvas {
 }
 
 @keyframes cpBoot {
-    0% { opacity: 0; transform: scale(0.94) skewX(-4deg); filter: hue-rotate(90deg) brightness(2); }
-    60% { opacity: 1; transform: scale(1.01) skewX(1deg); filter: none; }
-    100% { transform: none; }
+    0% {
+        opacity: 0;
+        transform: scale(0.94) skewX(-4deg);
+        filter: hue-rotate(90deg) brightness(2);
+    }
+
+    60% {
+        opacity: 1;
+        transform: scale(1.01) skewX(1deg);
+        filter: none;
+    }
+
+    100% {
+        transform: none;
+    }
 }
 
 @keyframes cpScan {
-    to { top: 110%; }
+    to {
+        top: 110%;
+    }
 }
 
 /* ---------- 头部 ---------- */
@@ -4921,6 +4935,7 @@ body.tile-mode-active #pixel-canvas {
     scrollbar-width: thin;
     scrollbar-color: var(--cp-magenta) transparent;
 }
+
 #pro-modal .modal-header {
     position: relative;
     background: linear-gradient(90deg, rgba(252, 238, 10, 0.08), transparent 70%);
@@ -5051,11 +5066,24 @@ body.tile-mode-active #pixel-canvas {
     pointer-events: none;
 }
 
-#pro-modal .cyber-corner.tl { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
-#pro-modal .cyber-corner.br { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
+#pro-modal .cyber-corner.tl {
+    top: -2px;
+    left: -2px;
+    border-right: 0;
+    border-bottom: 0;
+}
+
+#pro-modal .cyber-corner.br {
+    bottom: -2px;
+    right: -2px;
+    border-left: 0;
+    border-top: 0;
+}
 
 /* 价格 */
-#pro-modal .cyber-price-display { text-align: center; }
+#pro-modal .cyber-price-display {
+    text-align: center;
+}
 
 #pro-modal .cp-tag {
     font-family: var(--cp-mono);
@@ -5100,14 +5128,39 @@ body.tile-mode-active #pixel-canvas {
     opacity: 0.8;
 }
 
-#pro-modal .cp-now::before { color: var(--cp-cyan); animation: cpGlitch 3.2s infinite steps(1); }
-#pro-modal .cp-now::after { color: var(--cp-magenta); animation: cpGlitch 3.2s infinite steps(1) reverse; }
+#pro-modal .cp-now::before {
+    color: var(--cp-cyan);
+    animation: cpGlitch 3.2s infinite steps(1);
+}
+
+#pro-modal .cp-now::after {
+    color: var(--cp-magenta);
+    animation: cpGlitch 3.2s infinite steps(1) reverse;
+}
 
 @keyframes cpGlitch {
-    0%, 88%, 100% { clip-path: inset(0 0 100% 0); transform: none; }
-    90% { clip-path: inset(10% 0 55% 0); transform: translate(-3px, 0); }
-    93% { clip-path: inset(60% 0 8% 0); transform: translate(3px, 0); }
-    96% { clip-path: inset(35% 0 35% 0); transform: translate(-2px, 0); }
+
+    0%,
+    88%,
+    100% {
+        clip-path: inset(0 0 100% 0);
+        transform: none;
+    }
+
+    90% {
+        clip-path: inset(10% 0 55% 0);
+        transform: translate(-3px, 0);
+    }
+
+    93% {
+        clip-path: inset(60% 0 8% 0);
+        transform: translate(3px, 0);
+    }
+
+    96% {
+        clip-path: inset(35% 0 35% 0);
+        transform: translate(-2px, 0);
+    }
 }
 
 #pro-modal .cp-off {
@@ -5175,8 +5228,16 @@ body.tile-mode-active #pixel-canvas {
 }
 
 @keyframes cpShake {
-    20%, 60% { transform: translateX(-5px); }
-    40%, 80% { transform: translateX(5px); }
+
+    20%,
+    60% {
+        transform: translateX(-5px);
+    }
+
+    40%,
+    80% {
+        transform: translateX(5px);
+    }
 }
 
 #pro-modal .cyber-field-hint {
@@ -5226,7 +5287,11 @@ body.tile-mode-active #pixel-canvas {
     animation: cpSpin 0.7s linear infinite;
 }
 
-@keyframes cpSpin { to { transform: rotate(360deg); } }
+@keyframes cpSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
 
 /* OR 分割 */
 #pro-modal .cyber-or {
@@ -5252,8 +5317,13 @@ body.tile-mode-active #pixel-canvas {
     border-radius: 0 !important;
 }
 
-#pro-modal #paypal-button-container:hover { transform: none !important; }
-#pro-modal #paypal-button-container iframe { border: none !important; }
+#pro-modal #paypal-button-container:hover {
+    transform: none !important;
+}
+
+#pro-modal #paypal-button-container iframe {
+    border: none !important;
+}
 
 #pro-modal #paypal-button-container:empty::after {
     content: '> LOADING PAYPAL_' !important;
@@ -5265,7 +5335,11 @@ body.tile-mode-active #pixel-canvas {
     animation: cpBlink 1s steps(2) infinite;
 }
 
-@keyframes cpBlink { 50% { opacity: 0.4; } }
+@keyframes cpBlink {
+    50% {
+        opacity: 0.4;
+    }
+}
 
 #pro-modal .paypal-fallback {
     padding: 12px;
@@ -5287,9 +5361,22 @@ body.tile-mode-active #pixel-canvas {
     color: var(--cp-cyan);
 }
 
-#pro-modal .cyber-pay-status.show { display: block; animation: cpBoot 0.3s; }
-#pro-modal .cyber-pay-status[data-type="error"] { border-color: var(--cp-magenta); background: rgba(255, 42, 109, 0.1); color: #ff7aa2; }
-#pro-modal .cyber-pay-status[data-type="success"] { border-color: var(--cp-yellow); background: rgba(252, 238, 10, 0.08); color: var(--cp-yellow); }
+#pro-modal .cyber-pay-status.show {
+    display: block;
+    animation: cpBoot 0.3s;
+}
+
+#pro-modal .cyber-pay-status[data-type="error"] {
+    border-color: var(--cp-magenta);
+    background: rgba(255, 42, 109, 0.1);
+    color: #ff7aa2;
+}
+
+#pro-modal .cyber-pay-status[data-type="success"] {
+    border-color: var(--cp-yellow);
+    background: rgba(252, 238, 10, 0.08);
+    color: var(--cp-yellow);
+}
 
 /* 信任徽章 */
 #pro-modal .cyber-trust-row {
@@ -5313,7 +5400,9 @@ body.tile-mode-active #pixel-canvas {
     transition: color 0.2s;
 }
 
-#pro-modal details summary:hover { color: var(--cp-cyan) !important; }
+#pro-modal details summary:hover {
+    color: var(--cp-cyan) !important;
+}
 
 #pro-modal #itch-activation-input {
     background: rgba(0, 0, 0, 0.55) !important;
@@ -5341,16 +5430,41 @@ body.tile-mode-active #pixel-canvas {
 
 /* 移动端 */
 @media (max-width: 560px) {
-    #pro-modal .pro-modal-card { clip-path: none; }
+    #pro-modal .pro-modal-card {
+        clip-path: none;
+    }
+
     #pro-modal .pro-table th:first-child,
-    #pro-modal .pro-table td:first-child { max-width: 150px; }
-    #pro-modal .pro-table th, #pro-modal .pro-table td { padding: 8px 6px; font-size: 11px; }
-    #pro-modal .cp-now { font-size: 36px; }
+    #pro-modal .pro-table td:first-child {
+        max-width: 150px;
+    }
+
+    #pro-modal .pro-table th,
+    #pro-modal .pro-table td {
+        padding: 8px 6px;
+        font-size: 11px;
+    }
+
+    #pro-modal .cp-now {
+        font-size: 36px;
+    }
 }
 
 /* 尊重"减少动态效果"系统设置 */
 @media (prefers-reduced-motion: reduce) {
+
     #pro-modal *,
     #pro-modal .pro-modal-card,
-    #pro-modal .pro-modal-card::after { animation: none !important; }
+    #pro-modal .pro-modal-card::after {
+        animation: none !important;
+    }
+}
+
+/* 隐藏 <details> 默认三角，保持赛博风格 */
+details>summary {
+    list-style: none;
+}
+
+details>summary::-webkit-details-marker {
+    display: none;
 }
