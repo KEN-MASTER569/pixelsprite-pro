@@ -7731,29 +7731,32 @@ document.addEventListener('DOMContentLoaded', () => {
     // #endregion [R10] 事件总线与初始化 (Event Bus & Init)
 
     // ============================================================
-    // 🚀 终极完全体：像 PS 一样的边缘丝滑拉伸面板 (无感注入版)
+    // 🚀 终极版本：符合人体工学的侧边栏丝滑拉伸
     // ============================================================
     function initProSidebarResizer() {
         const leftSidebar = document.querySelector('.left-sidebar');
         const rightSidebar = document.querySelector('.right-sidebar');
         if (!leftSidebar || !rightSidebar) return;
 
-        // 1. 动态注入最左侧和最右侧的感应条（不需要改 HTML）
-        const leftBar = document.createElement('div');
-        leftBar.className = 'pro-resizer-bar';
-        leftBar.style.cssText = 'position:fixed; top:70px; bottom:0; left:0; width:10px; cursor:col-resize; z-index:999999; transition: background 0.2s;';
+        // 1. 创建拖拽手柄（紧贴面板边缘，而不是屏幕边缘）
+        const leftHandle = document.createElement('div');
+        leftHandle.className = 'cyber-resizer';
+        leftHandle.style.cssText = 'position:absolute; top:0; right:-5px; width:10px; height:100%; cursor:col-resize; z-index:9999; background:transparent; transition: background 0.2s;';
 
-        const rightBar = document.createElement('div');
-        rightBar.className = 'pro-resizer-bar';
-        rightBar.style.cssText = 'position:fixed; top:70px; bottom:0; right:0; width:10px; cursor:col-resize; z-index:999999; transition: background 0.2s;';
+        const rightHandle = document.createElement('div');
+        rightHandle.className = 'cyber-resizer';
+        rightHandle.style.cssText = 'position:absolute; top:0; left:-5px; width:10px; height:100%; cursor:col-resize; z-index:9999; background:transparent; transition: background 0.2s;';
 
-        document.body.appendChild(leftBar);
-        document.body.appendChild(rightBar);
+        // 将手柄塞进侧边栏内部（前提是侧边栏必须有 position: relative）
+        leftSidebar.style.position = 'relative';
+        rightSidebar.style.position = 'relative';
+        leftSidebar.appendChild(leftHandle);
+        rightSidebar.appendChild(rightHandle);
 
         // 悬浮高亮效果
-        [leftBar, rightBar].forEach(bar => {
-            bar.addEventListener('mouseenter', () => bar.style.background = 'rgba(0, 242, 254, 0.4)');
-            bar.addEventListener('mouseleave', () => bar.style.background = 'transparent');
+        [leftHandle, rightHandle].forEach(handle => {
+            handle.addEventListener('mouseenter', () => handle.style.background = 'rgba(0, 242, 254, 0.5)');
+            handle.addEventListener('mouseleave', () => handle.style.background = 'transparent');
         });
 
         // 2. 核心拖拽逻辑
@@ -7762,49 +7765,42 @@ document.addEventListener('DOMContentLoaded', () => {
         let startX = 0;
         let startWidth = 0;
         let activeSidebar = null;
+        let activeHandle = null;
 
-        const onMouseDown = (e, sidebar, isLeft) => {
+        const onMouseDown = (e, sidebar, handle, isLeft) => {
             e.preventDefault();
             startX = e.clientX;
             startWidth = sidebar.offsetWidth;
 
             if (isLeft) {
                 isDraggingLeft = true;
-                leftBar.style.background = 'rgba(0, 242, 254, 0.8)';
             } else {
                 isDraggingRight = true;
-                rightBar.style.background = 'rgba(0, 242, 254, 0.8)';
             }
             activeSidebar = sidebar;
+            activeHandle = handle;
 
+            handle.style.background = 'rgba(0, 242, 254, 0.9)';
             document.body.style.cursor = 'col-resize';
-            document.body.style.userSelect = 'none'; // 防止拖拽时选中文字
-
-            // 临时关闭 transition，实现 0 延迟跟手
-            activeSidebar.style.transition = 'none';
+            document.body.style.userSelect = 'none';
         };
 
-        leftBar.addEventListener('mousedown', (e) => onMouseDown(e, leftSidebar, true));
-        rightBar.addEventListener('mousedown', (e) => onMouseDown(e, rightSidebar, false));
+        leftHandle.addEventListener('mousedown', (e) => onMouseDown(e, leftSidebar, leftHandle, true));
+        rightHandle.addEventListener('mousedown', (e) => onMouseDown(e, rightSidebar, rightHandle, false));
 
         window.addEventListener('mousemove', (e) => {
             if (!isDraggingLeft && !isDraggingRight) return;
 
-            let newWidth;
-            if (isDraggingLeft) {
-                newWidth = startWidth + (e.clientX - startX);
-            } else {
-                newWidth = startWidth - (e.clientX - startX);
-            }
+            // 🚨 修复方向：左侧面板鼠标往右变宽 (+)，右侧面板鼠标往左变宽 (-)
+            const deltaX = e.clientX - startX;
+            let newWidth = isDraggingLeft ? (startWidth + deltaX) : (startWidth - deltaX);
 
-            // 限制面板的极限宽度：最小 220px，最大 600px (防止把画布挤没)
-            newWidth = Math.max(220, Math.min(600, newWidth));
+            // 限制极限宽度 (220px ~ 500px)
+            newWidth = Math.max(220, Math.min(500, newWidth));
 
-            // 强制修改宽度（打破原生 CSS 限制）
+            // 强行覆盖样式
             activeSidebar.style.setProperty('width', `${newWidth}px`, 'important');
-            activeSidebar.style.setProperty('flex-basis', `${newWidth}px`, 'important');
-            activeSidebar.style.setProperty('max-width', `${newWidth}px`, 'important');
-            activeSidebar.style.setProperty('min-width', `${newWidth}px`, 'important');
+            activeSidebar.style.setProperty('flex', `0 0 ${newWidth}px`, 'important'); // 防止被挤出
         });
 
         window.addEventListener('mouseup', () => {
@@ -7812,25 +7808,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
             isDraggingLeft = false;
             isDraggingRight = false;
-            leftBar.style.background = 'transparent';
-            rightBar.style.background = 'transparent';
+            if (activeHandle) activeHandle.style.background = 'transparent';
             document.body.style.cursor = '';
             document.body.style.userSelect = '';
 
-            if (activeSidebar) {
-                activeSidebar.style.transition = '';
-            }
-
-            // 🚨 核心大招：松手瞬间，强制让底层画布重新计算缩放和居中
+            // 松手重新计算画布
             if (typeof applyCanvasTransform === 'function') applyCanvasTransform(false);
             if (typeof drawGridOverlay === 'function') drawGridOverlay();
-            if (typeof renderMainCanvas === 'function') renderMainCanvas();
 
             activeSidebar = null;
+            activeHandle = null;
         });
     }
 
-    // 立即启动这个拖拽模块
     initProSidebarResizer();
 
     initApp();
