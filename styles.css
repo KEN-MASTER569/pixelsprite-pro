@@ -5481,3 +5481,60 @@ details>summary::-webkit-details-marker {
     background: #00f2fe;
     box-shadow: 0 0 12px #00f2fe;
 }
+
+/* ============================================================ */
+/* 🚀 终极主布局重构：强制改为 Flex，解除 Grid 锁死 */
+/* ============================================================ */
+.editor-layout {
+    display: flex !important;
+    flex-direction: row !important;
+    height: calc(100vh - 80px) !important;
+    gap: 16px !important;
+    overflow: hidden !important;
+}
+
+.left-sidebar,
+.right-sidebar {
+    flex-shrink: 0 !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    position: relative !important;
+    transition: none !important;
+    /* 必须关掉 transition，否则拖拽会卡顿 */
+}
+
+/* 中间画布区自动填满剩余空间 */
+.canvas-area {
+    flex: 1 1 auto !important;
+    min-width: 200px !important;
+    height: 100% !important;
+    max-height: 100% !important;
+}
+
+/* 左右面板自带的拖拽发光条 */
+.cyber-drag-handle {
+    position: absolute;
+    top: 0;
+    width: 12px;
+    height: 100%;
+    cursor: col-resize;
+    z-index: 9999;
+    background: transparent;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+#cyber-left-handle {
+    right: -6px;
+}
+
+#cyber-right-handle {
+    left: -6px;
+}
+
+.cyber-drag-handle:hover,
+.cyber-drag-handle.dragging {
+    background: rgba(0, 242, 254, 0.6);
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.8);
+}

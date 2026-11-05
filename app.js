@@ -5644,6 +5644,101 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
+
+        // ============================================================
+        // 🚀 终极侧边栏丝滑拖拽引擎 (坐标追踪版)
+        // ============================================================
+        (function initCyberDragResizer() {
+            const leftSidebar = document.querySelector('.left-sidebar');
+            const rightSidebar = document.querySelector('.right-sidebar');
+
+            if (!leftSidebar || !rightSidebar) return;
+
+            // 1. 动态创建拖拽感应条
+            const leftHandle = document.createElement('div');
+            leftHandle.id = 'cyber-left-handle';
+            leftHandle.className = 'cyber-drag-handle';
+
+            const rightHandle = document.createElement('div');
+            rightHandle.id = 'cyber-right-handle';
+            rightHandle.className = 'cyber-drag-handle';
+
+            leftSidebar.appendChild(leftHandle);
+            rightSidebar.appendChild(rightHandle);
+
+            // 2. 拖拽核心变量
+            let isDragging = false;
+            let activeSide = null; // 'left' or 'right'
+            let startX = 0;
+            let startWidth = 0;
+            let activeHandle = null;
+
+            // 3. 鼠标按下：开始拖拽
+            function onMouseDown(e, side, handle) {
+                e.preventDefault();
+                isDragging = true;
+                activeSide = side;
+                activeHandle = handle;
+                startX = e.clientX;
+
+                // 记录初始宽度
+                const sidebar = side === 'left' ? leftSidebar : rightSidebar;
+                startWidth = sidebar.getBoundingClientRect().width;
+
+                handle.classList.add('dragging');
+                document.body.style.cursor = 'col-resize';
+                document.body.style.userSelect = 'none';
+            }
+
+            // 4. 鼠标移动：实时改变宽度
+            function onMouseMove(e) {
+                if (!isDragging) return;
+
+                const sidebar = activeSide === 'left' ? leftSidebar : rightSidebar;
+                const deltaX = e.clientX - startX;
+
+                let newWidth;
+                if (activeSide === 'left') {
+                    // 左侧：鼠标往右，宽度增加
+                    newWidth = startWidth + deltaX;
+                } else {
+                    // 右侧：鼠标往左，宽度增加（向左拖是正数）
+                    newWidth = startWidth - deltaX;
+                }
+
+                // 限制最大最小宽度 (220px ~ 500px)
+                newWidth = Math.max(220, Math.min(500, newWidth));
+
+                // 强行覆盖宽度
+                sidebar.style.setProperty('width', newWidth + 'px', 'important');
+                sidebar.style.setProperty('flex', '0 0 ' + newWidth + 'px', 'important');
+            }
+
+            // 5. 鼠标松开：结束拖拽并重绘画布
+            function onMouseUp() {
+                if (!isDragging) return;
+                isDragging = false;
+
+                if (activeHandle) activeHandle.classList.remove('dragging');
+
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+
+                // 🚨 核心：重绘画布，防止网格错位
+                if (typeof applyCanvasTransform === 'function') applyCanvasTransform(false);
+                if (typeof drawGridOverlay === 'function') drawGridOverlay();
+
+                activeSide = null;
+                activeHandle = null;
+            }
+
+            // 绑定事件
+            leftHandle.addEventListener('mousedown', (e) => onMouseDown(e, 'left', leftHandle));
+            rightHandle.addEventListener('mousedown', (e) => onMouseDown(e, 'right', rightHandle));
+
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mouseup', onMouseUp);
+        })();
     }
 
     function switchTool(toolName) {
@@ -7665,98 +7760,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // #endregion [R10] 事件总线与初始化 (Event Bus & Init)
-
-    // ============================================================
-    // 🚀 终极丝滑面板拉伸 (纯 JS 动态注入，不依赖 HTML)
-    // ============================================================
-    function initPerfectSidebarResizer() {
-        const leftSidebar = document.querySelector('.left-sidebar');
-        const rightSidebar = document.querySelector('.right-sidebar');
-        if (!leftSidebar || !rightSidebar) return;
-
-        // 确保父级定位正确
-        leftSidebar.style.position = 'relative';
-        rightSidebar.style.position = 'relative';
-
-        // 1. 动态创建左右两个看不见的拖拽条
-        const leftHandle = document.createElement('div');
-        leftHandle.style.cssText = 'position:absolute; top:0; right:-5px; width:10px; height:100%; cursor:col-resize; z-index:9999; background:transparent; transition: background 0.2s;';
-
-        const rightHandle = document.createElement('div');
-        rightHandle.style.cssText = 'position:absolute; top:0; left:-5px; width:10px; height:100%; cursor:col-resize; z-index:9999; background:transparent; transition: background 0.2s;';
-
-        // 把手柄塞进面板边缘
-        leftSidebar.appendChild(leftHandle);
-        rightSidebar.appendChild(rightHandle);
-
-        // 悬浮高亮效果
-        [leftHandle, rightHandle].forEach(handle => {
-            handle.addEventListener('mouseenter', () => handle.style.background = 'rgba(0, 242, 254, 0.5)');
-            handle.addEventListener('mouseleave', () => handle.style.background = 'transparent');
-        });
-
-        // 2. 拖拽逻辑
-        let isDraggingLeft = false;
-        let isDraggingRight = false;
-        let startX = 0;
-        let startWidth = 0;
-        let activeSidebar = null;
-        let activeHandle = null;
-
-        const onMouseDown = (e, sidebar, handle, isLeft) => {
-            e.preventDefault();
-            startX = e.clientX;
-            startWidth = sidebar.offsetWidth;
-
-            if (isLeft) isDraggingLeft = true;
-            else isDraggingRight = true;
-
-            activeSidebar = sidebar;
-            activeHandle = handle;
-
-            handle.style.background = 'rgba(0, 242, 254, 0.9)';
-            document.body.style.cursor = 'col-resize';
-            document.body.style.userSelect = 'none';
-        };
-
-        leftHandle.addEventListener('mousedown', (e) => onMouseDown(e, leftSidebar, leftHandle, true));
-        rightHandle.addEventListener('mousedown', (e) => onMouseDown(e, rightSidebar, rightHandle, false));
-
-        window.addEventListener('mousemove', (e) => {
-            if (!isDraggingLeft && !isDraggingRight) return;
-
-            // 左侧面板鼠标往右变宽 (+)，右侧面板鼠标往左变宽 (-)
-            const deltaX = e.clientX - startX;
-            let newWidth = isDraggingLeft ? (startWidth + deltaX) : (startWidth - deltaX);
-
-            // 限制极限宽度 (220px ~ 500px)
-            newWidth = Math.max(220, Math.min(500, newWidth));
-
-            // 强行修改宽度，画布会自动压缩
-            activeSidebar.style.setProperty('width', `${newWidth}px`, 'important');
-            activeSidebar.style.setProperty('flex', `0 0 ${newWidth}px`, 'important');
-        });
-
-        window.addEventListener('mouseup', () => {
-            if (!isDraggingLeft && !isDraggingRight) return;
-
-            isDraggingLeft = false;
-            isDraggingRight = false;
-            if (activeHandle) activeHandle.style.background = 'transparent';
-            document.body.style.cursor = '';
-            document.body.style.userSelect = '';
-
-            // 松手重新计算画布
-            if (typeof applyCanvasTransform === 'function') applyCanvasTransform(false);
-            if (typeof drawGridOverlay === 'function') drawGridOverlay();
-
-            activeSidebar = null;
-            activeHandle = null;
-        });
-    }
-
-    // 启动它
-    initPerfectSidebarResizer();
 
     initApp();
 });
