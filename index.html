@@ -1014,115 +1014,119 @@
                         <div class="panel-section">
                             <div
                                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <h3 class="section-title" style="margin-bottom: 0;" data-i18n="section_palette">🎨 调色板库
-                                </h3>
-                                <button id="btn-add-swatch" class="btn btn-secondary btn-xs" data-i18n="btn_add_swatch"
-                                    title="将当前选色加到调色板" data-i18n-title="title_add_swatch">➕ 添加色块</button>
-                            </div>
-                            <div style="display: flex; gap: 4px; margin-bottom: 8px;">
-                                <input type="text" id="hex-palette-input" class="select-input" placeholder="#000000"
-                                    maxlength="7"
-                                    style="flex: 1; font-family: monospace; font-size: 12px; text-transform: uppercase;">
-                                <button id="btn-add-hex-color" class="btn btn-secondary btn-xs"
-                                    style="white-space: nowrap;">➕ 加入</button>
-                            </div>
-                            <div class="palette-swatches" id="palette-swatches">
-                                <!-- 动态渲染色块 -->
-                            </div>
-                        </div>
-
-                        <!-- 3. PRO 游戏开发与高级像素工具 (PRO Power Features) -->
-                        <div id="section-pro-power-tools" class="panel-section collapsible-section">
-                            <h3 class="section-title collapsible-header" id="header-pro-tools">
-                                <span data-i18n="section_pro_tools">⭐ PRO 游戏开发高级功能库 <span
-                                        class="pro-tag-badge">PRO</span></span>
-                                <span class="toggle-arrow" id="arrow-pro-tools">▼</span>
-                            </h3>
-                            <div class="collapsible-content" id="content-pro-tools">
-                                <div class="pro-tools-vertical-list">
-
-                                    <!-- 📦 Sprite Sheet 切割器 -->
-                                    <button id="btn-open-slicer" class="btn btn-pro-item">
-                                        <span data-i18n="btn_slicer">📦 Sprite Sheet 图集切割器</span>
-                                        <span class="pro-tag-badge">PRO</span>
-                                    </button>
-
-                                    <!-- 🧱 无缝 Tile 模式 -->
-                                    <button id="btn-toggle-tile-mode" class="btn btn-pro-item">
-                                        <span data-i18n="btn_tile_mode">🧱 Seamless Tile 无缝瓷砖模式</span>
-                                        <span class="pro-tag-badge">PRO</span>
-                                    </button>
-
-                                    <!-- 🖼️ 图片转像素画 -->
-                                    <button id="btn-open-pixelate" class="btn btn-pro-item">
-                                        <span data-i18n="btn_pixelate">🖼️ 照片 / 图片转像素画转换器</span>
-                                        <span class="pro-tag-badge">PRO</span>
-                                    </button>
-
-                                    <!-- 🎨 高级调色板工具 -->
-                                    <div class="pro-sub-box">
-                                        <button id="btn-open-advanced-palette" class="btn btn-pro-item"
-                                            style="width: 100%; margin-bottom: 6px; padding: 6px 10px; justify-content: space-between;">
-                                            <span data-i18n="sub_adv_palette">🎨 高级调色板工作台</span>
-                                            <span class="pro-tag-badge">PRO</span>
-                                        </button>
-                                        <button id="btn-open-palette-extractor" class="btn btn-secondary btn-xs"
-                                            style="width: 100%;" data-i18n="btn_extract_palette"
-                                            title="上传一张图片，自动提取主要颜色替换当前调色板" data-i18n-title="title_extract_palette">🖼️
-                                            从图片自动提取调色板</button>
-                                        <div style="display: flex; gap: 4px; margin-top: 4px;">
-                                            <button id="btn-color-harmony" class="btn btn-secondary btn-xs"
-                                                style="flex: 1;" data-i18n="btn_color_harmony"
-                                                title="根据当前主色生成互补色、类似色与高光阴影色阶并加入调色板"
-                                                data-i18n-title="title_color_harmony">✨ 色彩和谐</button>
-                                            <button id="btn-palette-swap" class="btn btn-secondary btn-xs"
-                                                style="flex: 1;" data-i18n="btn_palette_swap"
-                                                title="在画布上点击一个颜色，把当前图层中该颜色全部替换为当前画笔颜色"
-                                                data-i18n-title="title_palette_swap">🔄 颜色替换</button>
-                                        </div>
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 6px;">
+                                    <h3 class="section-title" style="margin-bottom: 0; flex-shrink: 0;"
+                                        data-i18n="section_palette">🎨 调色板库</h3>
+                                    <div style="display: flex; gap: 4px; flex: 1; justify-content: flex-end;">
+                                        <input type="text" id="hex-palette-input" class="select-input"
+                                            placeholder="#000000" maxlength="7"
+                                            style="width: 80px; font-family: monospace; font-size: 12px; text-transform: uppercase; padding: 4px 8px; height: 26px; text-align: center;">
+                                        <button id="btn-add-hex-color" class="btn btn-secondary btn-xs"
+                                            data-i18n="btn_add_hex"
+                                            style="white-space: nowrap; padding: 4px 10px; height: 26px;">➕ 加入</button>
                                     </div>
-
-                                    <!-- ✨ 高级笔刷工具 -->
-                                    <div class="pro-sub-box">
-                                        <span class="sub-box-title" data-i18n="sub_pixel_tools">✨ 像素画高级笔刷</span>
-                                        <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
-                                            <select id="select-dither-pattern" class="select-input"
-                                                style="font-size: 11px;">
-                                                <option value="none" data-i18n="dither_none">关闭网格抖动 (No Dithering)
-                                                </option>
-                                                <option value="bayer2x2" data-i18n="dither_bayer2x2">░ Bayer 2x2 网格抖动
-                                                </option>
-                                                <option value="bayer4x4" data-i18n="dither_bayer4x4">▒ Bayer 4x4 高阶抖动
-                                                </option>
-                                                <option value="checkerboard" data-i18n="dither_checkerboard">▓ 棋盘交错抖动
-                                                </option>
-                                            </select>
-                                            <div style="display: flex; gap: 4px;">
-                                                <button id="btn-shading-lighten" class="btn btn-secondary btn-xs"
-                                                    style="flex: 1;" data-i18n="btn_lighten" title="自动高光加亮"
-                                                    data-i18n-title="title_lighten">☀️ 加亮高光</button>
-                                                <button id="btn-shading-darken" class="btn btn-secondary btn-xs"
-                                                    style="flex: 1;" data-i18n="btn_darken" title="自动加深阴影"
-                                                    data-i18n-title="title_darken">🌙 加深阴影</button>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- 🔄 RotSprite 算法旋转形变 -->
-                                    <div style="display: flex; gap: 6px; align-items: stretch;">
-                                        <input type="number" id="rotsprite-angle" value="45" min="0" max="360"
-                                            style="width: 60px; background: rgba(0,0,0,0.5); color: #00f2fe; border: 1px solid rgba(0,242,254,0.3); border-radius: var(--radius-sm); text-align: center; font-weight: bold; font-size: 12px;"
-                                            title="输入旋转角度">
-                                        <button id="btn-rotsprite-rotate" class="btn btn-pro-item"
-                                            style="flex: 1; margin: 0;">
-                                            <span data-i18n="btn_rotsprite">🔄 RotSprite 旋转</span>
-                                            <span class="pro-tag-badge">PRO</span>
-                                        </button>
-                                    </div>
-
                                 </div>
-                            </div>
-                        </div>
+
+                                <!-- 3. PRO 游戏开发与高级像素工具 (PRO Power Features) -->
+                                <div id="section-pro-power-tools" class="panel-section collapsible-section">
+                                    <h3 class="section-title collapsible-header" id="header-pro-tools">
+                                        <span data-i18n="section_pro_tools">⭐ PRO 游戏开发高级功能库 <span
+                                                class="pro-tag-badge">PRO</span></span>
+                                        <span class="toggle-arrow" id="arrow-pro-tools">▼</span>
+                                    </h3>
+                                    <div class="collapsible-content" id="content-pro-tools">
+                                        <div class="pro-tools-vertical-list">
+
+                                            <!-- 📦 Sprite Sheet 切割器 -->
+                                            <button id="btn-open-slicer" class="btn btn-pro-item">
+                                                <span data-i18n="btn_slicer">📦 Sprite Sheet 图集切割器</span>
+                                                <span class="pro-tag-badge">PRO</span>
+                                            </button>
+
+                                            <!-- 🧱 无缝 Tile 模式 -->
+                                            <button id="btn-toggle-tile-mode" class="btn btn-pro-item">
+                                                <span data-i18n="btn_tile_mode">🧱 Seamless Tile 无缝瓷砖模式</span>
+                                                <span class="pro-tag-badge">PRO</span>
+                                            </button>
+
+                                            <!-- 🖼️ 图片转像素画 -->
+                                            <button id="btn-open-pixelate" class="btn btn-pro-item">
+                                                <span data-i18n="btn_pixelate">🖼️ 照片 / 图片转像素画转换器</span>
+                                                <span class="pro-tag-badge">PRO</span>
+                                            </button>
+
+                                            <!-- 🎨 高级调色板工具 -->
+                                            <div class="pro-sub-box">
+                                                <button id="btn-open-advanced-palette" class="btn btn-pro-item"
+                                                    style="width: 100%; margin-bottom: 6px; padding: 6px 10px; justify-content: space-between;">
+                                                    <span data-i18n="sub_adv_palette">🎨 高级调色板工作台</span>
+                                                    <span class="pro-tag-badge">PRO</span>
+                                                </button>
+                                                <button id="btn-open-palette-extractor" class="btn btn-secondary btn-xs"
+                                                    style="width: 100%;" data-i18n="btn_extract_palette"
+                                                    title="上传一张图片，自动提取主要颜色替换当前调色板"
+                                                    data-i18n-title="title_extract_palette">🖼️
+                                                    从图片自动提取调色板</button>
+                                                <div style="display: flex; gap: 4px; margin-top: 4px;">
+                                                    <button id="btn-color-harmony" class="btn btn-secondary btn-xs"
+                                                        style="flex: 1;" data-i18n="btn_color_harmony"
+                                                        title="根据当前主色生成互补色、类似色与高光阴影色阶并加入调色板"
+                                                        data-i18n-title="title_color_harmony">✨ 色彩和谐</button>
+                                                    <button id="btn-palette-swap" class="btn btn-secondary btn-xs"
+                                                        style="flex: 1;" data-i18n="btn_palette_swap"
+                                                        title="在画布上点击一个颜色，把当前图层中该颜色全部替换为当前画笔颜色"
+                                                        data-i18n-title="title_palette_swap">🔄 颜色替换</button>
+                                                </div>
+                                            </div>
+
+                                            <!-- ✨ 高级笔刷工具 -->
+                                            <div class="pro-sub-box">
+                                                <span class="sub-box-title" data-i18n="sub_pixel_tools">✨ 像素画高级笔刷</span>
+                                                <div
+                                                    style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+                                                    <select id="select-dither-pattern" class="select-input"
+                                                        style="font-size: 11px;">
+                                                        <option value="none" data-i18n="dither_none">关闭网格抖动 (No
+                                                            Dithering)
+                                                        </option>
+                                                        <option value="bayer2x2" data-i18n="dither_bayer2x2">░ Bayer 2x2
+                                                            网格抖动
+                                                        </option>
+                                                        <option value="bayer4x4" data-i18n="dither_bayer4x4">▒ Bayer 4x4
+                                                            高阶抖动
+                                                        </option>
+                                                        <option value="checkerboard" data-i18n="dither_checkerboard">▓
+                                                            棋盘交错抖动
+                                                        </option>
+                                                    </select>
+                                                    <div style="display: flex; gap: 4px;">
+                                                        <button id="btn-shading-lighten"
+                                                            class="btn btn-secondary btn-xs" style="flex: 1;"
+                                                            data-i18n="btn_lighten" title="自动高光加亮"
+                                                            data-i18n-title="title_lighten">☀️ 加亮高光</button>
+                                                        <button id="btn-shading-darken" class="btn btn-secondary btn-xs"
+                                                            style="flex: 1;" data-i18n="btn_darken" title="自动加深阴影"
+                                                            data-i18n-title="title_darken">🌙 加深阴影</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- 🔄 RotSprite 算法旋转形变 -->
+                                            <div style="display: flex; gap: 6px; align-items: stretch;">
+                                                <input type="number" id="rotsprite-angle" value="45" min="0" max="360"
+                                                    style="width: 60px; background: rgba(0,0,0,0.5); color: #00f2fe; border: 1px solid rgba(0,242,254,0.3); border-radius: var(--radius-sm); text-align: center; font-weight: bold; font-size: 12px;"
+                                                    title="输入旋转角度">
+                                                <button id="btn-rotsprite-rotate" class="btn btn-pro-item"
+                                                    style="flex: 1; margin: 0;">
+                                                    <span data-i18n="btn_rotsprite">🔄 RotSprite 旋转</span>
+                                                    <span class="pro-tag-badge">PRO</span>
+                                                </button>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
 
                     </aside>
                 </div>
@@ -1884,7 +1888,7 @@
                 <!-- 版本号徽章 -->
                 <div class="badge"
                     style="background: rgba(0,242,254,0.1); border-color: rgba(0,242,254,0.3); color: var(--accent-cyan); font-size: 12px; padding: 4px 12px; margin-bottom: 10px;">
-                    <span data-i18n="about_version">版本</span> v2.9.0 (Build 2026)
+                    <span data-i18n="about_version">版本</span> v2.9.1 (Build 2026)
                 </div>
 
                 <!-- 介绍文字 -->
@@ -1892,19 +1896,19 @@
                     专业级 2D 像素画与游戏 Sprite 动画创作工坊。<br>专为独立游戏开发者与像素艺术家打造。
                 </p>
 
-                <!-- 🚨 更新日志区 (首发专属版) -->
+                <!-- 🚨 更新日志区 (v2.9.1 专属版) -->
                 <div
                     style="width: 100%; background: rgba(0, 0, 0, 0.3); border-left: 3px solid #00f2fe; padding: 10px 14px; border-radius: 4px; text-align: left; margin-bottom: 16px;">
                     <h4 data-i18n="changelog_title"
-                        style="color: #fff; font-size: 13px; margin-bottom: 6px; font-weight: 700;">🚀 v1.0.0 全球首发
-                        (Initial Release)
+                        style="color: #fff; font-size: 13px; margin-bottom: 6px; font-weight: 700;">🚀 v2.9.1 更新日志 (最新版)
                     </h4>
                     <ul
                         style="font-size: 11px; color: var(--text-muted); line-height: 1.6; padding-left: 16px; margin: 0;">
-                        <li data-i18n="changelog_item_1">🎉 PixelSprite PRO 网页版首次惊艳亮相！</li>
-                        <li data-i18n="changelog_item_2">🎞️ 专为独立游戏开发者打造的完整逐帧动画时间轴。</li>
-                        <li data-i18n="changelog_item_3">🧱 独创 Seamless Tile 3x3 无缝平铺预览系统。</li>
-                        <li data-i18n="changelog_item_4">📦 游戏级 Sprite Sheet 切割、导出与 JSON Atlas 引擎。</li>
+                        <li data-i18n="changelog_item_1">💰 优化并重塑了全球动态折扣系统（支持自动根据时间更新不同折扣）。</li>
+                        <li data-i18n="changelog_item_2">🎨 新增 HEX 颜色代码输入功能，输入 #000000 即可精准自动添加色块。</li>
+                        <li data-i18n="changelog_item_3">🔒 优化了 PRO 权限及价格展示，修复红色锁定状态下折扣标签看不清的问题。</li>
+                        <li data-i18n="changelog_item_4">🌐 精简了登录界面的 Google 授权按钮，提升多语言切换的准确度。</li>
+                        <li data-i18n="changelog_item_5">🐛 修复了部分 UI 边界溢出与图片导入的像素对齐问题。</li>
                     </ul>
                 </div>
 

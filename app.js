@@ -6598,11 +6598,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnHeaderBuyPro.style.border = 'none';
                 btnHeaderBuyPro.style.boxShadow = '0 4px 12px rgba(255, 196, 57, 0.4)';
             } else {
-                btnHeaderBuyPro.innerHTML = `🔒 <span data-i18n="pro_btn_locked">${dict.pro_btn_locked || '解锁 PRO 终身版 ($19.99)'}</span>`;
+                // 🚨 核心修复：把价格和折扣直接写进红色按钮里，不再依赖悬浮角标
+                const promo = typeof window.getDynamicPrice === 'function' ? window.getDynamicPrice() : { isPromo: false, finalPrice: 2.99, originalPrice: 2.99, discount: 10 };
+                const offPercent = 100 - (promo.discount * 10);
+
+                // 如果是促销期，显式显示“-50%”之类的字样，不管什么颜色底，文字用白色 + 阴影，必可见
+                const promoBadge = promo.isPromo
+                    ? `<span style="background: #ffea70; color: #000; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-left: 6px; font-weight: 900; box-shadow: 0 0 8px rgba(255, 234, 112, 0.8);">-${offPercent}%</span>`
+                    : '';
+
+                btnHeaderBuyPro.innerHTML = `🔒 <span style="margin-right: 4px;">${dict.pro_btn_locked || '解锁 PRO 终身版'}</span> <span style="text-decoration: line-through; opacity: 0.7; font-size: 11px;">$${promo.originalPrice}</span> <span style="font-weight: 900;">$${promo.finalPrice}</span>${promoBadge}`;
                 btnHeaderBuyPro.style.background = 'linear-gradient(135deg, #ff4757 0%, #ff6b81 100%)';
                 btnHeaderBuyPro.style.color = '#ffffff';
                 btnHeaderBuyPro.style.border = 'none';
                 btnHeaderBuyPro.style.boxShadow = '0 4px 12px rgba(255, 71, 87, 0.4)';
+                btnHeaderBuyPro.style.display = 'flex';
+                btnHeaderBuyPro.style.alignItems = 'center';
+                btnHeaderBuyPro.style.gap = '4px';
             }
         }
 
@@ -7570,20 +7582,31 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnHeaderBuyPro = document.getElementById('btn-header-buy-pro');
         if (btnHeaderBuyPro) {
             if (promo.isPromo) {
-                // 🚨 核心修复：根据语言动态显示文字
-                const upgradeText = dict.pro_btn_upgrade_promo || (window.currentLang === 'en' ? 'Upgrade PRO' : '升级 PRO');
-                const offText = dict.pro_btn_discount_tag || (window.currentLang === 'en' ? `${promo.discount * 10}% OFF` : `${promo.discount}折`);
+                // 🚨 核心修复：动态计算百分比
+                const offPercent = 100 - (promo.discount * 10); // 5折 => 50, 6折 => 40
+                const dictTag = window.I18N_TRANSLATIONS[window.currentLang]?.pro_btn_discount_tag || '{percent}% OFF';
+                const offText = dictTag.replace('{percent}', offPercent);
 
+                // 🚨 核心修复：如果是试用过期（红色按钮），让角标颜色变成亮黄色或者白色，绝对不和红色撞色
+                const isLocked = !checkIsProActive();
+                const badgeBg = isLocked ? '#ffea70' : '#ff4757';
+                const badgeColor = isLocked ? '#000000' : '#ffffff';
+                const badgeTextColor = isLocked ? '折扣' : offText;
+
+                // 强制覆盖按钮文字和样式
                 btnHeaderBuyPro.innerHTML = `
-                👑 <span style="text-decoration: line-through; opacity: 0.6; font-size: 11px; margin-right: 4px;">$${promo.originalPrice}</span>
-                <span style="color: #ff4757; font-weight: 900;">${upgradeText} ($${promo.finalPrice})</span>
-                <span style="position: absolute; top: -8px; right: -8px; background: #ff4757; color: #fff; font-size: 9px; padding: 2px 4px; border-radius: 4px; border: 1px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.3); animation: pulseDot 1s infinite alternate;">${offText}</span>
-            `;
+            👑 <span style="text-decoration: line-through; opacity: 0.6; font-size: 11px; margin-right: 4px;">$${promo.originalPrice}</span>
+            <span style="color: ${isLocked ? '#ffffff' : '#ff4757'}; font-weight: 900;">${upgradeText} ($${promo.finalPrice})</span>
+            <span style="position: absolute; top: -8px; right: -8px; background: ${badgeBg}; color: ${badgeColor}; font-size: 9px; padding: 2px 4px; border-radius: 4px; border: 1px solid ${isLocked ? '#000' : '#fff'}; box-shadow: 0 2px 5px rgba(0,0,0,0.5); animation: pulseDot 1s infinite alternate; white-space: nowrap;">
+                ${isLocked ? offText : offText}
+            </span>
+        `;
+
                 btnHeaderBuyPro.style.overflow = 'visible';
                 btnHeaderBuyPro.style.position = 'relative';
-                btnHeaderBuyPro.title = dict.pro_btn_upgrade_tooltip || `购买解锁 PRO 终身尊享版 ($${promo.finalPrice} USD，限时 ${promo.discount} 折)`;
+                btnHeaderBuyPro.title = dict.pro_btn_upgrade_tooltip ? dict.pro_btn_upgrade_tooltip.replace('$19.99', `$${promo.finalPrice}`).replace('5折', `${promo.discount}折`) : `购买解锁 PRO 终身尊享版 ($${promo.finalPrice} USD，限时 ${promo.discount} 折)`;
             } else {
-                btnHeaderBuyPro.title = dict.pro_btn_upgrade_tooltip_normal || `购买解锁 PRO 终身尊享版 ($19.99 USD)`;
+                btnHeaderBuyPro.title = dict.pro_btn_upgrade_tooltip_normal ? dict.pro_btn_upgrade_tooltip_normal.replace('$19.99', `$${promo.originalPrice}`) : `购买解锁 PRO 终身尊享版 ($${promo.originalPrice} USD)`;
             }
         }
 
