@@ -483,6 +483,19 @@
 
             promo_month_range: '📅 促销期间：{month}月1日 至 {month}月10日',
 
+            cyber_email_label: '接收激活码的邮箱',
+            cyber_secure_checkout: '安全加密支付',
+            cyber_instant_unlock: '即时解锁',
+            cyber_lifetime_updates: '终身更新',
+            cyber_have_license: '已经拥有激活码？点击输入',
+            promo_limited_offer: '限时特惠',
+            promo_lifetime_license: '终身买断',
+            promo_save: '立省',
+            promo_one_time: '一次付费',
+            promo_lifetime: '终身使用',
+            promo_no_sub: '无订阅',
+            promo_period: '促销期间：{start} 至 {end}',
+
             // 💳 支付系统
             pay_stripe_btn: '信用卡支付 (Stripe)',
             pay_paypal_btn: 'PayPal',
@@ -978,6 +991,19 @@
 
             promo_month_range: '📅 Promotion Period: {month} 1st to {month} 10th',
 
+            cyber_email_label: 'EMAIL FOR LICENSE KEY',
+            cyber_secure_checkout: 'SECURE CHECKOUT',
+            cyber_instant_unlock: 'INSTANT UNLOCK',
+            cyber_lifetime_updates: 'LIFETIME UPDATES',
+            cyber_have_license: 'Already have a license key? Click to enter',
+            promo_limited_offer: 'LIMITED OFFER',
+            promo_lifetime_license: 'LIFETIME LICENSE',
+            promo_save: 'SAVE',
+            promo_one_time: 'ONE-TIME',
+            promo_lifetime: 'LIFETIME',
+            promo_no_sub: 'NO SUBSCRIPTION',
+            promo_period: 'Promotion Period: {start} - {end}',
+
             // 💳 payment system
             pay_stripe_btn: 'Pay with Card (Stripe)',
             pay_paypal_btn: 'PayPal',
@@ -1467,6 +1493,19 @@
             toast_moved_layer: '🖐️ レイヤーを移動しました ({dx}, {dy})',
 
             promo_month_range: '📅 キャンペーン期間：{month}月1日 〜 {month}月10日',
+
+            cyber_email_label: 'ライセンス送信先メール',
+            cyber_secure_checkout: '安全な決済',
+            cyber_instant_unlock: '即時解放',
+            cyber_lifetime_updates: '永久アップデート',
+            cyber_have_license: 'すでにライセンスをお持ちですか？ここをクリック',
+            promo_limited_offer: '期間限定',
+            promo_lifetime_license: '買い切り',
+            promo_save: '節約',
+            promo_one_time: '一度のお支払い',
+            promo_lifetime: '永久利用',
+            promo_no_sub: 'サブスクなし',
+            promo_period: 'キャンペーン期間：{start} 〜 {end}',
 
             // 💳 支付系统
             pay_stripe_btn: 'クレジットカード決済 (Stripe)',

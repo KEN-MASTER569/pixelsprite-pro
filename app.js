@@ -7014,19 +7014,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 let dateHint = '';
 
-                // 如果是打折期，显示日期提示（使用促销真实起止日，而不是写死 1-10 号）
-                // ⚠️ 注意：这里原先又声明了一次 const promo，会造成暂时性死区 (TDZ)，导致上一行 promo.discount 直接报错
+                // 如果是打折期，显示日期提示（完全交给字典处理）
                 if (promo.promoStart && promo.promoEnd) {
                     const mEn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
                     const s = promo.promoStart, e = promo.promoEnd;
+                    let startStr, endStr;
 
                     if (window.currentLang === 'en') {
-                        dateHint = `📅 Promotion Period: ${mEn[s.m - 1]} ${s.d} – ${mEn[e.m - 1]} ${e.d}`;
+                        startStr = `${mEn[s.m - 1]} ${s.d}`;
+                        endStr = `${mEn[e.m - 1]} ${e.d}`;
                     } else if (window.currentLang === 'ja') {
-                        dateHint = `📅 キャンペーン期間：${s.m}月${s.d}日 〜 ${e.m}月${e.d}日`;
+                        startStr = `${s.m}月${s.d}日`;
+                        endStr = `${e.m}月${e.d}日`;
                     } else {
-                        dateHint = `📅 促销期间：${s.m}月${s.d}日 至 ${e.m}月${e.d}日`;
+                        startStr = `${s.m}月${s.d}日`;
+                        endStr = `${e.m}月${e.d}日`;
                     }
+
+                    dateHint = `📅 ` + (dict.promo_period || 'Promotion Period: {start} - {end}')
+                        .replace('{start}', startStr)
+                        .replace('{end}', endStr);
                 }
 
                 // 拼接打折价格

@@ -79,33 +79,45 @@
     }
 
     // ---------------- 价格终端 + 文案本地化 ----------------
+    // ---------------- 价格终端 + 文案本地化 ----------------
     function renderCheckout() {
         const box = $('cyber-price-display');
         const p = getPromo();
+        const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
+
         if (box) {
             const save = (p.originalPrice - p.finalPrice).toFixed(2);
             const offLabel = L(`${p.discount} 折`, `-${100 - p.discount * 10}%`, `${100 - p.discount * 10}% OFF`);
+
+            // 从字典读取文案
+            const tagOffer = dict.promo_limited_offer || 'LIMITED OFFER';
+            const tagLife = dict.promo_lifetime_license || 'LIFETIME LICENSE';
+            const strSave = dict.promo_save || 'SAVE';
+            const strOneTime = dict.promo_one_time || 'ONE-TIME';
+            const strLife = dict.promo_lifetime || 'LIFETIME';
+            const strNoSub = dict.promo_no_sub || 'NO SUBSCRIPTION';
+
             box.innerHTML = p.isPromo
-                ? `<div class="cp-tag">// ${L('限时特惠', 'LIMITED OFFER', '期間限定')}</div>
+                ? `<div class="cp-tag">// ${tagOffer}</div>
                    <div class="cp-row">
                      <span class="cp-old">$${p.originalPrice}</span>
                      <span class="cp-now" data-text="$${p.finalPrice}">$${p.finalPrice}</span>
                      <span class="cp-off">${offLabel}</span>
                    </div>
-                   <div class="cp-sub">${L(`立省 $${save} · 一次付费 · 终身使用`, `SAVE $${save} · ONE-TIME · LIFETIME`, `$${save} お得 · 買い切り`)}</div>`
-                : `<div class="cp-tag">// ${L('终身买断', 'LIFETIME LICENSE', '買い切り')}</div>
+                   <div class="cp-sub">${strSave} $${save} · ${strOneTime} · ${strLife}</div>`
+                : `<div class="cp-tag">// ${tagLife}</div>
                    <div class="cp-row"><span class="cp-now" data-text="$${p.finalPrice}">$${p.finalPrice}</span><span class="cp-cur">USD</span></div>
-                   <div class="cp-sub">${L('一次付费 · 终身使用 · 无订阅', 'ONE-TIME · LIFETIME · NO SUBSCRIPTION', '買い切り · サブスクなし')}</div>`;
+                   <div class="cp-sub">${strOneTime} · ${strLife} · ${strNoSub}</div>`;
         }
 
         const label = $('pay-email-label');
-        if (label) label.textContent = '> ' + L('接收激活码的邮箱', 'EMAIL FOR LICENSE KEY', 'ライセンス送信先メール');
+        if (label) label.textContent = '> ' + (dict.cyber_email_label || 'EMAIL FOR LICENSE KEY');
 
         const trust = $('cyber-trust-row');
         if (trust) {
-            trust.innerHTML = `<li>🔒 ${L('安全加密支付', 'SECURE CHECKOUT', '安全な決済')}</li>
-                               <li>⚡ ${L('即时解锁', 'INSTANT UNLOCK', '即時解放')}</li>
-                               <li>♾️ ${L('终身更新', 'LIFETIME UPDATES', '永久アップデート')}</li>`;
+            trust.innerHTML = `<li>🔒 ${dict.cyber_secure_checkout || 'SECURE CHECKOUT'}</li>
+                               <li>⚡ ${dict.cyber_instant_unlock || 'INSTANT UNLOCK'}</li>
+                               <li>♾️ ${dict.cyber_lifetime_updates || 'LIFETIME UPDATES'}</li>`;
         }
         prefillEmail();
         setStatus('');

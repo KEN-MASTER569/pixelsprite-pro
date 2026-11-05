@@ -1362,9 +1362,10 @@
                     <!-- 价格终端 (由 addon-payment.js 动态渲染) -->
                     <div class="cyber-price-display" id="cyber-price-display"></div>
 
-                    <!-- 邮箱输入：替代原来的 prompt() 弹框 -->
+                    <!-- 邮箱输入 -->
                     <label class="cyber-field" for="pay-email-input">
-                        <span class="cyber-field-label" id="pay-email-label">&gt; EMAIL_FOR_LICENSE</span>
+                        <span class="cyber-field-label" id="pay-email-label" data-i18n="cyber_email_label">&gt;
+                            EMAIL_FOR_LICENSE</span>
                         <input type="email" id="pay-email-input" autocomplete="email" inputmode="email"
                             placeholder="you@example.com" spellcheck="false">
                         <small class="cyber-field-hint" id="pay-email-hint"></small>
@@ -1389,18 +1390,18 @@
 
                     <!-- 信任徽章 -->
                     <ul class="cyber-trust-row" id="cyber-trust-row">
-                        <li>🔒 SSL</li>
-                        <li>♾️ LIFETIME</li>
-                        <li>⚡ INSTANT</li>
+                        <li>🔒 <span data-i18n="cyber_secure_checkout">SECURE CHECKOUT</span></li>
+                        <li>♾️ <span data-i18n="cyber_lifetime_updates">LIFETIME UPDATES</span></li>
+                        <li>⚡ <span data-i18n="cyber_instant_unlock">INSTANT UNLOCK</span></li>
                     </ul>
 
-                    <!-- 🚨 手动输入激活码的备用通道 -->
+                    <!-- 激活码输入 -->
                     <div
                         style="width: 100%; margin-top: 15px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px;">
                         <details style="cursor: pointer; outline: none;">
                             <summary
                                 style="font-size: 12px; color: var(--text-muted); text-align: center; list-style: none;">
-                                <span data-i18n="have_license">已经拥有激活码？点击输入</span>
+                                <span data-i18n="cyber_have_license">已经拥有激活码？点击输入</span>
                             </summary>
                             <div style="display: flex; gap: 8px; margin-top: 10px;">
                                 <input type="text" id="itch-activation-input" class="select-input"
