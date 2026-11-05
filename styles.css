@@ -5468,3 +5468,9 @@ details>summary {
 details>summary::-webkit-details-marker {
     display: none;
 }
+
+.select-input.invalid {
+    border-color: #ff2a6d !important;
+    box-shadow: 0 0 12px rgba(255, 42, 109, 0.4) !important;
+    animation: cpShake 0.35s;
+}

@@ -4412,6 +4412,55 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // 🎨 HEX 输入 → 校验 → 加入调色板
+        const hexPaletteInput = document.getElementById('hex-palette-input');
+        const btnAddHexColor = document.getElementById('btn-add-hex-color');
+
+        function normalizeHex(raw) {
+            if (!raw) return null;
+            let v = raw.trim().toUpperCase();
+            if (!v.startsWith('#')) v = '#' + v;
+            // 支持 #RGB 简写 → #RRGGBB
+            if (/^#[0-9A-F]{3}$/.test(v)) {
+                v = '#' + v[1] + v[1] + v[2] + v[2] + v[3] + v[3];
+            }
+            if (!/^#[0-9A-F]{6}$/.test(v)) return null;
+            return v;
+        }
+
+        function addHexColorToPalette() {
+            if (!hexPaletteInput) return;
+            const hex = normalizeHex(hexPaletteInput.value);
+            if (!hex) {
+                showToast('⚠️ 颜色格式无效，请输入如 #000000 或 #RGB');
+                hexPaletteInput.classList.add('invalid');
+                return;
+            }
+            hexPaletteInput.classList.remove('invalid');
+            const added = addColorsToPalette([hex]);   // 复用已有的去重添加函数
+            if (added > 0) {
+                showToast(`🎨 已加入调色板: ${hex}`);
+            } else {
+                showToast(`⚠️ 调色板中已存在: ${hex}`);
+            }
+            hexPaletteInput.value = '';
+        }
+
+        if (btnAddHexColor) {
+            btnAddHexColor.addEventListener('click', addHexColorToPalette);
+        }
+        if (hexPaletteInput) {
+            hexPaletteInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addHexColorToPalette();
+                }
+            });
+            hexPaletteInput.addEventListener('input', () => {
+                hexPaletteInput.classList.remove('invalid');
+            });
+        }
+
         // Mouse Drawing Events on Canvas Wrapper
         const targetElement = canvasWrapper || gridCanvas;
 
@@ -7457,26 +7506,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const month = now.getMonth() + 1;
         const year = now.getFullYear();
 
-        const originalPrice = 19.99;
+        const originalPrice = 2.99;          // 🚨 新原价
         let finalPrice = originalPrice;
-        let discount = 10;
+        let discount = 10;                    // 10 = 不打折
         let isPromo = false;
-        let promoStart = null, promoEnd = null; // { m, d }
+        let promoStart = null, promoEnd = null;
 
-        // 首发特别促销期（按你实际情况改年份/月份/日期）
+        // 首发特别促销期（按实际情况改年份/月份/日期）
         if (year === 2026 && month === 10 && day >= 24 && day <= 31) {
             isPromo = true;
-            discount = 5;
-            finalPrice = 9.99;
-            promoStart = { m: 10, d: 24 }; promoEnd = { m: 10, d: 31 };
+            discount = 5;                     // 5 折
+            finalPrice = 1.49;                // $2.99 * 0.5 = $1.495 → 取 1.49
+            promoStart = { m: 10, d: 24 };
+            promoEnd = { m: 10, d: 31 };
         }
-        // 常规促销：每月 1-10 号，5-9 折随机（按年月做种子，同一个月内所有人看到同一个折扣）
+        // 常规促销：每月 1-10 号，5~9 折随机（按年月做种子，同月所有人同价）
         else if (day >= 1 && day <= 10) {
             isPromo = true;
-            const seed = (year * month) % 5;
-            discount = seed + 5;
-            finalPrice = Number((originalPrice * (discount / 10)).toFixed(2));
-            promoStart = { m: month, d: 1 }; promoEnd = { m: month, d: 10 };
+            const seed = (year * month) % 5;  // 0..4
+            discount = seed + 5;              // 5..9
+            // 5折→1.49, 6折→1.79, 7折→2.09, 8折→2.39, 9折→2.69
+            const priceMap = { 5: 1.49, 6: 1.79, 7: 2.09, 8: 2.39, 9: 2.69 };
+            finalPrice = priceMap[discount];
+            promoStart = { m: month, d: 1 };
+            promoEnd = { m: month, d: 10 };
         }
 
         return { isPromo, discount, finalPrice, originalPrice, promoStart, promoEnd };
