@@ -5475,44 +5475,6 @@ details>summary::-webkit-details-marker {
     animation: cpShake 0.35s;
 }
 
-/* ============================================================ */
-/* 🚀 丝滑面板宽度拉伸系统 (Smooth Resizer) */
-/* ============================================================ */
-
-/* 左右面板基础设定 */
-.left-sidebar,
-.right-sidebar {
-    position: relative !important;
-    transition: width 0s, flex-basis 0s;
-    /* 拖拽时不加动画，瞬间跟随鼠标 */
-    flex-shrink: 0 !important;
-    /* 绝对不允许被 flex 强行挤压 */
-    overflow-y: auto !important;
-}
-
-/* 拖拽感应线 (加宽到 8px，方便鼠标抓取) */
-.sidebar-resizer {
-    position: absolute;
-    top: 0;
-    width: 8px;
-    height: 100%;
-    cursor: col-resize;
-    /* 鼠标变成左右箭头 */
-    z-index: 9999;
-    background: transparent;
-    transition: background 0.2s ease;
-}
-
-/* 左侧面板的拖拽线在右边边缘 */
-#left-resizer {
-    right: -4px;
-}
-
-/* 右侧面板的拖拽线在左边边缘 */
-#right-resizer {
-    left: -4px;
-}
-
 /* 鼠标悬浮或拖拽时显示发光青色线条 */
 .sidebar-resizer:hover,
 .sidebar-resizer.active {

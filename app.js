@@ -5644,70 +5644,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
-
-        // ============================================================
-        // 🚀 核心机制：左右面板自由拉伸引擎
-        // ============================================================
-        function initSmoothSidebarResizer() {
-            const leftSidebar = document.querySelector('.left-sidebar');
-            const rightSidebar = document.querySelector('.right-sidebar');
-            const leftResizer = document.getElementById('left-resizer');
-            const rightResizer = document.getElementById('right-resizer');
-
-            if (!leftSidebar || !rightSidebar || !leftResizer || !rightResizer) return;
-
-            const setupResizer = (resizer, sidebar, isLeft) => {
-                let isDragging = false;
-                let startX, startWidth;
-
-                resizer.addEventListener('mousedown', (e) => {
-                    isDragging = true;
-                    startX = e.clientX;
-                    startWidth = sidebar.offsetWidth;
-                    resizer.classList.add('active');
-                    document.body.style.cursor = 'col-resize';
-                    document.body.style.userSelect = 'none'; // 防止拖拽时选中里面的文字
-                });
-
-                window.addEventListener('mousemove', (e) => {
-                    if (!isDragging) return;
-
-                    let newWidth;
-                    if (isLeft) {
-                        // 左侧面板：鼠标往右走变宽
-                        newWidth = startWidth + (e.clientX - startX);
-                    } else {
-                        // 右侧面板：鼠标往左走变宽
-                        newWidth = startWidth - (e.clientX - startX);
-                    }
-
-                    // 限制面板宽度：最小 220px，最大 500px (你可以自己改)
-                    newWidth = Math.max(220, Math.min(500, newWidth));
-
-                    // 强行修改宽度，画布会自动被挤压/拉伸
-                    sidebar.style.width = `${newWidth}px`;
-                });
-
-                window.addEventListener('mouseup', () => {
-                    if (isDragging) {
-                        isDragging = false;
-                        resizer.classList.remove('active');
-                        document.body.style.cursor = '';
-                        document.body.style.userSelect = '';
-
-                        // 🚨 核心：拖拽结束后，强制通知画布重新计算缩放和网格，防止错位
-                        if (typeof applyCanvasTransform === 'function') applyCanvasTransform(false);
-                        if (typeof drawGridOverlay === 'function') drawGridOverlay();
-                    }
-                });
-            };
-
-            setupResizer(leftResizer, leftSidebar, true);
-            setupResizer(rightResizer, rightSidebar, false);
-        }
-
-        // 启动它
-        initSmoothSidebarResizer();
     }
 
     function switchTool(toolName) {
@@ -7731,25 +7667,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // #endregion [R10] 事件总线与初始化 (Event Bus & Init)
 
     // ============================================================
-    // 🚀 终极版本：符合人体工学的侧边栏丝滑拉伸
+    // 🚀 终极丝滑面板拉伸 (纯 JS 动态注入，不依赖 HTML)
     // ============================================================
-    function initProSidebarResizer() {
+    function initPerfectSidebarResizer() {
         const leftSidebar = document.querySelector('.left-sidebar');
         const rightSidebar = document.querySelector('.right-sidebar');
         if (!leftSidebar || !rightSidebar) return;
 
-        // 1. 创建拖拽手柄（紧贴面板边缘，而不是屏幕边缘）
+        // 确保父级定位正确
+        leftSidebar.style.position = 'relative';
+        rightSidebar.style.position = 'relative';
+
+        // 1. 动态创建左右两个看不见的拖拽条
         const leftHandle = document.createElement('div');
-        leftHandle.className = 'cyber-resizer';
         leftHandle.style.cssText = 'position:absolute; top:0; right:-5px; width:10px; height:100%; cursor:col-resize; z-index:9999; background:transparent; transition: background 0.2s;';
 
         const rightHandle = document.createElement('div');
-        rightHandle.className = 'cyber-resizer';
         rightHandle.style.cssText = 'position:absolute; top:0; left:-5px; width:10px; height:100%; cursor:col-resize; z-index:9999; background:transparent; transition: background 0.2s;';
 
-        // 将手柄塞进侧边栏内部（前提是侧边栏必须有 position: relative）
-        leftSidebar.style.position = 'relative';
-        rightSidebar.style.position = 'relative';
+        // 把手柄塞进面板边缘
         leftSidebar.appendChild(leftHandle);
         rightSidebar.appendChild(rightHandle);
 
@@ -7759,7 +7695,7 @@ document.addEventListener('DOMContentLoaded', () => {
             handle.addEventListener('mouseleave', () => handle.style.background = 'transparent');
         });
 
-        // 2. 核心拖拽逻辑
+        // 2. 拖拽逻辑
         let isDraggingLeft = false;
         let isDraggingRight = false;
         let startX = 0;
@@ -7772,11 +7708,9 @@ document.addEventListener('DOMContentLoaded', () => {
             startX = e.clientX;
             startWidth = sidebar.offsetWidth;
 
-            if (isLeft) {
-                isDraggingLeft = true;
-            } else {
-                isDraggingRight = true;
-            }
+            if (isLeft) isDraggingLeft = true;
+            else isDraggingRight = true;
+
             activeSidebar = sidebar;
             activeHandle = handle;
 
@@ -7791,16 +7725,16 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener('mousemove', (e) => {
             if (!isDraggingLeft && !isDraggingRight) return;
 
-            // 🚨 修复方向：左侧面板鼠标往右变宽 (+)，右侧面板鼠标往左变宽 (-)
+            // 左侧面板鼠标往右变宽 (+)，右侧面板鼠标往左变宽 (-)
             const deltaX = e.clientX - startX;
             let newWidth = isDraggingLeft ? (startWidth + deltaX) : (startWidth - deltaX);
 
             // 限制极限宽度 (220px ~ 500px)
             newWidth = Math.max(220, Math.min(500, newWidth));
 
-            // 强行覆盖样式
+            // 强行修改宽度，画布会自动压缩
             activeSidebar.style.setProperty('width', `${newWidth}px`, 'important');
-            activeSidebar.style.setProperty('flex', `0 0 ${newWidth}px`, 'important'); // 防止被挤出
+            activeSidebar.style.setProperty('flex', `0 0 ${newWidth}px`, 'important');
         });
 
         window.addEventListener('mouseup', () => {
@@ -7821,7 +7755,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    initProSidebarResizer();
+    // 启动它
+    initPerfectSidebarResizer();
 
     initApp();
 });
