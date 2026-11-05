@@ -5644,6 +5644,70 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
+
+        // ============================================================
+        // 🚀 核心机制：左右面板自由拉伸引擎
+        // ============================================================
+        function initSmoothSidebarResizer() {
+            const leftSidebar = document.querySelector('.left-sidebar');
+            const rightSidebar = document.querySelector('.right-sidebar');
+            const leftResizer = document.getElementById('left-resizer');
+            const rightResizer = document.getElementById('right-resizer');
+
+            if (!leftSidebar || !rightSidebar || !leftResizer || !rightResizer) return;
+
+            const setupResizer = (resizer, sidebar, isLeft) => {
+                let isDragging = false;
+                let startX, startWidth;
+
+                resizer.addEventListener('mousedown', (e) => {
+                    isDragging = true;
+                    startX = e.clientX;
+                    startWidth = sidebar.offsetWidth;
+                    resizer.classList.add('active');
+                    document.body.style.cursor = 'col-resize';
+                    document.body.style.userSelect = 'none'; // 防止拖拽时选中里面的文字
+                });
+
+                window.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+
+                    let newWidth;
+                    if (isLeft) {
+                        // 左侧面板：鼠标往右走变宽
+                        newWidth = startWidth + (e.clientX - startX);
+                    } else {
+                        // 右侧面板：鼠标往左走变宽
+                        newWidth = startWidth - (e.clientX - startX);
+                    }
+
+                    // 限制面板宽度：最小 220px，最大 500px (你可以自己改)
+                    newWidth = Math.max(220, Math.min(500, newWidth));
+
+                    // 强行修改宽度，画布会自动被挤压/拉伸
+                    sidebar.style.width = `${newWidth}px`;
+                });
+
+                window.addEventListener('mouseup', () => {
+                    if (isDragging) {
+                        isDragging = false;
+                        resizer.classList.remove('active');
+                        document.body.style.cursor = '';
+                        document.body.style.userSelect = '';
+
+                        // 🚨 核心：拖拽结束后，强制通知画布重新计算缩放和网格，防止错位
+                        if (typeof applyCanvasTransform === 'function') applyCanvasTransform(false);
+                        if (typeof drawGridOverlay === 'function') drawGridOverlay();
+                    }
+                });
+            };
+
+            setupResizer(leftResizer, leftSidebar, true);
+            setupResizer(rightResizer, rightSidebar, false);
+        }
+
+        // 启动它
+        initSmoothSidebarResizer();
     }
 
     function switchTool(toolName) {
