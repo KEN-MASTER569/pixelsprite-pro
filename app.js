@@ -4948,6 +4948,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnExportJsonAtlas) btnExportJsonAtlas.addEventListener('click', exportJsonAtlas);
         if (btnExportSvg) btnExportSvg.addEventListener('click', exportSvg);
 
+        const btnExportZip = document.getElementById('btn-export-zip');
+        if (btnExportZip) {
+            btnExportZip.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const exportMenu = document.getElementById('export-menu');
+                if (exportMenu) exportMenu.style.display = 'none';
+                if (exportArrow) exportArrow.style.transform = 'rotate(0deg)';
+                await exportZipBundle();
+            });
+        }
+
         // Project Save & Import
         if (btnSaveProject) btnSaveProject.addEventListener('click', saveProject);
         if (btnImportProject && fileImportInput) {
@@ -5875,7 +5887,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentModalData = null;
     let currentModalFilename = '';
 
-    function showExportModal(dataUrlOrBlob, filename, badgeText, titleText, descText) {
+    function showExportModal(dataUrlOrBlob, filename, badgeText, titleText, descText, previewImgUrl) {
         currentModalData = dataUrlOrBlob;
         currentModalFilename = filename;
         window.currentModalData = dataUrlOrBlob;
@@ -5887,8 +5899,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const dataUrlStr = (typeof dataUrlOrBlob === 'string') ? dataUrlOrBlob : '';
         if (modalPreviewImg) {
-            if (dataUrlStr) modalPreviewImg.src = dataUrlStr;
-            else if (dataUrlOrBlob instanceof Blob) modalPreviewImg.src = URL.createObjectURL(dataUrlOrBlob);
+            if (previewImgUrl) {
+                modalPreviewImg.src = previewImgUrl;
+            } else if (dataUrlStr) {
+                modalPreviewImg.src = dataUrlStr;
+            } else if (dataUrlOrBlob instanceof Blob && (dataUrlOrBlob.type.startsWith('image/') || !dataUrlOrBlob.type)) {
+                modalPreviewImg.src = URL.createObjectURL(dataUrlOrBlob);
+            }
         }
 
         if (modalTitle) modalTitle.textContent = titleText || dict.export_success_title || dict.export_modal_title || '✨ 资产导出成功';
@@ -6358,6 +6375,240 @@ document.addEventListener('DOMContentLoaded', () => {
         if (status === 'cancel') return; // 👈 用户取消
 
         showExportModal(dataUrl, filename, `SVG 矢量图 | ${sizeW}x${sizeH}px`, '✨ 矢量 SVG 导出成功！');
+    }
+
+    async function exportZipBundle() {
+        if (!checkIsProActive()) { openProModal(); return; }
+        commitSelection();
+
+        // 1. 显示全局 Loading
+        const loader = document.getElementById('global-loader');
+        if (loader) loader.style.display = 'flex';
+
+        // 2. 检查 JSZip 库是否就绪（未就绪则动态加载并兜底）
+        if (typeof JSZip === 'undefined') {
+            try {
+                await new Promise((resolve, reject) => {
+                    const s = document.createElement('script');
+                    s.src = 'jszip.min.js';
+                    s.onload = resolve;
+                    s.onerror = () => {
+                        const fallback = document.createElement('script');
+                        fallback.src = 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js';
+                        fallback.onload = resolve;
+                        fallback.onerror = reject;
+                        document.head.appendChild(fallback);
+                    };
+                    document.head.appendChild(s);
+                });
+            } catch (loadErr) {
+                if (loader) loader.style.display = 'none';
+                alert('ZIP 库加载失败，请检查网络连接');
+                return;
+            }
+        }
+
+        setTimeout(async () => {
+            try {
+                const zip = new JSZip();
+                const resX = engine.resX || 32;
+                const resY = engine.resY || 32;
+                const totalFrames = (frameBuffers && frameBuffers.length > 0) ? frameBuffers.length : 1;
+
+                // 读取用户设置的图集倍数 (默认 1x 原分辨率)
+                const scaleSelect = document.getElementById('select-sheet-scale');
+                const frameScale = scaleSelect ? (parseInt(scaleSelect.value) || 1) : 1;
+
+                // 读取每行帧数
+                const colsInput = document.getElementById('param-sheet-cols');
+                let cols = colsInput ? parseInt(colsInput.value) : 0;
+                if (isNaN(cols) || cols <= 0) cols = totalFrames;
+                cols = Math.max(1, Math.min(cols, 64));
+                const rows = Math.ceil(totalFrames / cols);
+
+                const sheetW = cols * resX * frameScale;
+                const sheetH = rows * resY * frameScale;
+
+                // 背景模式
+                const bgModeSelect = document.getElementById('select-bg-mode');
+                const currentBgMode = bgModeSelect ? bgModeSelect.value : 'checkered';
+                const bgColorInput = document.getElementById('bg-color-picker');
+                const currentSolidColor = bgColorInput ? bgColorInput.value : '#ffffff';
+
+                // ==============================
+                // A. 创建 Sprite Sheet 画布
+                // ==============================
+                const sheetCanvas = document.createElement('canvas');
+                sheetCanvas.width = sheetW;
+                sheetCanvas.height = sheetH;
+                const sctx = sheetCanvas.getContext('2d');
+                sctx.imageSmoothingEnabled = false;
+
+                if (currentBgMode === 'solid') {
+                    sctx.fillStyle = currentSolidColor;
+                    sctx.fillRect(0, 0, sheetW, sheetH);
+                }
+
+                // ==============================
+                // B. 生成 frames/ 逐帧 PNG 序列
+                // ==============================
+                const framesFolder = zip.folder('frames');
+                const atlasFrames = [];
+                const gifCanvasList = [];
+
+                for (let f = 0; f < totalFrames; f++) {
+                    const fc = document.createElement('canvas');
+                    fc.width = resX * frameScale;
+                    fc.height = resY * frameScale;
+                    const fctx = fc.getContext('2d');
+                    fctx.imageSmoothingEnabled = false;
+
+                    const buf = (typeof getCompositedFrameBuffer === 'function')
+                        ? getCompositedFrameBuffer(f)
+                        : (frameBuffers[f] || engine.createBuffer(resX, resY));
+
+                    engine.renderToCanvas(buf, fc, true);
+
+                    // 绘制到 Sprite Sheet 画布中
+                    const col = f % cols;
+                    const row = Math.floor(f / cols);
+                    const posX = col * resX * frameScale;
+                    const posY = row * resY * frameScale;
+                    sctx.drawImage(fc, posX, posY);
+
+                    // 写入 frames/ 目录
+                    const padIdx = String(f + 1).padStart(3, '0');
+                    const frameDataUrl = fc.toDataURL('image/png');
+                    const base64Data = frameDataUrl.replace(/^data:image\/png;base64,/, '');
+                    framesFolder.file(`frame_${padIdx}.png`, base64Data, { base64: true });
+
+                    // Atlas 元数据记录
+                    atlasFrames.push({
+                        filename: `frame_${padIdx}.png`,
+                        frame: { x: posX, y: posY, w: resX * frameScale, h: resY * frameScale },
+                        rotated: false,
+                        trimmed: false,
+                        spriteSourceSize: { x: 0, y: 0, w: resX * frameScale, h: resY * frameScale },
+                        sourceSize: { w: resX * frameScale, h: resY * frameScale },
+                        duration: Math.round(1000 / (fps || 12))
+                    });
+
+                    // 收集用于生成 GIF 预览的 Canvas
+                    gifCanvasList.push(fc);
+                }
+
+                // 将 Sprite Sheet 写入 ZIP 根目录
+                const sheetDataUrl = sheetCanvas.toDataURL('image/png');
+                const sheetBase64 = sheetDataUrl.replace(/^data:image\/png;base64,/, '');
+                zip.file('spritesheet.png', sheetBase64, { base64: true });
+
+                // ==============================
+                // C. 生成 spritesheet.json (Atlas)
+                // ==============================
+                const atlasData = {
+                    frames: atlasFrames,
+                    meta: {
+                        app: 'PixelSprite Pro',
+                        version: '2.0',
+                        image: 'spritesheet.png',
+                        format: 'RGBA8888',
+                        size: { w: sheetW, h: sheetH },
+                        scale: String(frameScale),
+                        fps: fps || 12,
+                        totalFrames: totalFrames
+                    }
+                };
+                zip.file('spritesheet.json', JSON.stringify(atlasData, null, 2));
+
+                // ==============================
+                // D. 生成 animation.gif (多帧预览)
+                // ==============================
+                if (totalFrames > 1 && typeof encodeGIF === 'function') {
+                    try {
+                        const delayMs = Math.round(1000 / (fps || 12));
+                        const gifBlob = encodeGIF(gifCanvasList, delayMs);
+                        if (gifBlob) {
+                            zip.file('animation.gif', gifBlob);
+                        }
+                    } catch (gifErr) {
+                        console.warn('GIF 生成跳过:', gifErr);
+                    }
+                }
+
+                // ==============================
+                // E. 生成 README.txt 资产使用说明
+                // ==============================
+                const dateStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
+                const readmeContent = [
+                    '====================================================',
+                    '👑 PixelSprite PRO - Game Asset Package',
+                    '====================================================',
+                    `Export Time    : ${dateStr}`,
+                    `Frame Size     : ${resX * frameScale}x${resY * frameScale} px (${frameScale}x scale)`,
+                    `Total Frames   : ${totalFrames}`,
+                    `Animation FPS  : ${fps || 12} FPS`,
+                    `Sheet Layout   : ${cols} cols x ${rows} rows (Total: ${sheetW}x${sheetH} px)`,
+                    '',
+                    '📦 Package Contents:',
+                    '--------------------',
+                    '1. spritesheet.png  : Full Sprite Sheet (Transparent Alpha Channel)',
+                    '2. spritesheet.json : Texture Atlas (Phaser / Pixi / Godot / Unity compatible)',
+                    '3. frames/          : Individual PNG frame sequence (e.g. frame_001.png...)',
+                    (totalFrames > 1 ? '4. animation.gif    : Animated preview for asset stores and quick viewing\n' : '') +
+                    '5. README.txt       : Asset specifications and license notice',
+                    '',
+                    '🎮 Engine Compatibility:',
+                    '- Godot Engine (AnimatedSprite2D / SpriteFrames)',
+                    '- Unity (Sprite Editor / Multiple Sprite Mode)',
+                    '- Unreal Engine / GameMaker / RPG Maker / Cocos Creator',
+                    '',
+                    '⚖️ License: PixelSprite PRO Commercial & Personal License (Royalty-Free)',
+                    'Created with PixelSprite Studio Pro: https://pixelsprite-pro.vercel.app'
+                ].join('\n');
+                zip.file('README.txt', readmeContent);
+
+                // ==============================
+                // F. 打包为 Blob 并触发保存
+                // ==============================
+                const zipBlob = await zip.generateAsync({
+                    type: 'blob',
+                    compression: 'DEFLATE',
+                    compressionOptions: { level: 6 }
+                });
+
+                if (loader) loader.style.display = 'none';
+
+                const filename = `pixelsprite_pro_bundle_${totalFrames}frames_${resX * frameScale}x${resY * frameScale}.zip`;
+                const status = await promptSaveFilePicker(zipBlob, filename, [
+                    { description: 'ZIP Game Asset Bundle', accept: { 'application/zip': ['.zip'] } }
+                ]);
+
+                if (status === 'cancel') return;
+
+                const dict = window.I18N_TRANSLATIONS?.[window.currentLang] || window.I18N_TRANSLATIONS?.zh || window.I18N_TRANSLATIONS?.en || {};
+                showExportModal(
+                    zipBlob,
+                    filename,
+                    `PRO ZIP 资产包 | ${totalFrames} 帧 | ${resX * frameScale}x${resY * frameScale}px`,
+                    dict.toast_zip_success || '✨ PRO 游戏全套资产 ZIP 包已打包成功！',
+                    '已打包包含：Sprite Sheet 图集、逐帧 PNG 序列、JSON Atlas 与 GIF 动图预览。',
+                    sheetDataUrl
+                );
+
+                if (typeof showToast === 'function') {
+                    showToast(dict.toast_zip_success || '✨ PRO 游戏全套资产 ZIP 包已打包成功！');
+                }
+
+                // 释放临时画布内存
+                sheetCanvas.width = 0;
+                sheetCanvas.height = 0;
+                gifCanvasList.forEach(c => { c.width = 0; c.height = 0; });
+            } catch (err) {
+                console.error('ZIP 打包导出异常:', err);
+                if (loader) loader.style.display = 'none';
+                alert('❌ 打包 ZIP 出现错误：' + (err.message || err));
+            }
+        }, 50);
     }
 
     async function saveProject() {

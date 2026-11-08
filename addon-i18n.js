@@ -22,6 +22,9 @@
             export_sheet: '📊 导出 Sprite Sheet 图集 (PRO)',
             export_json: '🎮 导出 JSON 动画 Atlas (PRO)',
             export_svg: '🎨 导出矢量 SVG (PRO)',
+            export_zip: '📦 导出全套资产 ZIP 包 (PRO)',
+            title_export_zip: '一键打包导出游戏产品资产包 (SpriteSheet + 逐帧PNG + JSON Atlas + GIF动图)',
+            toast_zip_success: '✨ PRO 游戏全套资产 ZIP 包已打包导出！',
             lang_select_header: '🌐 选择系统语言 / Select Language',
 
             // Header & Profile & Auth
@@ -540,6 +543,9 @@
             export_sheet: '📊 Export Sprite Sheet (PRO)',
             export_json: '🎮 Export JSON Atlas (PRO)',
             export_svg: '🎨 Export Vector SVG (PRO)',
+            export_zip: '📦 Export Asset ZIP Bundle (PRO)',
+            title_export_zip: 'One-click export complete game asset pack (SpriteSheet + PNG frames + JSON Atlas + GIF)',
+            toast_zip_success: '✨ PRO Game Asset ZIP Bundle exported successfully!',
             lang_select_header: '🌐 Select System Language',
 
             // Header & Profile & Auth
@@ -1057,6 +1063,9 @@
             export_sheet: '📊 スプライトシート (PRO)',
             export_json: '🎮 JSON アトラス (PRO)',
             export_svg: '🎨 ベクター SVG (PRO)',
+            export_zip: '📦 全アセット ZIP パック (PRO)',
+            title_export_zip: 'ゲーム制作用アセット一括出力 (SpriteSheet + 各フレームPNG + JSON + GIF)',
+            toast_zip_success: '✨ PRO ゲームアセット ZIP パックの出力に成功しました！',
             lang_select_header: '🌐 言語の選択',
 
             // Header & Profile & Auth

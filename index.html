@@ -556,6 +556,20 @@
                                 style="background: #ff007f; color: #050b14; border: none; box-shadow: 0 0 8px #ff007f; font-weight: 900;">PRO</span>
                         </button>
 
+                        <!-- 📦 PRO 专属：一键打包导出游戏资产全套 ZIP 包 -->
+                        <button id="btn-export-zip" class="btn btn-secondary pro-feature-element"
+                            style="width: 100%; justify-content: space-between; text-align: left; font-size: 13px; padding: 10px 12px; border: 1px solid rgba(245, 158, 11, 0.6); background: linear-gradient(90deg, rgba(245, 158, 11, 0.15) 0%, transparent 100%); border-radius: 6px; color: #fbbf24; transition: all 0.2s; box-shadow: inset 0 0 10px rgba(245, 158, 11, 0.1); position: relative; overflow: hidden;"
+                            onmouseover="this.style.boxShadow='inset 0 0 15px rgba(245, 158, 11, 0.3), 0 0 15px rgba(245, 158, 11, 0.2)'; this.style.borderColor='#fbbf24'"
+                            onmouseout="this.style.boxShadow='inset 0 0 10px rgba(245, 158, 11, 0.1)'; this.style.borderColor='rgba(245, 158, 11, 0.6)'"
+                            title="一键打包导出游戏产品资产包 (SpriteSheet + 逐帧PNG + JSON Atlas + GIF动图)" data-i18n-title="title_export_zip">
+                            <div
+                                style="position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.3), transparent); animation: exportScan 3s infinite;">
+                            </div>
+                            <span data-i18n="export_zip">📦 导出全套资产 ZIP 包</span>
+                            <span class="pro-tag-badge"
+                                style="background: #fbbf24; color: #050b14; border: none; box-shadow: 0 0 8px #fbbf24; font-weight: 900;">PRO</span>
+                        </button>
+
                         <div
                             style="height: 1px; background: linear-gradient(90deg, transparent, rgba(0, 242, 254, 0.5), transparent); margin: 4px 0;">
                         </div>
@@ -2209,6 +2223,7 @@
     </div>
 
     <!-- Scripts -->
+    <script src="jszip.min.js"></script>
     <script src="gif_encoder.js?v=2.9"></script>
     <script src="pixel_engine.js?v=2.9"></script>
     <script src="addon-i18n.js?v=1.0"></script>
