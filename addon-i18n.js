@@ -403,6 +403,7 @@
             cloud_save_offline: '⚠️ 网络连接断开，无法确认保存状态，请稍后去“云端读取”查看。',
 
             auth_welcome_toast: '🎉 欢迎，{name}！登录成功！',
+            toast_pro_synced: '👑 检测到当前账号已购买 PRO，已自动同步激活！',
             auth_logout_toast: '👋 已成功退出登录',
             auth_err_no_info: '⚠️ 无法获取 Google 信息',
             auth_err_fetch_fail: '⚠️ 获取信息失败',
@@ -435,6 +436,14 @@
             gif_scale_4x: "4x 高清",
             gif_scale_8x: "8x 超清 (推荐)",
             gif_scale_16x: "16x 极致",
+
+            png_scale_label: "🔍 PNG 尺寸倍数:",
+            sheet_scale_label: "🔍 图集单帧倍数:",
+            scale_1x: "1x (原尺寸，游戏开发推荐)",
+            scale_2x: "2x (双倍清晰)",
+            scale_4x: "4x 高清",
+            scale_8x: "8x 超清",
+            scale_16x: "16x 极致 (社交头像/展示)",
 
             bg_transparent: '🔲 纯透明（无背景）',
             bg_checkered: '🏁 透明棋盘网格',
@@ -912,6 +921,7 @@
             cloud_save_offline: '⚠️ Network disconnected. Unable to confirm save status. Please check "Cloud Load" later.',
 
             auth_welcome_toast: '🎉 Welcome, {name}! Login successful!',
+            toast_pro_synced: '👑 PRO membership detected! Automatically activated on this device.',
             auth_logout_toast: '👋 Successfully logged out',
             auth_err_no_info: '⚠️ Unable to get Google info',
             auth_err_fetch_fail: '⚠️ Failed to fetch info',
@@ -944,6 +954,14 @@
             gif_scale_4x: "4x HD",
             gif_scale_8x: "8x Ultra (Recommended)",
             gif_scale_16x: "16x Extreme",
+
+            png_scale_label: "🔍 PNG Export Scale:",
+            sheet_scale_label: "🔍 Frame Scale:",
+            scale_1x: "1x (Original, Game Dev Recommended)",
+            scale_2x: "2x (Double)",
+            scale_4x: "4x (HD)",
+            scale_8x: "8x (Ultra)",
+            scale_16x: "16x (Extreme / Social)",
 
             bg_transparent: '🔲 Pure Transparent',
             bg_checkered: '🏁 Checkered Grid',
@@ -1415,6 +1433,7 @@
 
             // --- User Auth & Profile (Japanese) ---
             auth_welcome_toast: '🎉 ようこそ、{name} さん！ログインに成功しました！',
+            toast_pro_synced: '👑 PRO 会員が確認されました！この端末で自動アクティベートされました。',
             auth_logout_toast: '👋 ログアウトしました',
             auth_err_no_info: '⚠️ Google の情報を取得できません',
             auth_err_fetch_fail: '⚠️ 情報の取得に失敗しました',
@@ -1447,6 +1466,14 @@
             gif_scale_4x: "4x 高画質",
             gif_scale_8x: "8x 超高画質 (推奨)",
             gif_scale_16x: "16x 極限",
+
+            png_scale_label: "🔍 PNG 出力倍率:",
+            sheet_scale_label: "🔍 画像集フレーム倍率:",
+            scale_1x: "1x (原寸、ゲーム開発推奨)",
+            scale_2x: "2x (2倍)",
+            scale_4x: "4x (高画質)",
+            scale_8x: "8x (超高画質)",
+            scale_16x: "16x (極限 / SNS用)",
 
             bg_transparent: '🔲 完全透明（背景なし）',
             bg_checkered: '🏁 透明チェッカー',

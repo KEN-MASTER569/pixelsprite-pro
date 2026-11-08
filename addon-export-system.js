@@ -35,7 +35,8 @@
         const resX = parseInt(document.getElementById('res-custom-x')?.value) || 32;
         const resY = parseInt(document.getElementById('res-custom-y')?.value) || 32;
 
-        const exportScale = isPro ? 16 : 8;
+        const scaleSelect = document.getElementById('select-png-scale');
+        const exportScale = scaleSelect ? (parseInt(scaleSelect.value) || 1) : 1;
         const innerW = resX * exportScale;
         const innerH = resY * exportScale;
 
@@ -83,7 +84,8 @@
         } else {
             // 免费版：底部加水印条，但像素画主体区域背景必须保持 100% 透明！
             const footerHeight = Math.max(36, Math.floor(innerH * 0.15));
-            exportCanvas.width = innerW;
+            const canvasW = Math.max(innerW, 220);
+            exportCanvas.width = canvasW;
             exportCanvas.height = innerH + footerHeight;
 
             // ✅ 关键：只有纯色模式才填底色；透明模式绝不填底色，完全保留 alpha！
@@ -92,8 +94,9 @@
                 ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
             }
 
-            // 把透明像素画绘制在上方
-            ctx.drawImage(tempCanvas, 0, 0);
+            // 把透明像素画居中绘制在上方
+            const spriteX = Math.floor((canvasW - innerW) / 2);
+            ctx.drawImage(tempCanvas, spriteX, 0);
 
             // 仅在底部绘制深色水印条
             const footerY = innerH;
@@ -117,14 +120,14 @@
         }
 
         // ===== 5. 导出文件名 & 保存（原逻辑不动）=====
-        const filename = isPro ? `pixelsprite_pro_${resX}x${resY}.png` : `pixelsprite_free_${resX}x${resY}.png`;
+        const filename = isPro ? `pixelsprite_pro_${innerW}x${innerH}.png` : `pixelsprite_free_${innerW}x${innerH}.png`;
         const dataUrl = exportCanvas.toDataURL('image/png');
 
         if (window.promptSaveFilePicker) {
             window.promptSaveFilePicker(dataUrl, filename, [{ description: 'PNG Image', accept: { 'image/png': ['.png'] } }]).then(status => {
                 if (status === 'cancel') return;
                 if (typeof window.showExportModal === 'function') {
-                    window.showExportModal(dataUrl, filename, isPro ? 'PRO 纯净原图' : '免费版（含水印）', isPro ? '✨ PRO 导出成功！' : '✨ 免费版导出成功！', '您可以点击下方按钮浏览本地路径。');
+                    window.showExportModal(dataUrl, filename, `PNG | ${innerW}x${innerH}px`, isPro ? '✨ PRO 导出成功！' : '✨ 免费版导出成功！', isPro ? '您已导出纯净无水印原图。' : '您可以点击下方按钮浏览本地路径。');
                 }
             });
         } else {

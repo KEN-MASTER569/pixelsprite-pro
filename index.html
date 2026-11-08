@@ -442,6 +442,21 @@
                             onmouseout="this.style.background='rgba(255,255,255,0.03)'" data-i18n="export_png"
                             title="导出单帧 PNG 图片" data-i18n-title="title_export_png">🖼️ 导出 PNG 单图 (Free)</button>
 
+                        <!-- PNG 尺寸设置区 -->
+                        <div
+                            style="padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 6px; margin-bottom: 4px; border-left: 2px solid rgba(255,255,255,0.4);">
+                            <label style="font-size: 12px; color: #e2e8f0; display: block; margin-bottom: 4px;"
+                                data-i18n="png_scale_label">🔍 PNG 尺寸倍数:</label>
+                            <select id="select-png-scale" class="select-input"
+                                style="width: 100%; padding: 6px; font-size: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255, 255, 255, 0.2); color: #e2e8f0;">
+                                <option value="1" selected data-i18n="scale_1x">1x (原尺寸，游戏开发推荐)</option>
+                                <option value="2" data-i18n="scale_2x">2x (双倍清晰)</option>
+                                <option value="4" data-i18n="scale_4x">4x 高清</option>
+                                <option value="8" data-i18n="scale_8x">8x 超清</option>
+                                <option value="16" data-i18n="scale_16x">16x 极致 (社交头像/展示)</option>
+                            </select>
+                        </div>
+
                         <div
                             style="height: 1px; background: linear-gradient(90deg, transparent, rgba(0, 242, 254, 0.5), transparent); margin: 4px 0;">
                         </div>
@@ -485,8 +500,19 @@
                             <label style="font-size: 12px; color: #e2e8f0; display: block; margin-bottom: 4px;"
                                 data-i18n="sheet_cols_label">📊 Sprite Sheet 每行帧数:</label>
                             <input type="number" id="param-sheet-cols" value="0" min="0" max="64" class="select-input"
-                                style="width: 100%; padding: 6px; font-size: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0, 242, 254, 0.3); color: #00f2fe;"
+                                style="width: 100%; padding: 6px; font-size: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0, 242, 254, 0.3); color: #00f2fe; margin-bottom: 6px;"
                                 placeholder="填 0 自动横向排满" data-i18n-placeholder="sheet_cols_placeholder">
+
+                            <label style="font-size: 12px; color: #e2e8f0; display: block; margin-bottom: 4px;"
+                                data-i18n="sheet_scale_label">🔍 图集单帧倍数:</label>
+                            <select id="select-sheet-scale" class="select-input"
+                                style="width: 100%; padding: 6px; font-size: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0, 242, 254, 0.3); color: #00f2fe;">
+                                <option value="1" selected data-i18n="scale_1x">1x (原尺寸，游戏开发推荐)</option>
+                                <option value="2" data-i18n="scale_2x">2x</option>
+                                <option value="4" data-i18n="scale_4x">4x 高清</option>
+                                <option value="8" data-i18n="scale_8x">8x 超清</option>
+                                <option value="16" data-i18n="scale_16x">16x 极致</option>
+                            </select>
                         </div>
 
                         <button id="btn-export-sheet" class="btn btn-secondary pro-feature-element"

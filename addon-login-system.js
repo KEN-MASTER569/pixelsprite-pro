@@ -140,6 +140,11 @@
         }
 
         document.body.classList.add('logged-in');
+
+        // 🚨 核心优化：登录成功后，自动根据邮箱向云端同步 PRO 终身会员状态
+        if (typeof window.syncProStatusWithBackend === 'function') {
+            window.syncProStatusWithBackend(email);
+        }
     };
 
     // 关闭所有弹窗：只隐藏，并清除残留的 pointer-events，保证下次打开可正常点击
@@ -177,7 +182,18 @@
         window.userState.username = '';
         window.userState.email = '';
         window.userState.avatar = '';
-        try { localStorage.removeItem('pixelsprite_google_user'); } catch (err) { }
+        try { 
+            localStorage.removeItem('pixelsprite_google_user');
+            localStorage.removeItem('pixelsprite_license_key');
+            localStorage.removeItem('pixelsprite_pro_state_v3');
+        } catch (err) { }
+
+        if (window.proState) {
+            window.proState.isLifetimePro = false;
+        }
+        if (typeof window.updateProStatusAndUI === 'function') {
+            window.updateProStatusAndUI();
+        }
 
         // 3. 强制隐藏头像胶囊
         const pill = document.getElementById('user-profile-pill');
@@ -257,6 +273,47 @@
         if (typeof window.showToast === 'function') window.showToast('⚠️ Google 登录 SDK 未就绪，请刷新页面');
     };
 
+    // 6.5 跨设备自动同步 PRO 状态 (云端核验)
+    window.syncProStatusWithBackend = function (email) {
+        const targetEmail = (email || window.userState?.email || '').trim().toLowerCase();
+        if (!targetEmail) return;
+
+        // 如果本地已是合法 PRO 且有激活码，无需频繁请求
+        const localKey = localStorage.getItem('pixelsprite_license_key');
+        const isLifetime = window.proState?.isLifetimePro || (localKey && localKey.startsWith('PRO-'));
+        if (isLifetime) return;
+
+        const BACKEND_URL = 'https://pixelsprite-backend.onrender.com';
+        fetch(`${BACKEND_URL}/api/check-pro-by-email`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: targetEmail })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.success && data.isPro && data.licenseKey) {
+                    console.log('👑 [SyncPro] 检测到当前账号已购买 PRO，自动激活:', data.licenseKey);
+                    localStorage.setItem('pixelsprite_license_key', data.licenseKey);
+                    if (!window.proState) window.proState = {};
+                    window.proState.isLifetimePro = true;
+
+                    if (typeof window.activateLifetimePro === 'function') {
+                        window.activateLifetimePro();
+                    } else if (typeof window.updateProStatusAndUI === 'function') {
+                        window.updateProStatusAndUI();
+                    }
+
+                    if (typeof window.showToast === 'function') {
+                        const dict = window.I18N_TRANSLATIONS?.[window.currentLang] || window.I18N_TRANSLATIONS?.zh || {};
+                        window.showToast(dict.toast_pro_synced || '👑 检测到当前账号已购买 PRO，已自动同步激活！');
+                    }
+                }
+            })
+            .catch(err => {
+                console.warn('[SyncPro] 自动同步 PRO 状态失败:', err);
+            });
+    };
+
     // 7. 启动检查（读取本地状态）
     function bootAuth() {
         let loggedIn = false;
@@ -287,6 +344,12 @@
 
         if (realLoggedIn) {
             if (app) app.style.display = 'block';
+            // 🚨 跨设备自动静默同步 PRO 状态
+            setTimeout(() => {
+                if (typeof window.syncProStatusWithBackend === 'function') {
+                    window.syncProStatusWithBackend(window.userState.email);
+                }
+            }, 600);
         } else {
             if (gate) {
                 gate.style.display = 'flex';

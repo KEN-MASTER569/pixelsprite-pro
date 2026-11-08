@@ -5969,8 +5969,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const resX = engine.resX || 32;
         const resY = engine.resY || 32;
 
-        // 🚨 内存防爆护盾：动态计算安全的导出倍数
-        let exportScale = isPro ? 16 : 8;
+        // 🚨 从 DOM 读取用户选择的倍数，默认为 1x 原尺寸 (如 32×32)
+        const scaleSelect = document.getElementById('select-png-scale');
+        let exportScale = scaleSelect ? (parseInt(scaleSelect.value) || 1) : 1;
         const maxSafeSize = 4096; // 浏览器安全上限 (4096x4096)
 
         if (resX * exportScale > maxSafeSize || resY * exportScale > maxSafeSize) {
@@ -6014,8 +6015,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isPro) {
             // 免费版：底部加水印条，但像素画主体背景必须保持 100% 透明！
             const footerHeight = Math.max(36, Math.floor(innerH * 0.15));
+            const canvasW = Math.max(innerW, 220);
             const watermarkedCanvas = document.createElement('canvas');
-            watermarkedCanvas.width = innerW;
+            watermarkedCanvas.width = canvasW;
             watermarkedCanvas.height = innerH + footerHeight;
             const wctx = watermarkedCanvas.getContext('2d');
             wctx.imageSmoothingEnabled = false;
@@ -6025,7 +6027,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 wctx.fillRect(0, 0, watermarkedCanvas.width, watermarkedCanvas.height);
             }
 
-            wctx.drawImage(tempCanvas, 0, 0);
+            const spriteX = Math.floor((canvasW - innerW) / 2);
+            wctx.drawImage(tempCanvas, spriteX, 0);
 
             // 仅在底部绘制水印条
             const footerY = innerH;
@@ -6050,7 +6053,7 @@ document.addEventListener('DOMContentLoaded', () => {
             exportCanvas = watermarkedCanvas;
         }
 
-        const filename = isPro ? `pixelsprite_pro_${resX}x${resY}.png` : `pixelsprite_free_${resX}x${resY}.png`;
+        const filename = isPro ? `pixelsprite_pro_${innerW}x${innerH}.png` : `pixelsprite_free_${innerW}x${innerH}.png`;
         const dataUrl = exportCanvas.toDataURL('image/png');
 
         const status = await promptSaveFilePicker(dataUrl, filename, [{ description: 'PNG Image', accept: { 'image/png': ['.png'] } }]);
@@ -6179,7 +6182,9 @@ document.addEventListener('DOMContentLoaded', () => {
         cols = Math.max(1, Math.min(cols, 64));
         const rows = Math.ceil(totalFrames / cols);
 
-        const frameScale = 8;
+        // 🚨 从 DOM 读取用户选择的单帧放大倍数，默认为 1x 原尺寸 (游戏引擎推荐)
+        const scaleSelect = document.getElementById('select-sheet-scale');
+        const frameScale = scaleSelect ? (parseInt(scaleSelect.value) || 1) : 1;
         const sheetW = cols * resX * frameScale;
         const sheetH = rows * resY * frameScale;
 
@@ -6224,39 +6229,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!isPro) {
             // 免费版：底部加水印条（保留图集完整功能，与 PNG 单图保持一致）
-            const footerHeight = Math.max(48, Math.floor(sheetW * 0.08));
+            const footerHeight = Math.max(36, Math.floor(sheetH * 0.12));
+            const canvasW = Math.max(sheetW, 260);
             const watermarkedCanvas = document.createElement('canvas');
-            watermarkedCanvas.width = sheetW;
+            watermarkedCanvas.width = canvasW;
             watermarkedCanvas.height = sheetH + footerHeight;
             const wctx = watermarkedCanvas.getContext('2d');
             wctx.imageSmoothingEnabled = false;
 
-            wctx.drawImage(sheetCanvas, 0, 0);
+            if (currentBgMode === 'solid') {
+                wctx.fillStyle = currentSolidColor;
+                wctx.fillRect(0, 0, watermarkedCanvas.width, watermarkedCanvas.height);
+            }
+
+            const sheetX = Math.floor((canvasW - sheetW) / 2);
+            wctx.drawImage(sheetCanvas, sheetX, 0);
 
             // 绘制水印底条
             wctx.fillStyle = '#050b14';
-            wctx.fillRect(0, sheetH, sheetW, footerHeight);
+            wctx.fillRect(0, sheetH, canvasW, footerHeight);
             wctx.fillStyle = '#00f2fe';
-            wctx.fillRect(0, sheetH, sheetW, 2);
+            wctx.fillRect(0, sheetH, canvasW, 2);
 
             wctx.textAlign = 'center';
             wctx.textBaseline = 'middle';
             const titleSize = Math.max(12, Math.floor(footerHeight * 0.35));
             wctx.fillStyle = '#00f2fe';
             wctx.font = `bold ${titleSize}px 'Outfit', sans-serif`;
-            wctx.fillText('👑 Made with PixelSprite Pro · Unlock PRO for Watermark-free Export', sheetW / 2, sheetH + footerHeight * 0.4);
+            wctx.fillText('👑 Made with PixelSprite Pro · Unlock PRO for Watermark-free Export', canvasW / 2, sheetH + footerHeight * 0.4);
 
             const subSize = Math.max(10, Math.floor(footerHeight * 0.25));
             wctx.fillStyle = '#94a3b8';
             wctx.font = `normal ${subSize}px sans-serif`;
-            wctx.fillText('Professional 2D Sprite Sheet & Animation Studio', sheetW / 2, sheetH + footerHeight * 0.75);
+            wctx.fillText('Professional 2D Sprite Sheet & Animation Studio', canvasW / 2, sheetH + footerHeight * 0.75);
 
             exportCanvas = watermarkedCanvas;
         }
 
         const filename = isPro 
-            ? `spritesheet_pro_${totalFrames}frames_${cols}x${rows}.png`
-            : `spritesheet_free_${totalFrames}frames_${cols}x${rows}.png`;
+            ? `spritesheet_pro_${totalFrames}frames_${cols}x${rows}_${resX * frameScale}x${resY * frameScale}.png`
+            : `spritesheet_free_${totalFrames}frames_${cols}x${rows}_${resX * frameScale}x${resY * frameScale}.png`;
         const dataUrl = exportCanvas.toDataURL('image/png');
 
         // 获取当前语言字典
@@ -6270,7 +6282,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showExportModal(
             dataUrl,
             filename,
-            isPro ? `PRO 图集 | ${cols}列 ${rows}行 | ${totalFrames}帧` : `免费图集(含水印) | ${cols}列 ${rows}行 | ${totalFrames}帧`,
+            isPro ? `PRO 图集 | ${cols}列 ${rows}行 | 单帧 ${resX * frameScale}x${resY * frameScale}px` : `免费图集(含水印) | ${cols}列 ${rows}行 | 单帧 ${resX * frameScale}x${resY * frameScale}px`,
             dict.toast_sheet_success || '✨ Sprite Sheet 图集导出成功！',
             isPro ? (dict.sheet_save_hint || '可随时点击下方“快速下载”或“浏览保存路径”。') : '免费版带水印，升级 PRO 尊享版可导出无水印高精图集。'
         );
