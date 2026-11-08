@@ -4936,11 +4936,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 e.stopPropagation();
 
-                if (!checkIsProActive()) { openProModal(); return; }
-
                 // 🚨 关闭下拉菜单，防止挡住画面
                 const exportMenu = document.getElementById('export-menu');
                 if (exportMenu) exportMenu.style.display = 'none';
+                if (exportArrow) exportArrow.style.transform = 'rotate(0deg)';
 
                 // 🚨 直接执行导出（此时输入框里的数值会被 exportSpritesheet 读取）
                 await exportSpritesheet();
@@ -5507,6 +5506,19 @@ document.addEventListener('DOMContentLoaded', () => {
         // Modals
         if (modalClose) modalClose.addEventListener('click', closeModal);
         if (btnModalClose) btnModalClose.addEventListener('click', closeModal);
+        if (btnCustomPathSave) {
+            btnCustomPathSave.addEventListener('click', async () => {
+                const targetFilename = (exportFilenameInput && exportFilenameInput.value.trim()) ? exportFilenameInput.value.trim() : (window.currentModalFilename || 'export.png');
+                if (window.currentModalData) {
+                    await promptSaveFilePicker(window.currentModalData, targetFilename);
+                }
+            });
+        }
+        if (exportModal) {
+            exportModal.addEventListener('click', (e) => {
+                if (e.target === exportModal) closeModal();
+            });
+        }
         if (slicerModalClose) slicerModalClose.addEventListener('click', closeSpriteSheetSlicer);
         if (btnSlicerCancel) btnSlicerCancel.addEventListener('click', closeSpriteSheetSlicer);
         if (slicerFileInput) slicerFileInput.addEventListener('change', handleSlicerFile);
@@ -5860,7 +5872,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // ============================================================
     // #region [R8] 导入导出与工程保存 (Export / Import)
     // ============================================================
+    let currentModalData = null;
+    let currentModalFilename = '';
+
     function showExportModal(dataUrlOrBlob, filename, badgeText, titleText, descText) {
+        currentModalData = dataUrlOrBlob;
+        currentModalFilename = filename;
+        window.currentModalData = dataUrlOrBlob;
+        window.currentModalFilename = filename;
+
+        const dict = window.I18N_TRANSLATIONS?.[window.currentLang] || window.I18N_TRANSLATIONS?.zh || window.I18N_TRANSLATIONS?.en || {};
+
         if (exportFilenameInput) exportFilenameInput.value = filename;
 
         const dataUrlStr = (typeof dataUrlOrBlob === 'string') ? dataUrlOrBlob : '';
@@ -5869,9 +5891,9 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (dataUrlOrBlob instanceof Blob) modalPreviewImg.src = URL.createObjectURL(dataUrlOrBlob);
         }
 
-        if (modalTitle) modalTitle.textContent = titleText || dict.export_success_title || '✨ 资产导出成功';
+        if (modalTitle) modalTitle.textContent = titleText || dict.export_success_title || dict.export_modal_title || '✨ 资产导出成功';
         if (modalBadge) modalBadge.textContent = badgeText || 'PNG | 512x512';
-        if (modalDesc) modalDesc.textContent = descText || dict.export_success_desc || '可随时点击保存到本地！';
+        if (modalDesc) modalDesc.textContent = descText || dict.export_desc || dict.export_success_desc || '可随时点击保存到本地！';
 
         if (modalDownloadLink) {
             if (dataUrlStr) modalDownloadLink.href = dataUrlStr;
@@ -5882,6 +5904,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (exportModal) exportModal.style.display = 'flex';
     }
     window.showExportModal = showExportModal;   // 👈 新增
+    window.getCompositedFrameBuffer = getCompositedFrameBuffer;
+    window.engine = engine;
+    window.getCurrentFrame = () => currentFrame;
 
 
     async function promptSaveFilePicker(contentData, defaultFilename, fileTypes) {
@@ -5912,17 +5937,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 return 'error';
             }
         }
-        return 'fallback';
+
+        // 🚨 兜底：若不支持 showSaveFilePicker，直接通过 <a> 触发原生下载
+        try {
+            const a = document.createElement('a');
+            if (contentData instanceof Blob) {
+                a.href = URL.createObjectURL(contentData);
+            } else {
+                a.href = contentData;
+            }
+            a.download = defaultFilename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            if (typeof showToast === 'function') showToast(`✨ 已开始下载: ${defaultFilename}`);
+            return 'downloaded';
+        } catch (downloadErr) {
+            console.error('下载失败:', downloadErr);
+            return 'fallback';
+        }
     }
     window.promptSaveFilePicker = promptSaveFilePicker;  // 👈 新增
 
     async function exportPng() {
         commitSelection();
+        let isPro = false;
+        if (typeof checkIsProActive === 'function') {
+            isPro = checkIsProActive();
+        }
+
         const resX = engine.resX || 32;
         const resY = engine.resY || 32;
 
         // 🚨 内存防爆护盾：动态计算安全的导出倍数
-        let exportScale = 16;
+        let exportScale = isPro ? 16 : 8;
         const maxSafeSize = 4096; // 浏览器安全上限 (4096x4096)
 
         if (resX * exportScale > maxSafeSize || resY * exportScale > maxSafeSize) {
@@ -5938,19 +5986,76 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        const exportCanvas = document.createElement('canvas');
-        exportCanvas.width = resX * exportScale;
-        exportCanvas.height = resY * exportScale;
+        const innerW = resX * exportScale;
+        const innerH = resY * exportScale;
 
-        const activeBuf = getCompositedFrameBuffer(currentFrame);
-        engine.renderToCanvas(activeBuf, exportCanvas, true);
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = innerW;
+        tempCanvas.height = innerH;
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx.imageSmoothingEnabled = false;
 
-        const filename = `pixel_art_${resX}x${resY}.png`;
+        // 🚨 检查背景模式：只有用户主动选择 solid 纯色时才填底色；透明/棋盘格模式绝对不填底色，保持 100% 透明 alpha！
+        const bgModeSelect = document.getElementById('select-bg-mode');
+        const currentBgMode = bgModeSelect ? bgModeSelect.value : 'checkered';
+        const bgColorInput = document.getElementById('bg-color-picker');
+        const currentSolidColor = bgColorInput ? bgColorInput.value : '#ffffff';
+
+        if (currentBgMode === 'solid') {
+            tempCtx.fillStyle = currentSolidColor;
+            tempCtx.fillRect(0, 0, innerW, innerH);
+        }
+
+        const activeBuf = (typeof getCompositedFrameBuffer === 'function') ? getCompositedFrameBuffer(currentFrame) : (frameBuffers[currentFrame] || engine.createBuffer(resX, resY));
+        engine.renderToCanvas(activeBuf, tempCanvas, currentBgMode !== 'solid');
+
+        let exportCanvas = tempCanvas;
+
+        if (!isPro) {
+            // 免费版：底部加水印条，但像素画主体背景必须保持 100% 透明！
+            const footerHeight = Math.max(36, Math.floor(innerH * 0.15));
+            const watermarkedCanvas = document.createElement('canvas');
+            watermarkedCanvas.width = innerW;
+            watermarkedCanvas.height = innerH + footerHeight;
+            const wctx = watermarkedCanvas.getContext('2d');
+            wctx.imageSmoothingEnabled = false;
+
+            if (currentBgMode === 'solid') {
+                wctx.fillStyle = currentSolidColor;
+                wctx.fillRect(0, 0, watermarkedCanvas.width, watermarkedCanvas.height);
+            }
+
+            wctx.drawImage(tempCanvas, 0, 0);
+
+            // 仅在底部绘制水印条
+            const footerY = innerH;
+            wctx.fillStyle = '#050b14';
+            wctx.fillRect(0, footerY, watermarkedCanvas.width, footerHeight);
+            wctx.fillStyle = '#00f2fe';
+            wctx.fillRect(0, footerY, watermarkedCanvas.width, 2);
+
+            wctx.textAlign = 'center';
+            wctx.textBaseline = 'middle';
+            const titleSize = Math.max(12, Math.floor(footerHeight * 0.35));
+            const subSize = Math.max(10, Math.floor(footerHeight * 0.25));
+
+            wctx.fillStyle = '#00f2fe';
+            wctx.font = `bold ${titleSize}px 'Outfit', sans-serif`;
+            wctx.fillText('👑 Made with PixelSprite Pro', watermarkedCanvas.width / 2, footerY + footerHeight * 0.4);
+
+            wctx.fillStyle = '#94a3b8';
+            wctx.font = `normal ${subSize}px sans-serif`;
+            wctx.fillText('Unlock PRO for Clean HD Export without Watermark', watermarkedCanvas.width / 2, footerY + footerHeight * 0.75);
+
+            exportCanvas = watermarkedCanvas;
+        }
+
+        const filename = isPro ? `pixelsprite_pro_${resX}x${resY}.png` : `pixelsprite_free_${resX}x${resY}.png`;
         const dataUrl = exportCanvas.toDataURL('image/png');
 
         const status = await promptSaveFilePicker(dataUrl, filename, [{ description: 'PNG Image', accept: { 'image/png': ['.png'] } }]);
         if (status === 'cancel') return;
-        showExportModal(dataUrl, filename, `PNG 单图 | ${exportCanvas.width}x${exportCanvas.height}px`, '✨ PNG 图片导出成功！');
+        showExportModal(dataUrl, filename, isPro ? `PRO 纯净原图 | ${innerW}x${innerH}px` : `免费版(含水印) | ${innerW}x${innerH}px`, isPro ? '✨ PRO 图片导出成功！' : '✨ 免费版图片已导出！');
     }
 
     async function exportGif() {
@@ -6002,7 +6107,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const tempCtx = tempCanvas.getContext('2d');
             tempCtx.imageSmoothingEnabled = false;
 
-            const buf = frameBuffers[f] || engine.createBuffer(resX, resY);
+            const buf = (typeof getCompositedFrameBuffer === 'function') ? getCompositedFrameBuffer(f) : (frameBuffers[f] || engine.createBuffer(resX, resY));
             engine.renderToCanvas(buf, tempCanvas, false);
 
             // 直接缩放绘制
@@ -6054,63 +6159,133 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function exportSpritesheet() {
-        if (!checkIsProActive()) { openProModal(); return; }
         commitSelection();
+
+        let isPro = false;
+        if (typeof checkIsProActive === 'function') {
+            isPro = checkIsProActive();
+        } else if (typeof window.checkIsProActive === 'function') {
+            isPro = window.checkIsProActive();
+        }
 
         const resX = engine.resX || 32;
         const resY = engine.resY || 32;
-        const totalFrames = frameBuffers.length;
+        const totalFrames = (frameBuffers && frameBuffers.length > 0) ? frameBuffers.length : 1;
 
         // 🚨 从输入框获取用户想要的列数
         const colsInput = document.getElementById('param-sheet-cols');
         let cols = colsInput ? parseInt(colsInput.value) : 0;
-        if (cols <= 0) cols = totalFrames; // 填 0 表示横向排成一整条
+        if (isNaN(cols) || cols <= 0) cols = totalFrames; // 填 0 或无效表示横向排成一整条
+        cols = Math.max(1, Math.min(cols, 64));
         const rows = Math.ceil(totalFrames / cols);
 
-        const exportCanvas = document.createElement('canvas');
-        exportCanvas.width = cols * resX * 8;
-        exportCanvas.height = rows * resY * 8;
+        const frameScale = 8;
+        const sheetW = cols * resX * frameScale;
+        const sheetH = rows * resY * frameScale;
 
-        const ctx = exportCanvas.getContext('2d');
-        ctx.imageSmoothingEnabled = false;
+        const sheetCanvas = document.createElement('canvas');
+        sheetCanvas.width = sheetW;
+        sheetCanvas.height = sheetH;
+
+        const sctx = sheetCanvas.getContext('2d');
+        sctx.imageSmoothingEnabled = false;
+
+        // 检查背景设置（纯色模式填底色，透明/棋盘格模式保持透明 alpha）
+        const bgModeSelect = document.getElementById('select-bg-mode');
+        const currentBgMode = bgModeSelect ? bgModeSelect.value : 'checkered';
+        const bgColorInput = document.getElementById('bg-color-picker');
+        const currentSolidColor = bgColorInput ? bgColorInput.value : '#ffffff';
+
+        if (currentBgMode === 'solid') {
+            sctx.fillStyle = currentSolidColor;
+            sctx.fillRect(0, 0, sheetW, sheetH);
+        }
 
         // 逐帧绘制到二维网格
         for (let f = 0; f < totalFrames; f++) {
             const fc = document.createElement('canvas');
-            fc.width = resX * 8;
-            fc.height = resY * 8;
-            const buf = frameBuffers[f] || engine.createBuffer(resX, resY);
+            fc.width = resX * frameScale;
+            fc.height = resY * frameScale;
+            const buf = (typeof getCompositedFrameBuffer === 'function') ? getCompositedFrameBuffer(f) : (frameBuffers[f] || engine.createBuffer(resX, resY));
             engine.renderToCanvas(buf, fc, true);
 
             // 二维网格坐标计算
             const col = f % cols;
             const row = Math.floor(f / cols);
 
-            ctx.drawImage(fc, col * resX * 8, row * resY * 8);
+            sctx.drawImage(fc, col * resX * frameScale, row * resY * frameScale);
 
             // 释放临时 Canvas
             fc.width = 0;
             fc.height = 0;
         }
 
-        const filename = `spritesheet_${totalFrames}frames_${cols}x${rows}.png`;
+        let exportCanvas = sheetCanvas;
+
+        if (!isPro) {
+            // 免费版：底部加水印条（保留图集完整功能，与 PNG 单图保持一致）
+            const footerHeight = Math.max(48, Math.floor(sheetW * 0.08));
+            const watermarkedCanvas = document.createElement('canvas');
+            watermarkedCanvas.width = sheetW;
+            watermarkedCanvas.height = sheetH + footerHeight;
+            const wctx = watermarkedCanvas.getContext('2d');
+            wctx.imageSmoothingEnabled = false;
+
+            wctx.drawImage(sheetCanvas, 0, 0);
+
+            // 绘制水印底条
+            wctx.fillStyle = '#050b14';
+            wctx.fillRect(0, sheetH, sheetW, footerHeight);
+            wctx.fillStyle = '#00f2fe';
+            wctx.fillRect(0, sheetH, sheetW, 2);
+
+            wctx.textAlign = 'center';
+            wctx.textBaseline = 'middle';
+            const titleSize = Math.max(12, Math.floor(footerHeight * 0.35));
+            wctx.fillStyle = '#00f2fe';
+            wctx.font = `bold ${titleSize}px 'Outfit', sans-serif`;
+            wctx.fillText('👑 Made with PixelSprite Pro · Unlock PRO for Watermark-free Export', sheetW / 2, sheetH + footerHeight * 0.4);
+
+            const subSize = Math.max(10, Math.floor(footerHeight * 0.25));
+            wctx.fillStyle = '#94a3b8';
+            wctx.font = `normal ${subSize}px sans-serif`;
+            wctx.fillText('Professional 2D Sprite Sheet & Animation Studio', sheetW / 2, sheetH + footerHeight * 0.75);
+
+            exportCanvas = watermarkedCanvas;
+        }
+
+        const filename = isPro 
+            ? `spritesheet_pro_${totalFrames}frames_${cols}x${rows}.png`
+            : `spritesheet_free_${totalFrames}frames_${cols}x${rows}.png`;
         const dataUrl = exportCanvas.toDataURL('image/png');
 
         // 获取当前语言字典
-        const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.zh;
+        const dict = window.I18N_TRANSLATIONS?.[window.currentLang] || window.I18N_TRANSLATIONS?.zh || window.I18N_TRANSLATIONS?.en || {};
 
-        // 🚨 终极绝杀：不搞任何花里胡哨的系统另存为，直接弹窗！
+        // 🚨 核心：调起本地保存文件对话框或触发直接下载
+        const status = await promptSaveFilePicker(dataUrl, filename, [{ description: 'PNG Spritesheet', accept: { 'image/png': ['.png'] } }]);
+        if (status === 'cancel') return;
+
+        // 弹窗预览与快速下载
         showExportModal(
             dataUrl,
             filename,
-            `PNG Spritesheet | ${cols}列 ${rows}行`,
+            isPro ? `PRO 图集 | ${cols}列 ${rows}行 | ${totalFrames}帧` : `免费图集(含水印) | ${cols}列 ${rows}行 | ${totalFrames}帧`,
             dict.toast_sheet_success || '✨ Sprite Sheet 图集导出成功！',
-            dict.sheet_save_hint || '点击下方“保存到本地”即可下载。'
+            isPro ? (dict.sheet_save_hint || '可随时点击下方“快速下载”或“浏览保存路径”。') : '免费版带水印，升级 PRO 尊享版可导出无水印高精图集。'
         );
 
+        if (typeof showToast === 'function') {
+            showToast(isPro ? (dict.toast_sheet_success || '✨ Sprite Sheet 图集导出成功！') : '⚠️ Sprite Sheet 已导出（免费版含水印）');
+        }
+
         // 释放大画布内存
-        exportCanvas.width = 0;
-        exportCanvas.height = 0;
+        sheetCanvas.width = 0;
+        sheetCanvas.height = 0;
+        if (exportCanvas !== sheetCanvas) {
+            exportCanvas.width = 0;
+            exportCanvas.height = 0;
+        }
     }
 
     async function exportJsonAtlas() {

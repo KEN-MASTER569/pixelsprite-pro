@@ -60,14 +60,20 @@
         }
 
         // ===== 3. 把像素画布画上去（保留 alpha）=====
-        const pixelCanvas = document.getElementById('pixel-canvas');
-        if (pixelCanvas) {
-            tempCtx.drawImage(pixelCanvas, 0, 0, innerW, innerH);
+        if (typeof window.getCompositedFrameBuffer === 'function' && window.engine) {
+            const buf = window.getCompositedFrameBuffer();
+            window.engine.renderToCanvas(buf, tempCanvas, currentBgMode !== 'solid');
+        } else {
+            const pixelCanvas = document.getElementById('pixel-canvas');
+            if (pixelCanvas) {
+                tempCtx.drawImage(pixelCanvas, 0, 0, innerW, innerH);
+            }
         }
 
         // ===== 4. 组装最终导出画布 =====
         const exportCanvas = document.createElement('canvas');
         const ctx = exportCanvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
 
         if (isPro) {
             // PRO：直接输出，保留透明
@@ -75,34 +81,39 @@
             exportCanvas.height = innerH;
             ctx.drawImage(tempCanvas, 0, 0);
         } else {
-            // 免费版：加水印（灰底 + 底部条），本来就不透明
-            const padding = Math.max(16, Math.floor(innerW * 0.1));
-            const footerHeight = Math.max(50, Math.floor(innerW * 0.25));
-            exportCanvas.width = innerW + padding * 2;
-            exportCanvas.height = innerH + padding + footerHeight;
+            // 免费版：底部加水印条，但像素画主体区域背景必须保持 100% 透明！
+            const footerHeight = Math.max(36, Math.floor(innerH * 0.15));
+            exportCanvas.width = innerW;
+            exportCanvas.height = innerH + footerHeight;
 
-            ctx.fillStyle = '#f1f5f9';
-            ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
-            ctx.drawImage(tempCanvas, padding, padding);
+            // ✅ 关键：只有纯色模式才填底色；透明模式绝不填底色，完全保留 alpha！
+            if (currentBgMode === 'solid') {
+                ctx.fillStyle = currentSolidColor;
+                ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+            }
 
-            const footerY = exportCanvas.height - footerHeight;
+            // 把透明像素画绘制在上方
+            ctx.drawImage(tempCanvas, 0, 0);
+
+            // 仅在底部绘制深色水印条
+            const footerY = innerH;
             ctx.fillStyle = '#050b14';
             ctx.fillRect(0, footerY, exportCanvas.width, footerHeight);
-            ctx.fillStyle = '#ff4757';
-            ctx.fillRect(0, footerY, exportCanvas.width, 3);
+            ctx.fillStyle = '#00f2fe';
+            ctx.fillRect(0, footerY, exportCanvas.width, 2);
 
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            const titleSize = Math.max(14, Math.floor(exportCanvas.width * 0.05));
-            const subSize = Math.max(10, Math.floor(exportCanvas.width * 0.03));
+            const titleSize = Math.max(12, Math.floor(footerHeight * 0.35));
+            const subSize = Math.max(10, Math.floor(footerHeight * 0.25));
 
             ctx.fillStyle = '#00f2fe';
             ctx.font = `bold ${titleSize}px 'Outfit', sans-serif`;
-            ctx.fillText('👑 Made with PixelSprite Pro', exportCanvas.width / 2, footerY + footerHeight * 0.35);
+            ctx.fillText('👑 Made with PixelSprite Pro', exportCanvas.width / 2, footerY + footerHeight * 0.4);
 
             ctx.fillStyle = '#94a3b8';
-            ctx.font = `bold ${subSize}px sans-serif`;
-            ctx.fillText('Unlock 16x HD Export & Remove Watermark for $19.99', exportCanvas.width / 2, footerY + footerHeight * 0.75);
+            ctx.font = `normal ${subSize}px sans-serif`;
+            ctx.fillText('Unlock PRO for Clean HD Export without Watermark', exportCanvas.width / 2, footerY + footerHeight * 0.75);
         }
 
         // ===== 5. 导出文件名 & 保存（原逻辑不动）=====

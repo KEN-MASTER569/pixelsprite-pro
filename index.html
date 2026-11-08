@@ -1276,6 +1276,41 @@
         </div>
     </div>
 
+    <!-- 导出预览弹窗 Export Preview Modal -->
+    <div id="export-modal" class="modal-backdrop" style="display: none; z-index: 100000;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modal-title" data-i18n="export_modal_title">✨ 资产导出成功</h3>
+                <button id="modal-close" class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-image-box">
+                    <img id="modal-preview-img" src="" alt="Export Preview">
+                </div>
+                <div class="modal-info">
+                    <span id="modal-badge" class="badge">PNG | 512x512</span>
+
+                    <div class="path-selector-box">
+                        <label class="path-label" data-i18n="label_path">📂 保存文件名与路径选择:</label>
+                        <div class="path-input-group">
+                            <input type="text" id="export-filename-input" class="select-input path-field"
+                                placeholder="project_32x32.png">
+                            <button id="btn-custom-path-save" class="btn btn-secondary btn-path-picker"
+                                data-i18n="btn_browse_path" title="选择 Windows 本地保存路径">📂 浏览保存路径</button>
+                        </div>
+                    </div>
+
+                    <p id="modal-desc" data-i18n="export_desc">可随时点击“浏览保存路径”选择本地保存目录！</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a id="modal-download-link" href="#" download="" class="btn btn-primary" data-i18n="btn_quick_download"
+                    target="_blank">⬇️ 快速下载</a>
+                <button id="btn-modal-close" class="btn btn-secondary" data-i18n="btn_close">关闭</button>
+            </div>
+        </div>
+    </div>
+
     <!-- PRO 尊享版会员升级弹窗 Pro VIP Modal -->
     <div id="pro-modal" class="modal-backdrop" style="display: none;">
         <div class="modal-card pro-modal-card">
