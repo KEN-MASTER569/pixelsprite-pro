@@ -1835,13 +1835,9 @@ document.addEventListener('DOMContentLoaded', () => {
         drawGridOverlay();
         drawSymmetryOverlay();
 
-        // 🚨 核心：如果在画画（鼠标没松开），就跳过重建图层面板和缩略图！
-        // 等鼠标松开触发了 handleStrokeEnd，isDrawingNow 变回 false，再去重建。
-        if (!isDrawingNow) {
-            renderFilmstripThumbnails();
-            renderLayersUI();
-            updateHistoryUI();
-        }
+        renderFilmstripThumbnails();
+        renderLayersUI();
+        updateHistoryUI();
     }
 
     function renderMainCanvas() {
@@ -1969,6 +1965,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
+
+        // 🚨 实时同步更新时间轴当前帧的缩略图 (实时绘制反馈)
+        if (!isPlaying) {
+            updateActiveFrameThumbnail();
+        }
+    }
+
+    // ⚡ 极速实时更新当前帧缩略图（直接复用现有 canvas，不触发 DOM 重构，0 延迟）
+    function updateActiveFrameThumbnail() {
+        if (isPlaying || !frameFilmstrip) return;
+        const activeCard = frameFilmstrip.querySelector(`.frame-thumb-card[data-frame="${currentFrame}"]`);
+        if (!activeCard) return;
+        const thumbCanvas = activeCard.querySelector('.frame-thumb-canvas');
+        if (!thumbCanvas) return;
+
+        const buf = (typeof getCompositedFrameBuffer === 'function')
+            ? getCompositedFrameBuffer(currentFrame)
+            : (frameBuffers[currentFrame] || engine.createBuffer());
+
+        engine.renderToCanvas(buf, thumbCanvas, true);
     }
 
     let currentHoverPixelX = -1;
@@ -4496,7 +4512,10 @@ document.addEventListener('DOMContentLoaded', () => {
             strokeCurrentY = coords.y;
 
             const strokeStarted = handleStrokeStart(coords.x, coords.y, isRightClickStroke, e);
-            if (strokeStarted === false) isMouseDown = false;
+            if (strokeStarted === false) {
+                isMouseDown = false;
+                isDrawingNow = false;
+            }
         });
 
         window.addEventListener('mousemove', (e) => {
@@ -4536,6 +4555,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 isMouseDown = false;
                 isRightClickStroke = false;
             }
+            isDrawingNow = false;
         });
 
         // ==========================================
@@ -4613,6 +4633,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 isMouseDown = false;
                 isRightClickStroke = false;
             }
+            isDrawingNow = false;
 
             // 松开手指，解除双指模式
             isTwoFingerMode = false;
@@ -4860,6 +4881,23 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (k === '8') switchTool('select');
             else if (k === '9') switchTool('move');
             else if (k === '0') switchTool('crop');
+
+            // 🎬 动画时间轴专属快捷键 (游戏动画师专属高频键)
+            if (k === 'n' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                if (btnFrameAdd) { btnFrameAdd.click(); e.preventDefault(); return; }
+            }
+            if ((k === 'd' || code === 'KeyD') && e.shiftKey && !e.ctrlKey && !e.metaKey) {
+                if (btnFrameDuplicate) { btnFrameDuplicate.click(); e.preventDefault(); return; }
+            }
+            if (k === ',' || k === '[' || code === 'BracketLeft') {
+                if (btnAnimPrev) { btnAnimPrev.click(); e.preventDefault(); return; }
+            }
+            if (k === '.' || k === ']' || code === 'BracketRight') {
+                if (btnAnimNext) { btnAnimNext.click(); e.preventDefault(); return; }
+            }
+            if (k === 'p' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                if (btnAnimPlay) { btnAnimPlay.click(); e.preventDefault(); return; }
+            }
         });
 
         // Spacebar Panning Hotkey
@@ -5412,16 +5450,24 @@ document.addEventListener('DOMContentLoaded', () => {
             btnAnimPrev.addEventListener('click', () => {
                 stopAnimation();
                 currentFrame = (currentFrame - 1 + frameBuffers.length) % frameBuffers.length;
+                selectedFrames = [currentFrame];
+                lastClickedFrame = currentFrame;
                 updateFrameUI();
                 renderMainCanvas();
+                const activeCard = frameFilmstrip?.querySelector(`.frame-thumb-card[data-frame="${currentFrame}"]`);
+                if (activeCard) activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
             });
         }
         if (btnAnimNext) {
             btnAnimNext.addEventListener('click', () => {
                 stopAnimation();
                 currentFrame = (currentFrame + 1) % frameBuffers.length;
+                selectedFrames = [currentFrame];
+                lastClickedFrame = currentFrame;
                 updateFrameUI();
                 renderMainCanvas();
+                const activeCard = frameFilmstrip?.querySelector(`.frame-thumb-card[data-frame="${currentFrame}"]`);
+                if (activeCard) activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
             });
         }
         if (selectLoopMode) selectLoopMode.addEventListener('change', (e) => { loopMode = e.target.value; });
@@ -5433,8 +5479,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const tagIdx = e.target.value;
                 if (tagIdx !== 'all' && frameTags[tagIdx]) {
                     currentFrame = frameTags[tagIdx].from;
+                    selectedFrames = [currentFrame];
+                    lastClickedFrame = currentFrame;
                     updateFrameUI();
                     renderMainCanvas();
+                    const activeCard = frameFilmstrip?.querySelector(`.frame-thumb-card[data-frame="${currentFrame}"]`);
+                    if (activeCard) activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
                 }
             });
         }
@@ -5442,7 +5492,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnFrameAdd) {
             btnFrameAdd.addEventListener('click', () => {
                 if (!checkIsProActive()) { openProModal(); return; }
+                commitSelection();
+                stopAnimation();
+                isDrawingNow = false;
                 pushHistoryState();
+
                 const resX = engine.resX || 32;
                 const resY = engine.resY || 32;
                 const buf = engine.createBuffer(resX, resY);
@@ -5454,15 +5508,36 @@ document.addEventListener('DOMContentLoaded', () => {
                     opacity: 1.0,
                     buffer: cloneBuffer(buf)
                 }]);
+
                 currentFrame = frameBuffers.length - 1;
+                selectedFrames = [currentFrame];
+                lastClickedFrame = currentFrame;
+                activeLayerIndex = 0;
+
+                syncCurrentFrameBuffer();
                 renderAll();
+                renderFilmstripThumbnails();
+                updateFrameUI();
+
+                if (frameFilmstrip) {
+                    setTimeout(() => {
+                        const newCard = frameFilmstrip.querySelector(`.frame-thumb-card[data-frame="${currentFrame}"]`);
+                        if (newCard) {
+                            newCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+                        }
+                    }, 20);
+                }
             });
         }
 
         if (btnFrameDuplicate) {
             btnFrameDuplicate.addEventListener('click', () => {
                 if (!checkIsProActive()) { openProModal(); return; }
+                commitSelection();
+                stopAnimation();
+                isDrawingNow = false;
                 pushHistoryState();
+
                 initFrameLayers(currentFrame);
                 const curLayers = frameLayers[currentFrame] || [];
                 const clonedLayers = curLayers.map(l => ({
@@ -5472,10 +5547,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     opacity: l.opacity,
                     buffer: cloneBuffer(l.buffer)
                 }));
-                frameBuffers.splice(currentFrame + 1, 0, getCompositedFrameBuffer(currentFrame));
+
+                const compositedBuf = getCompositedFrameBuffer(currentFrame);
+                frameBuffers.splice(currentFrame + 1, 0, cloneBuffer(compositedBuf));
                 frameLayers.splice(currentFrame + 1, 0, clonedLayers);
+
                 currentFrame++;
+                selectedFrames = [currentFrame];
+                lastClickedFrame = currentFrame;
+                activeLayerIndex = 0;
+
+                syncCurrentFrameBuffer();
                 renderAll();
+                renderFilmstripThumbnails();
+                updateFrameUI();
+
+                if (frameFilmstrip) {
+                    setTimeout(() => {
+                        const newCard = frameFilmstrip.querySelector(`.frame-thumb-card[data-frame="${currentFrame}"]`);
+                        if (newCard) {
+                            newCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+                        }
+                    }, 20);
+                }
             });
         }
 
@@ -5483,11 +5577,23 @@ document.addEventListener('DOMContentLoaded', () => {
             btnFrameDelete.addEventListener('click', () => {
                 if (!checkIsProActive()) { openProModal(); return; }
                 if (frameBuffers.length <= 1) { showToast('⚠️ 至少保留一帧！'); return; }
+                commitSelection();
+                stopAnimation();
+                isDrawingNow = false;
                 pushHistoryState();
+
                 frameBuffers.splice(currentFrame, 1);
                 frameLayers.splice(currentFrame, 1);
+
                 currentFrame = Math.min(currentFrame, frameBuffers.length - 1);
+                selectedFrames = [currentFrame];
+                lastClickedFrame = currentFrame;
+                activeLayerIndex = 0;
+
+                syncCurrentFrameBuffer();
                 renderAll();
+                renderFilmstripThumbnails();
+                updateFrameUI();
             });
         }
 
