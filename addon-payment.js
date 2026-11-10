@@ -257,12 +257,19 @@
                 },
 
                 createOrder: async () => {
-                    const email = getEmail({ silent: true });
-                    window._paypalCurrentEmail = email;
+                    let email = getEmail({ silent: true });
+                    if (!email && window.userState && window.userState.email) {
+                        email = window.userState.email;
+                    }
+                    if (!email) {
+                        try { email = localStorage.getItem(EMAIL_KEY) || ''; } catch (e) { }
+                    }
+                    window._paypalCurrentEmail = email || '';
+
                     const res = await fetch(`${BACKEND_URL}/api/paypal/create-order`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email, price: getPromo().finalPrice })
+                        body: JSON.stringify({ email: window._paypalCurrentEmail, price: getPromo().finalPrice })
                     });
                     const data = await res.json();
                     if (!data.success) throw new Error(data.error || 'create-order failed');
@@ -272,10 +279,11 @@
                 onApprove: async (data) => {
                     setStatus(t('pay_verifying'));
                     try {
+                        let email = window._paypalCurrentEmail || getEmail({ silent: true }) || window.userState?.email || '';
                         const res = await fetch(`${BACKEND_URL}/api/paypal/capture-order`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ orderId: data.orderID, email: window._paypalCurrentEmail || '' })
+                            body: JSON.stringify({ orderId: data.orderID, email: email })
                         });
                         const result = await res.json();
                         if (result.success && result.licenseKey) {
