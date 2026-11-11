@@ -912,7 +912,13 @@
                             </p>
                         </div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <!-- 🌐 语言切换栏 (Language Switcher) -->
+                        <div class="comm-lang-switcher" style="display: flex; align-items: center; gap: 5px; margin-right: 4px;">
+                            <button type="button" class="comm-lang-btn ${window.currentLang === 'zh' ? 'active' : ''}" data-lang="zh" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 12px; cursor: pointer; transition: all 0.2s;">🇨🇳 中文</button>
+                            <button type="button" class="comm-lang-btn ${window.currentLang === 'en' ? 'active' : ''}" data-lang="en" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 12px; cursor: pointer; transition: all 0.2s;">🇺🇸 EN</button>
+                            <button type="button" class="comm-lang-btn ${window.currentLang === 'ja' ? 'active' : ''}" data-lang="ja" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 12px; cursor: pointer; transition: all 0.2s;">🇯🇵 日本語</button>
+                        </div>
                         <button id="btn-community-create-new" class="btn" style="
                             font-weight: 800; font-size: 13px; padding: 8px 16px; gap: 6px; border: none; border-radius: 8px;
                             background: linear-gradient(135deg, #ff007f 0%, #7f00ff 100%); color: #ffffff;
@@ -942,9 +948,9 @@
                     ">
                 </div>
 
-                <!-- 作品展示网格 (滚动区域) -->
+                <!-- 作品展示网格 (带专属高辨识度滑动条 Slider Bar) -->
                 <div id="community-cards-grid" style="
-                    flex: 1; overflow-y: auto; padding: 20px 24px;
+                    flex: 1; overflow-y: scroll !important; max-height: calc(88vh - 145px); padding: 20px 24px;
                     display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 18px;
                 ">
                 </div>
@@ -955,6 +961,17 @@
 
         document.getElementById('btn-close-community').onclick = closeCommunityModal;
         document.getElementById('btn-community-create-new').onclick = openPublishModal;
+
+        // 绑定弹窗内语言切换按钮
+        modal.querySelectorAll('.comm-lang-btn').forEach(btn => {
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                const lang = btn.dataset.lang;
+                if (typeof window.changeAppLanguage === 'function') {
+                    window.changeAppLanguage(lang);
+                }
+            };
+        });
 
         const pills = modal.querySelectorAll('.cat-pill');
         pills.forEach(p => {
@@ -1291,14 +1308,20 @@
             e.preventDefault();
             deferredInstallPrompt = e;
             console.log('[PWA] Install prompt ready!');
-            if (btnPwa) btnPwa.style.display = 'inline-flex';
+            if (btnPwa) btnPwa.style.display = 'flex';
         });
 
         if (btnPwa) {
             btnPwa.addEventListener('click', async () => {
                 if (!deferredInstallPrompt) {
+                    const lang = window.currentLang || 'zh';
+                    const msg = lang === 'zh'
+                        ? '💡 提示：如需安装桌面版，也可点击浏览器地址栏右侧的「安装」或「+」图标！'
+                        : (lang === 'ja'
+                            ? '💡 ヒント: ブラウザのアドレスバー右側にある「インストール」アイコンからもインストールできます！'
+                            : '💡 Tip: You can also click the Install icon in your browser address bar!');
                     if (typeof window.showToast === 'function') {
-                        window.showToast('💻 提示：如需安装桌面版，也可点击浏览器地址栏右侧的「安装」图标！');
+                        window.showToast(msg);
                     }
                     return;
                 }
@@ -1306,7 +1329,11 @@
                 deferredInstallPrompt.prompt();
                 const choice = await deferredInstallPrompt.userChoice;
                 if (choice.outcome === 'accepted') {
-                    if (typeof window.showToast === 'function') window.showToast('🎉 PixelSprite 桌面版安装成功！');
+                    const lang = window.currentLang || 'zh';
+                    const succMsg = lang === 'zh'
+                        ? '🎉 PixelSprite 桌面版安装成功！'
+                        : (lang === 'ja' ? '🎉 PixelSprite デスクトップ版のインストールが完了しました！' : '🎉 PixelSprite Desktop App installed successfully!');
+                    if (typeof window.showToast === 'function') window.showToast(succMsg);
                     btnPwa.style.display = 'none';
                 }
                 deferredInstallPrompt = null;

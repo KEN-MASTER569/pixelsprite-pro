@@ -5781,3 +5781,132 @@ details>summary::-webkit-details-marker {
     50% { box-shadow: 0 0 15px rgba(0, 242, 254, 0.5); }
 }
 
+/* ============================================================ */
+/* 🚀 终极防空白/黑屏铁壁布局保护 (Bulletproof Main Layout Guard) */
+/* ============================================================ */
+#app,
+.studio-container {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+}
+
+.studio-main {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    height: calc(100vh - 70px) !important;
+    max-height: calc(100vh - 70px) !important;
+    width: 100% !important;
+    padding: 10px 16px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    position: relative !important;
+}
+
+#editor-view-container {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.editor-layout {
+    display: flex !important;
+    flex-direction: row !important;
+    width: 100% !important;
+    height: 100% !important;
+    gap: 16px !important;
+    overflow: hidden !important;
+}
+
+.left-sidebar {
+    width: 300px !important;
+    min-width: 240px !important;
+    max-width: 480px !important;
+    flex: 0 0 300px !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.right-sidebar {
+    width: 280px !important;
+    min-width: 240px !important;
+    max-width: 440px !important;
+    flex: 0 0 280px !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.canvas-area {
+    flex: 1 1 auto !important;
+    min-width: 200px !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+}
+
+/* ============================================================ */
+/* 🌟 高辨识度可拖拽滑块（Draggable Slider Bar / Scrollbar）样式 */
+/* ============================================================ */
+#community-cards-grid,
+#about-app-modal .modal-body {
+    overflow-y: scroll !important;
+    scrollbar-width: thin;
+    scrollbar-color: #00f2fe rgba(0, 0, 0, 0.5);
+}
+
+#community-cards-grid::-webkit-scrollbar,
+#about-app-modal .modal-body::-webkit-scrollbar {
+    width: 10px !important;
+    background: rgba(0, 0, 0, 0.45) !important;
+    border-radius: 6px !important;
+}
+
+#community-cards-grid::-webkit-scrollbar-track,
+#about-app-modal .modal-body::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.7) !important;
+    border-radius: 6px !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+#community-cards-grid::-webkit-scrollbar-thumb,
+#about-app-modal .modal-body::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #00f2fe 0%, #7f00ff 100%) !important;
+    border-radius: 6px !important;
+    border: 1px solid rgba(0, 242, 254, 0.6) !important;
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.5) !important;
+    cursor: grab !important;
+}
+
+#community-cards-grid::-webkit-scrollbar-thumb:hover,
+#about-app-modal .modal-body::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #4facfe 0%, #ff007f 100%) !important;
+    box-shadow: 0 0 16px rgba(0, 242, 254, 0.8) !important;
+}
+
+#community-cards-grid::-webkit-scrollbar-thumb:active,
+#about-app-modal .modal-body::-webkit-scrollbar-thumb:active {
+    cursor: grabbing !important;
+}
+
+.about-lang-btn.active,
+.comm-lang-btn.active {
+    background: rgba(0, 242, 254, 0.2) !important;
+    border-color: #00f2fe !important;
+    color: #00f2fe !important;
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.3) !important;
+}
+

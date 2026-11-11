@@ -21,6 +21,7 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#00f2fe">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="logo.png">
     <script src="https://cdn.jsdelivr.net/npm/pica@9.0.1/dist/pica.min.js"></script>
@@ -416,10 +417,6 @@
                 <button id="btn-open-community" class="btn btn-secondary" data-i18n="btn_community_remix"
                     title="浏览精选社区模板与一键 Remix 二创" data-i18n-title="title_community_remix">🌐 社区 / Remix</button>
 
-                <!-- PWA 桌面端离线安装按钮 -->
-                <button id="btn-pwa-install" class="btn btn-outline btn-xs" data-i18n="btn_pwa_install"
-                    title="安装为独立桌面应用程序，支持离线运行" data-i18n-title="title_pwa_install" style="display: none; padding: 6px 12px; border-radius: var(--radius-sm); align-items: center; gap: 4px;">📲 安装桌面版</button>
-
                 <!-- 导出菜单 Dropdown -->
                 <div class="export-dropdown-wrapper" style="position: relative;">
                     <button id="btn-export-main" class="btn btn-primary"
@@ -632,15 +629,6 @@
                     <aside class="sidebar left-sidebar">
                         <!-- 🚨 加上这一行，作为拖拽线 -->
                         <div class="sidebar-resizer" id="left-resizer"></div>
-
-                        <!-- 🌐 全球社区作品与分享 (Global Community & Share) -->
-                        <div class="panel-section" style="padding: 6px 8px; margin-bottom: 8px;">
-                            <button id="btn-left-share-community" class="btn" style="width: 100%; background: linear-gradient(135deg, rgba(255, 0, 127, 0.25) 0%, rgba(0, 242, 254, 0.2) 100%); border: 1px solid #ff007f; color: #ffffff; font-weight: 800; font-size: 13px; padding: 10px 12px; border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(255, 0, 127, 0.3); transition: all 0.25s;" onmouseover="this.style.background='linear-gradient(135deg, rgba(255, 0, 127, 0.45) 0%, rgba(0, 242, 254, 0.35) 100%)'; this.style.boxShadow='0 0 20px rgba(255, 0, 127, 0.6)';" onmouseout="this.style.background='linear-gradient(135deg, rgba(255, 0, 127, 0.25) 0%, rgba(0, 242, 254, 0.2) 100%)'; this.style.boxShadow='0 4px 15px rgba(255, 0, 127, 0.3)';">
-                                <span style="font-size: 16px;">🌐</span>
-                                <span data-i18n="btn_global_community">全球社区作品 / 分享二创</span>
-                                <span style="background: #ff007f; color: #fff; font-size: 9px; padding: 1px 5px; border-radius: 4px; font-weight: 800;">HOT</span>
-                            </button>
-                        </div>
 
                         <!-- 1. 绘图工具箱 (Free Drawing Tools) -->
                         <div class="panel-section collapsible-section">
@@ -2078,7 +2066,7 @@
     <!-- 🚀 软件信息与关于弹窗 -->
     <div id="about-app-modal" class="modal-backdrop" style="display: none; z-index: 100000;">
         <div class="modal-card"
-            style="width: 420px; text-align: center; overflow: hidden; position: relative; border: 1px solid rgba(0, 242, 254, 0.3); box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(0, 242, 254, 0.15);">
+            style="width: 460px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; position: relative; border: 1px solid rgba(0, 242, 254, 0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.9), 0 0 35px rgba(0, 242, 254, 0.2); border-radius: 12px; background: rgba(11, 15, 26, 0.95); backdrop-filter: blur(25px);">
 
             <!-- 顶部背景光效 -->
             <div
@@ -2086,19 +2074,25 @@
             </div>
 
             <div class="modal-header"
-                style="position: relative; z-index: 2; border-bottom: none; padding-bottom: 0; justify-content: flex-end;">
+                style="position: relative; z-index: 2; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 12px 18px; display: flex; align-items: center; justify-content: space-between;">
+                <!-- 🌐 语言切换按钮 (Language Switcher) -->
+                <div class="about-modal-lang-bar" style="display: flex; align-items: center; gap: 6px;">
+                    <button type="button" class="about-lang-btn" onclick="window.changeAppLanguage('zh')" data-lang="zh" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s;">🇨🇳 中文</button>
+                    <button type="button" class="about-lang-btn" onclick="window.changeAppLanguage('en')" data-lang="en" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s;">🇺🇸 English</button>
+                    <button type="button" class="about-lang-btn" onclick="window.changeAppLanguage('ja')" data-lang="ja" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s;">🇯🇵 日本語</button>
+                </div>
                 <button id="about-modal-close" class="modal-close-btn"
                     onclick="document.getElementById('about-app-modal').style.display='none'"
-                    style="color: #ffffff; pointer-events: auto !important; z-index: 9999999 !important;">&times;</button>
+                    style="color: #ffffff; pointer-events: auto !important; font-size: 20px; cursor: pointer; border: none; background: transparent;">&times;</button>
             </div>
 
             <div class="modal-body"
-                style="position: relative; z-index: 2; align-items: center; gap: 12px; padding-top: 0;">
+                style="position: relative; z-index: 2; overflow-y: scroll !important; max-height: calc(85vh - 55px); padding: 16px 20px 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;">
 
-                <!-- 🚨 替换这里：放大版的 3D 魔方 Logo -->
-                <div class="logo-icon-wrapper" style="width: 90px; height: 90px; margin: 0 auto;">
+                <!-- 🚨 放大版的 3D 魔方 Logo -->
+                <div class="logo-icon-wrapper" style="width: 80px; height: 80px; margin: 0 auto;">
                     <div class="logo-icon-wrapper"
-                        style="position: relative; width: 72px; height: 72px; display: flex; align-items: center; justify-content: center;">
+                        style="position: relative; width: 68px; height: 68px; display: flex; align-items: center; justify-content: center;">
                         <!-- 背后的雷达扫描线 -->
                         <div
                             style="position: absolute; inset: -10px; border-radius: 50%; border: 1px dashed rgba(0, 242, 254, 0.4); animation: spinRing 10s linear infinite;">
@@ -2108,55 +2102,38 @@
                         </div>
 
                         <!-- 终极 Logo SVG -->
-                        <svg viewBox="0 0 100 100" width="64" height="64"
+                        <svg viewBox="0 0 100 100" width="60" height="60"
                             style="filter: drop-shadow(0 0 10px rgba(0, 242, 254, 0.6)); position: relative; z-index: 2;">
                             <defs>
-                                <!-- 顶部高光渐变 -->
-                                <linearGradient id="top-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <linearGradient id="about-top-grad" x1="0%" y1="0%" x2="100%" y2="100%">
                                     <stop offset="0%" stop-color="#ffffff" />
                                     <stop offset="50%" stop-color="#00f2fe" />
                                     <stop offset="100%" stop-color="#4facfe" />
                                 </linearGradient>
-                                <!-- 左侧暗面渐变 -->
-                                <linearGradient id="left-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <linearGradient id="about-left-grad" x1="0%" y1="0%" x2="0%" y2="100%">
                                     <stop offset="0%" stop-color="#7f00ff" />
                                     <stop offset="100%" stop-color="#3a00b0" />
                                 </linearGradient>
-                                <!-- 右侧亮面渐变 -->
-                                <linearGradient id="right-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <linearGradient id="about-right-grad" x1="0%" y1="0%" x2="0%" y2="100%">
                                     <stop offset="0%" stop-color="#00f2fe" />
                                     <stop offset="100%" stop-color="#0055ff" />
                                 </linearGradient>
-                                <!-- 内部核心发光 -->
-                                <filter id="core-glow" x="-50%" y="-50%" width="200%" height="200%">
+                                <filter id="about-core-glow" x="-50%" y="-50%" width="200%" height="200%">
                                     <feGaussianBlur stdDeviation="3" result="blur" />
                                     <feComposite in="SourceGraphic" in2="blur" operator="over" />
                                 </filter>
                             </defs>
-
-                            <!-- 外围科幻六角框 -->
                             <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="none"
                                 stroke="rgba(0, 242, 254, 0.3)" stroke-width="1.5" stroke-dasharray="10 5" />
-
-                            <!-- 主体 3D 魔方 -->
-                            <g filter="url(#core-glow)">
-                                <!-- 顶部菱形 -->
-                                <path d="M 50 15 L 80 35 L 50 55 L 20 35 Z" fill="url(#top-grad)" opacity="0.95" />
-                                <!-- 左侧暗面 -->
-                                <path d="M 20 35 L 50 55 L 50 85 L 20 65 Z" fill="url(#left-grad)" opacity="0.85" />
-                                <!-- 右侧亮面 -->
-                                <path d="M 80 35 L 50 55 L 50 85 L 80 65 Z" fill="url(#right-grad)" opacity="0.85" />
-
-                                <!-- 机械分割线 (增加科技感) -->
+                            <g filter="url(#about-core-glow)">
+                                <path d="M 50 15 L 80 35 L 50 55 L 20 35 Z" fill="url(#about-top-grad)" opacity="0.95" />
+                                <path d="M 20 35 L 50 55 L 50 85 L 20 65 Z" fill="url(#about-left-grad)" opacity="0.85" />
+                                <path d="M 80 35 L 50 55 L 50 85 L 80 65 Z" fill="url(#about-right-grad)" opacity="0.85" />
                                 <path d="M 50 15 L 50 85" stroke="#ffffff" stroke-width="1" opacity="0.4" />
-                                <path d="M 20 35 L 50 55 L 80 35" stroke="#ffffff" stroke-width="1.5" opacity="0.6"
-                                    fill="none" />
-                                <path d="M 35 45 L 35 75 M 65 45 L 65 75" stroke="#00f2fe" stroke-width="1"
-                                    opacity="0.3" />
+                                <path d="M 20 35 L 50 55 L 80 35" stroke="#ffffff" stroke-width="1.5" opacity="0.6" fill="none" />
+                                <path d="M 35 45 L 35 75 M 65 45 L 65 75" stroke="#00f2fe" stroke-width="1" opacity="0.3" />
                             </g>
-
-                            <!-- 中心的核心水晶 (脉动动画) -->
-                            <circle cx="50" cy="50" r="4" fill="#ffffff" filter="url(#core-glow)">
+                            <circle cx="50" cy="50" r="4" fill="#ffffff" filter="url(#about-core-glow)">
                                 <animate attributeName="r" values="3;5;3" dur="1.5s" repeatCount="indefinite" />
                                 <animate attributeName="opacity" values="1;0.5;1" dur="1.5s" repeatCount="indefinite" />
                             </circle>
@@ -2165,36 +2142,39 @@
                 </div>
 
                 <!-- 高级流光标题 -->
-                <h2 class="modal-premium-title">
+                <h2 class="modal-premium-title" style="margin: 0; font-size: 24px;">
                     PixelSprite <span>Pro</span>
                 </h2>
 
-                <!-- 版本号徽章 -->
-                <div class="badge"
-                    style="background: rgba(0,242,254,0.15); border-color: rgba(0,242,254,0.4); color: var(--accent-cyan); font-size: 12px; padding: 4px 12px; margin-bottom: 10px; font-weight: 800;">
-                    <span data-i18n="about_version">版本</span> v3.0.0 (Build 2026 Ultimate)
+                <!-- 🚀 版本号徽章 (大字号突出显示 v3.0.0) -->
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 6px;">
+                    <div class="badge-v3-hero"
+                        style="font-size: 22px; font-weight: 900; color: #00f2fe; text-shadow: 0 0 16px rgba(0,242,254,0.9); letter-spacing: 2px; padding: 4px 20px; background: rgba(0,242,254,0.12); border: 1px solid rgba(0,242,254,0.45); border-radius: 20px; box-shadow: 0 0 15px rgba(0, 242, 254, 0.2);">
+                        v3.0.0
+                    </div>
+                    <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">(Build 2026 Ultimate Pro)</span>
                 </div>
 
                 <!-- 介绍文字 -->
-                <p class="modal-desc-text" data-i18n="about_desc" style="margin-bottom: 16px;">
+                <p class="modal-desc-text" data-i18n="about_desc" style="margin-bottom: 12px; font-size: 12px;">
                     专业级 2D 像素画与游戏 Sprite 动画创作工坊。<br>专为独立游戏开发者与像素艺术家打造。
                 </p>
 
                 <!-- 🚨 更新日志区 (v3.0.0 专属版) -->
                 <div
-                    style="width: 100%; background: rgba(0, 0, 0, 0.3); border-left: 3px solid #00f2fe; padding: 10px 14px; border-radius: 4px; text-align: left; margin-bottom: 16px;">
+                    style="width: 100%; background: rgba(0, 0, 0, 0.35); border-left: 3px solid #00f2fe; padding: 12px 14px; border-radius: 6px; text-align: left; margin-bottom: 12px; border-top: 1px solid rgba(255,255,255,0.05); border-right: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05);">
                     <h4 data-i18n="changelog_title"
-                        style="color: #fff; font-size: 13px; margin-bottom: 6px; font-weight: 700;">🚀 v3.0.0 重大更新日志 (最新版)
+                        style="color: #fff; font-size: 13px; margin-bottom: 8px; font-weight: 800;">🚀 v3.0.0 重大更新日志 (最新版)
                     </h4>
                     <ul
-                        style="font-size: 11px; color: var(--text-muted); line-height: 1.6; padding-left: 16px; margin: 0;">
-                        <li>🏷️ <b>新增【动画片段 Tag 标签系统】</b>：标记 Idle/Walk/Attack 动作，导出带 Tag 的 Godot/Aseprite JSON Atlas 与独立动作 GIF。</li>
-                        <li>🧱 <b>重构【画布内 3×3 无缝平铺模式】</b>：淘汰 CSS 背景假平铺，画布内实时渲染九宫格克隆，支持笔画跨边自动穿透环绕绘制。</li>
-                        <li>↔️ <b>升级【发光对称镜像工具】</b>：顶栏一键直切水平/垂直/双轴对称，发光霓虹中轴线 + 实时对称光标落点预判。</li>
-                        <li>📤 <b>重构【专业导出面板与智能尺寸计算器】</b>：独立弹窗设置，实时像素换算与自适应预览，支持 1x~16x 自由倍数导出。</li>
-                        <li>🌐 <b>新增【全球社区画廊 & 互动 Remix】</b>：浏览世界各地作品，支持发布新画作、点赞、收藏、发表评论与一键 Remix 二创！</li>
-                        <li>📲 <b>支持【PWA 桌面版独立安装】</b>：支持离线断网创作，在 Windows / Mac / 移动设备独立窗口秒开运行。</li>
-                        <li>🎨 <b>新增【经典复古预设色板与重新量化映射】</b>：内置 GameBoy/NES/Pico-8 等色板，支持欧氏距离智能画布量化重映射。</li>
+                        style="font-size: 11px; color: var(--text-muted); line-height: 1.6; padding-left: 16px; margin: 0; display: flex; flex-direction: column; gap: 6px;">
+                        <li data-i18n="changelog_item_1">🏷️ <b>新增【动画片段 Tag 标签系统】</b>：标记 Idle/Walk/Attack 动作，导出带 Tag 的 Godot/Aseprite JSON Atlas 与独立动作 GIF。</li>
+                        <li data-i18n="changelog_item_2">🧱 <b>重构【画布内 3×3 无缝平铺模式】</b>：淘汰 CSS 背景假平铺，画布内实时渲染九宫格克隆，支持笔画跨边自动穿透环绕绘制。</li>
+                        <li data-i18n="changelog_item_3">↔️ <b>升级【发光对称镜像工具】</b>：顶栏一键直切水平/垂直/双轴对称，发光霓虹中轴线 + 实时对称光标落点预判。</li>
+                        <li data-i18n="changelog_item_4">📤 <b>重构【专业导出面板与智能尺寸计算器】</b>：独立弹窗设置，实时像素换算与自适应预览，支持 1x~16x 自由倍数导出。</li>
+                        <li data-i18n="changelog_item_5">🌐 <b>新增【全球社区画廊 & 互动 Remix】</b>：浏览世界各地作品，支持发布新画作、点赞、收藏、发表评论与一键 Remix 二创！</li>
+                        <li data-i18n="changelog_item_6">📲 <b>支持【PWA 桌面版独立安装】</b>：支持离线断网创作，在 Windows / Mac / 移动设备独立窗口秒开运行。</li>
+                        <li data-i18n="changelog_item_7">🎨 <b>新增【经典复古预设色板与重新量化映射】</b>：内置 GameBoy/NES/Pico-8 等色板，支持欧氏距离智能画布量化重映射。</li>
                     </ul>
                 </div>
 
@@ -2208,11 +2188,12 @@
                         padding: 12px 16px;
                         background: rgba(0, 0, 0, 0.4);
                         border: 1px solid rgba(255, 255, 255, 0.1);
-                        border-radius: 4px;
+                        border-radius: 6px;
                         text-decoration: none;
                         position: relative;
                         overflow: hidden;
                         transition: all 0.3s;
+                        box-sizing: border-box;
                     }
 
                     .cyber-social-btn::before {
@@ -2245,6 +2226,7 @@
                         justify-content: center;
                         border-radius: 6px;
                         margin-right: 12px;
+                        flex-shrink: 0;
                     }
                 </style>
 
@@ -2304,6 +2286,27 @@
                         <span data-i18n="link_action_connect"
                             style="font-size: 12px; font-weight: bold; opacity: 0.6;">连接 ➔</span>
                     </a>
+
+                    <!-- 📲 独立桌面版安装 (PWA Desktop App) 放置在 Discord 正下方 -->
+                    <button id="btn-pwa-install" class="cyber-social-btn"
+                        style="color: #00f2fe; border-color: rgba(0, 242, 254, 0.4); box-shadow: 0 0 15px rgba(0, 242, 254, 0.1); cursor: pointer; width: 100%; text-align: left; background: rgba(0, 0, 0, 0.4);"
+                        onmouseover="this.style.background='rgba(0, 242, 254, 0.12)'; this.style.transform='translateX(4px)'; this.style.boxShadow='0 0 25px rgba(0, 242, 254, 0.4)'; this.style.borderColor='#00f2fe';"
+                        onmouseout="this.style.background='rgba(0, 0, 0, 0.4)'; this.style.transform='translateX(0)'; this.style.boxShadow='0 0 15px rgba(0, 242, 254, 0.1)'; this.style.borderColor='rgba(0, 242, 254, 0.4)';">
+                        <div style="display: flex; align-items: center;">
+                            <div class="social-icon-box"
+                                style="background: linear-gradient(135deg, #00f2fe 0%, #7f00ff 100%); border: none; box-shadow: 0 0 12px rgba(0, 242, 254, 0.5); font-size: 18px; color: #fff;">
+                                📲
+                            </div>
+                            <div style="display: flex; flex-direction: column; text-align: left; margin-left: 12px;">
+                                <span data-i18n="pwa_modal_title"
+                                    style="font-family: 'Outfit'; font-size: 14px; font-weight: 800; color: #fff; letter-spacing: 1px;">DESKTOP APP</span>
+                                <span data-i18n="pwa_modal_desc"
+                                    style="font-size: 11px; color: var(--text-muted);">一键安装独立桌面端，秒开极速离线创作</span>
+                            </div>
+                        </div>
+                        <span data-i18n="btn_install_now"
+                            style="font-size: 12px; font-weight: bold; color: #00f2fe; opacity: 0.9;">安装 ➔</span>
+                    </button>
 
                     <!-- X (Twitter) -->
                     <a href="https://x.com/KenLoo424416" target="_blank" class="cyber-social-btn"

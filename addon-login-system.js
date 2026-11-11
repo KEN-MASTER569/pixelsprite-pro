@@ -21,7 +21,7 @@
 
         if (which === 'app') {
             if (gate) gate.style.display = 'none';
-            if (app) app.style.display = 'block';
+            if (app) { app.style.display = 'flex'; app.style.flexDirection = 'column'; }
         } else {
             if (gate) gate.style.display = 'flex';
             if (app) app.style.display = 'none';
@@ -86,7 +86,8 @@
         const app = document.getElementById('app');
         if (app) {
             app.style.removeProperty('display'); // 清掉退出时写入的 !important
-            app.style.display = 'block';
+            app.style.display = 'flex';
+            app.style.flexDirection = 'column';
             app.style.pointerEvents = 'auto';
         }
 
@@ -343,7 +344,7 @@
         }
 
         if (realLoggedIn) {
-            if (app) app.style.display = 'block';
+            if (app) { app.style.display = 'flex'; app.style.flexDirection = 'column'; }
             // 🚨 跨设备自动静默同步 PRO 状态
             setTimeout(() => {
                 if (typeof window.syncProStatusWithBackend === 'function') {
