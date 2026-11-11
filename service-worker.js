@@ -17,7 +17,8 @@ const STATIC_ASSETS = [
     './gif_encoder.js',
     './jszip.min.js',
     './logo.png',
-    './manifest.json'
+    './manifest.json',
+    './favicon.svg'
 ];
 
 // Install: Cache Static Assets

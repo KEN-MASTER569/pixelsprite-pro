@@ -85,27 +85,29 @@
         if (rxInput) rxInput.value = resX;
         if (ryInput) ryInput.value = resY;
 
-        // 注入帧与图层
-        const frames = workData.frames;
-        window.frameBuffers = [];
-        window.frameLayers = [];
-
-        frames.forEach((fBuf, idx) => {
-            const clonedBuf = JSON.parse(JSON.stringify(fBuf));
-            window.frameBuffers.push(clonedBuf);
-            window.frameLayers.push([
-                {
-                    id: 'layer_remix_' + Date.now() + '_' + idx,
-                    name: 'Remix ' + (workData.title || 'Layer'),
-                    visible: true,
-                    opacity: 1.0,
-                    buffer: JSON.parse(JSON.stringify(fBuf))
-                }
-            ]);
-        });
-
-        window.currentFrame = 0;
-        window.activeLayerIndex = 0;
+        if (typeof window.loadFramesIntoApp === 'function') {
+            window.loadFramesIntoApp(workData.frames, resX, resY, workData.fps || 4);
+        } else {
+            // 降级回退
+            window.frameBuffers = [];
+            window.frameLayers = [];
+            frames.forEach((fBuf, idx) => {
+                const clonedBuf = JSON.parse(JSON.stringify(fBuf));
+                window.frameBuffers.push(clonedBuf);
+                window.frameLayers.push([
+                    {
+                        id: 'layer_remix_' + Date.now() + '_' + idx,
+                        name: 'Remix ' + (workData.title || 'Layer'),
+                        visible: true,
+                        opacity: 1.0,
+                        buffer: JSON.parse(JSON.stringify(fBuf))
+                    }
+                ]);
+            });
+            window.currentFrame = 0;
+            window.activeLayerIndex = 0;
+            if (typeof window.renderAll === 'function') window.renderAll();
+        }
 
         // 注入调色板
         if (workData.palette && workData.palette.length && window.customPalette) {
@@ -221,19 +223,22 @@
             ctx.drawImage(mainCanvas, 0, 0, previewCanvas.width, previewCanvas.height);
         }
 
-        // 自动填入当前画板的分辨率
+        // 自动填入当前画板的分辨率与真实总帧数
         const resX = (window.engine && window.engine.resX) || 32;
         const resY = (window.engine && window.engine.resY) || 32;
-        const frameCount = (window.frameBuffers && window.frameBuffers.length) || 1;
+        const frameCount = (typeof window.getTotalFramesCount === 'function')
+            ? window.getTotalFramesCount()
+            : ((window.frameBuffers && window.frameBuffers.length) || 1);
         const infoBadge = document.getElementById('publish-spec-badge');
         if (infoBadge) infoBadge.textContent = `${resX}×${resY} 像素 • ${frameCount} 帧序列`;
 
-        // 自动填入作者名
-        const authorInput = document.getElementById('publish-input-author');
-        if (authorInput && (!authorInput.value || authorInput.value === 'PixelArtist')) {
-            const author = (window.userState && window.userState.user && window.userState.user.name) || 'PixelArtist';
-            authorInput.value = author;
-        }
+        // 自动填入当前登录用户的固定作者昵称 (只读展示，发布作品时不提供修改)
+        const author = (window.userState && window.userState.username)
+            || (window.userState && window.userState.user && window.userState.user.name)
+            || localStorage.getItem('pixelsprite_nickname')
+            || 'PixelArtist';
+        const displayAuthorEl = document.getElementById('publish-display-author');
+        if (displayAuthorEl) displayAuthorEl.textContent = author;
 
         modal.style.display = 'flex';
     }
@@ -293,13 +298,16 @@
                         ">
                     </div>
 
-                    <!-- 作者昵称 -->
+                    <!-- 作者昵称 (只读锁定，仅允许在用户资料中修改) -->
                     <div>
                         <label id="publish-author-label" style="font-size: 12px; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 6px;">${tr('publish_label_author')}</label>
-                        <input id="publish-input-author" type="text" value="PixelArtist" style="
-                            width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color);
-                            color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 13px; outline: none;
+                        <div style="
+                            width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+                            padding: 10px 14px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between;
                         ">
+                            <span id="publish-display-author" style="color: #00f2fe; font-weight: 800; font-size: 13px;">PixelArtist</span>
+                            <span style="font-size: 11px; color: var(--text-muted);">(可在右上角个人中心修改)</span>
+                        </div>
                     </div>
 
                     <!-- 分类标签 -->
@@ -345,18 +353,25 @@
 
         document.getElementById('btn-submit-publish').onclick = () => {
             const titleInput = document.getElementById('publish-input-title');
-            const authorInput = document.getElementById('publish-input-author');
             const catSelect = document.getElementById('publish-select-category');
             const descInput = document.getElementById('publish-input-desc');
 
             const title = (titleInput && titleInput.value.trim()) || 'Untitled Artwork';
-            const author = (authorInput && authorInput.value.trim()) || 'PixelArtist';
+            const author = (window.userState && window.userState.username)
+                || (window.userState && window.userState.user && window.userState.user.name)
+                || localStorage.getItem('pixelsprite_nickname')
+                || 'PixelArtist';
             const category = (catSelect && catSelect.value) || 'character';
             const desc = (descInput && descInput.value.trim()) || '由创作者在 PixelSprite 制作并公开发布的像素作品。';
 
             const resX = (window.engine && window.engine.resX) || 32;
             const resY = (window.engine && window.engine.resY) || 32;
-            const frames = JSON.parse(JSON.stringify(window.frameBuffers || []));
+            const frames = (typeof window.getAllFrameBuffers === 'function')
+                ? window.getAllFrameBuffers()
+                : JSON.parse(JSON.stringify(window.frameBuffers || []));
+            const fps = (typeof window.getAnimFps === 'function')
+                ? window.getAnimFps()
+                : (window.animFps || 4);
 
             const newWork = {
                 id: 'work_user_' + Date.now(),
@@ -366,7 +381,7 @@
                 category: category,
                 resX: resX,
                 resY: resY,
-                fps: window.animFps || 4,
+                fps: fps,
                 likes: 1,
                 bookmarks: 0,
                 tags: [category, `${resX}x${resY}`, 'UserCreation'],

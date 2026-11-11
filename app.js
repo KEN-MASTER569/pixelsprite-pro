@@ -6625,6 +6625,55 @@ document.addEventListener('DOMContentLoaded', () => {
     window.applyCanvasResolution = applyCanvasResolution;
     window.updateCanvasDOMDimensions = updateCanvasDOMDimensions;
 
+    // 🌟 全局多帧与动画导出/社区发布专用接口
+    window.frameBuffers = frameBuffers;
+    window.frameLayers = frameLayers;
+    window.getTotalFramesCount = function () {
+        return (frameBuffers && frameBuffers.length > 0) ? frameBuffers.length : 1;
+    };
+    window.getAnimFps = function () {
+        return (typeof animFps !== 'undefined') ? animFps : 4;
+    };
+    window.getAllFrameBuffers = function () {
+        const list = [];
+        for (let f = 0; f < frameBuffers.length; f++) {
+            const buf = (typeof getCompositedFrameBuffer === 'function')
+                ? getCompositedFrameBuffer(f)
+                : (frameBuffers[f] || engine.createBuffer(engine.resX || 32, engine.resY || 32));
+            list.push(JSON.parse(JSON.stringify(buf)));
+        }
+        return list;
+    };
+    window.loadFramesIntoApp = function (frames, resX, resY, fps) {
+        if (!frames || !frames.length) return;
+        engine.resX = resX;
+        engine.resY = resY;
+        engine.resolution = Math.max(resX, resY);
+        updateCanvasDOMDimensions(resX, resY);
+
+        frameBuffers.length = 0;
+        frameLayers.length = 0;
+
+        frames.forEach((fBuf, i) => {
+            const cloned = cloneBuffer(fBuf);
+            frameBuffers.push(cloned);
+            frameLayers.push([{
+                id: `layer_0_${Date.now()}_${i}`,
+                name: `Layer 1 (Frame ${i + 1})`,
+                visible: true,
+                opacity: 1.0,
+                buffer: cloneBuffer(fBuf)
+            }]);
+        });
+
+        currentFrame = 0;
+        activeLayerIndex = 0;
+        if (fps) animFps = fps;
+
+        renderAll();
+        if (typeof pushHistoryState === 'function') pushHistoryState();
+    };
+
 
     async function promptSaveFilePicker(contentData, defaultFilename, fileTypes) {
         if ('showSaveFilePicker' in window) {

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <defs>
+        <linearGradient id="cube-top" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ffffff" />
+            <stop offset="50%" stop-color="#00f2fe" />
+            <stop offset="100%" stop-color="#4facfe" />
+        </linearGradient>
+        <linearGradient id="cube-left" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#7f00ff" />
+            <stop offset="100%" stop-color="#3a00b0" />
+        </linearGradient>
+        <linearGradient id="cube-right" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#00f2fe" />
+            <stop offset="100%" stop-color="#0055ff" />
+        </linearGradient>
+    </defs>
+    <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="none" stroke="#00f2fe" stroke-width="2" stroke-dasharray="10 5" opacity="0.45" />
+    <g>
+        <path d="M 50 15 L 80 35 L 50 55 L 20 35 Z" fill="url(#cube-top)" opacity="0.95" />
+        <path d="M 20 35 L 50 55 L 50 85 L 20 65 Z" fill="url(#cube-left)" opacity="0.88" />
+        <path d="M 80 35 L 50 55 L 50 85 L 80 65 Z" fill="url(#cube-right)" opacity="0.88" />
+        <path d="M 50 15 L 50 85" stroke="#ffffff" stroke-width="1.5" opacity="0.5" />
+        <path d="M 20 35 L 50 55 L 80 35" stroke="#ffffff" stroke-width="1.8" opacity="0.75" fill="none" />
+        <path d="M 35 45 L 35 75 M 65 45 L 65 75" stroke="#00f2fe" stroke-width="1.2" opacity="0.45" />
+    </g>
+    <circle cx="50" cy="50" r="5" fill="#ffffff" />
+    <circle cx="50" cy="50" r="9" fill="none" stroke="#00f2fe" stroke-width="1.5" opacity="0.85" />
+</svg>
+

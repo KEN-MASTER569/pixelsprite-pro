@@ -23,7 +23,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="shortcut icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="apple-touch-icon" href="favicon.svg">
     <script src="https://cdn.jsdelivr.net/npm/pica@9.0.1/dist/pica.min.js"></script>
 </head>
 
@@ -2281,27 +2283,6 @@
                             style="font-size: 12px; font-weight: bold; opacity: 0.6;">连接 ➔</span>
                     </a>
 
-                    <!-- 📲 独立桌面版安装 (PWA Desktop App) 放置在 Discord 正下方 -->
-                    <button id="btn-pwa-install" class="cyber-social-btn"
-                        style="color: #00f2fe; border-color: rgba(0, 242, 254, 0.4); box-shadow: 0 0 15px rgba(0, 242, 254, 0.1); cursor: pointer; width: 100%; text-align: left; background: rgba(0, 0, 0, 0.4);"
-                        onmouseover="this.style.background='rgba(0, 242, 254, 0.12)'; this.style.transform='translateX(4px)'; this.style.boxShadow='0 0 25px rgba(0, 242, 254, 0.4)'; this.style.borderColor='#00f2fe';"
-                        onmouseout="this.style.background='rgba(0, 0, 0, 0.4)'; this.style.transform='translateX(0)'; this.style.boxShadow='0 0 15px rgba(0, 242, 254, 0.1)'; this.style.borderColor='rgba(0, 242, 254, 0.4)';">
-                        <div style="display: flex; align-items: center;">
-                            <div class="social-icon-box"
-                                style="background: linear-gradient(135deg, #00f2fe 0%, #7f00ff 100%); border: none; box-shadow: 0 0 12px rgba(0, 242, 254, 0.5); font-size: 18px; color: #fff;">
-                                📲
-                            </div>
-                            <div style="display: flex; flex-direction: column; text-align: left; margin-left: 12px;">
-                                <span data-i18n="pwa_modal_title"
-                                    style="font-family: 'Outfit'; font-size: 14px; font-weight: 800; color: #fff; letter-spacing: 1px;">DESKTOP APP</span>
-                                <span data-i18n="pwa_modal_desc"
-                                    style="font-size: 11px; color: var(--text-muted);">一键安装独立桌面端，秒开极速离线创作</span>
-                            </div>
-                        </div>
-                        <span data-i18n="btn_install_now"
-                            style="font-size: 12px; font-weight: bold; color: #00f2fe; opacity: 0.9;">安装 ➔</span>
-                    </button>
-
                     <!-- X (Twitter) -->
                     <a href="https://x.com/KenLoo424416" target="_blank" class="cyber-social-btn"
                         style="color: #ffffff; border-color: rgba(255, 255, 255, 0.3);">
@@ -2324,6 +2305,27 @@
                         <span data-i18n="link_action_connect"
                             style="font-size: 12px; font-weight: bold; opacity: 0.6;">连接 ➔</span>
                     </a>
+
+                    <!-- 📲 独立桌面版安装 (PWA Desktop App) 放置在 X (Twitter) 正下方 -->
+                    <button id="btn-pwa-install" class="cyber-social-btn"
+                        style="color: #00f2fe; border-color: rgba(0, 242, 254, 0.4); box-shadow: 0 0 15px rgba(0, 242, 254, 0.1); cursor: pointer; width: 100%; text-align: left; background: rgba(0, 0, 0, 0.4);"
+                        onmouseover="this.style.background='rgba(0, 242, 254, 0.12)'; this.style.transform='translateX(4px)'; this.style.boxShadow='0 0 25px rgba(0, 242, 254, 0.4)'; this.style.borderColor='#00f2fe';"
+                        onmouseout="this.style.background='rgba(0, 0, 0, 0.4)'; this.style.transform='translateX(0)'; this.style.boxShadow='0 0 15px rgba(0, 242, 254, 0.1)'; this.style.borderColor='rgba(0, 242, 254, 0.4)';">
+                        <div style="display: flex; align-items: center;">
+                            <div class="social-icon-box"
+                                style="background: linear-gradient(135deg, #00f2fe 0%, #7f00ff 100%); border: none; box-shadow: 0 0 12px rgba(0, 242, 254, 0.5); font-size: 18px; color: #fff;">
+                                📲
+                            </div>
+                            <div style="display: flex; flex-direction: column; text-align: left; margin-left: 12px;">
+                                <span data-i18n="pwa_modal_title"
+                                    style="font-family: 'Outfit'; font-size: 14px; font-weight: 800; color: #fff; letter-spacing: 1px;">DESKTOP APP</span>
+                                <span data-i18n="pwa_modal_desc"
+                                    style="font-size: 11px; color: var(--text-muted);">一键安装独立桌面端，秒开极速离线创作</span>
+                            </div>
+                        </div>
+                        <span data-i18n="btn_install_now"
+                            style="font-size: 12px; font-weight: bold; color: #00f2fe; opacity: 0.9;">安装 ➔</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -2447,31 +2449,36 @@
     <script src="addon-community-remix.js?v=1.0"></script>
 
     <script>
-        // 🚀 网页加载完成后，强行把左上角的发光魔方变成浏览器标签页的图标
+        // 🚀 确保浏览器标签页精准使用原版 3D 赛博魔方块
         window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                // 找到左上角那个 SVG 魔方
-                const logo = document.querySelector('.logo-icon-wrapper svg');
-                if (logo) {
-                    // 克隆它，并转成字符串
-                    const clone = logo.cloneNode(true);
-                    // 设置个合适的尺寸
-                    clone.setAttribute('width', '64');
-                    clone.setAttribute('height', '64');
+            const img = new Image();
+            img.onload = () => {
+                const cvs = document.createElement('canvas');
+                cvs.width = 64;
+                cvs.height = 64;
+                const ctx = cvs.getContext('2d');
+                ctx.drawImage(img, 0, 0, 64, 64);
+                const pngData = cvs.toDataURL('image/png');
 
-                    const svgString = new XMLSerializer().serializeToString(clone);
-                    const encodedSvg = encodeURIComponent(svgString).replace(/'/g, '%27').replace(/"/g, '%22');
-
-                    // 动态创建并替换 favicon
-                    let link = document.querySelector("link[rel*='icon']");
-                    if (!link) {
-                        link = document.createElement('link');
-                        link.rel = 'icon';
-                        document.head.appendChild(link);
-                    }
-                    link.href = 'data:image/svg+xml,' + encodedSvg;
+                let link = document.querySelector("link[rel='icon']");
+                if (!link) {
+                    link = document.createElement('link');
+                    link.rel = 'icon';
+                    document.head.appendChild(link);
                 }
-            }, 100);
+                link.type = 'image/png';
+                link.href = pngData;
+
+                let shortcutLink = document.querySelector("link[rel='shortcut icon']");
+                if (!shortcutLink) {
+                    shortcutLink = document.createElement('link');
+                    shortcutLink.rel = 'shortcut icon';
+                    document.head.appendChild(shortcutLink);
+                }
+                shortcutLink.type = 'image/png';
+                shortcutLink.href = pngData;
+            };
+            img.src = 'favicon.svg';
         });
     </script>
 
