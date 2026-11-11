@@ -912,21 +912,15 @@
                             </p>
                         </div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <!-- 🌐 语言切换栏 (Language Switcher) -->
-                        <div class="comm-lang-switcher" style="display: flex; align-items: center; gap: 5px; margin-right: 4px;">
-                            <button type="button" class="comm-lang-btn ${window.currentLang === 'zh' ? 'active' : ''}" data-lang="zh" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 12px; cursor: pointer; transition: all 0.2s;">🇨🇳 中文</button>
-                            <button type="button" class="comm-lang-btn ${window.currentLang === 'en' ? 'active' : ''}" data-lang="en" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 12px; cursor: pointer; transition: all 0.2s;">🇺🇸 EN</button>
-                            <button type="button" class="comm-lang-btn ${window.currentLang === 'ja' ? 'active' : ''}" data-lang="ja" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 12px; cursor: pointer; transition: all 0.2s;">🇯🇵 日本語</button>
-                        </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
                         <button id="btn-community-create-new" class="btn" style="
-                            font-weight: 800; font-size: 13px; padding: 8px 16px; gap: 6px; border: none; border-radius: 8px;
+                            font-weight: 800; font-size: 13px; padding: 8px 18px; gap: 6px; border: none; border-radius: 8px;
                             background: linear-gradient(135deg, #ff007f 0%, #7f00ff 100%); color: #ffffff;
-                            box-shadow: 0 0 20px rgba(255, 0, 127, 0.4); cursor: pointer; transition: all 0.2s;
+                            box-shadow: 0 0 20px rgba(255, 0, 127, 0.4); cursor: pointer; transition: all 0.2s; white-space: nowrap;
                         " onmouseover="this.style.boxShadow='0 0 28px rgba(255, 0, 127, 0.6)'; this.style.transform='translateY(-1px)';" onmouseout="this.style.boxShadow='0 0 20px rgba(255, 0, 127, 0.4)'; this.style.transform='';">
                             ${tr('comm_btn_publish')}
                         </button>
-                        <button id="btn-close-community" class="btn btn-secondary btn-xs" style="padding: 6px 12px; font-size: 15px;">✖</button>
+                        <button id="btn-close-community" class="btn btn-secondary btn-xs" style="padding: 6px 12px; font-size: 15px; cursor: pointer;">✖</button>
                     </div>
                 </div>
 
@@ -962,16 +956,7 @@
         document.getElementById('btn-close-community').onclick = closeCommunityModal;
         document.getElementById('btn-community-create-new').onclick = openPublishModal;
 
-        // 绑定弹窗内语言切换按钮
-        modal.querySelectorAll('.comm-lang-btn').forEach(btn => {
-            btn.onclick = (e) => {
-                e.stopPropagation();
-                const lang = btn.dataset.lang;
-                if (typeof window.changeAppLanguage === 'function') {
-                    window.changeAppLanguage(lang);
-                }
-            };
-        });
+
 
         const pills = modal.querySelectorAll('.cat-pill');
         pills.forEach(p => {
@@ -1051,14 +1036,20 @@
             `;
 
             card.innerHTML = `
-                <!-- 像素画面展示区 -->
+                <!-- 像素画面展示区 (Pixel Showcase Preview Container) -->
                 <div style="
-                    width: 100%; height: 160px; background: #07090e; border-radius: 8px;
-                    display: flex; align-items: center; justify-content: center; position: relative;
-                    border: 1px solid rgba(255, 255, 255, 0.05); overflow: hidden;
+                    width: 100%; height: 180px; background-color: #0c101d;
+                    background-image: 
+                        linear-gradient(45deg, rgba(255, 255, 255, 0.04) 25%, transparent 25%),
+                        linear-gradient(-45deg, rgba(255, 255, 255, 0.04) 25%, transparent 25%),
+                        linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.04) 75%),
+                        linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.04) 75%);
+                    background-size: 16px 16px; background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+                    border-radius: 10px; display: flex; align-items: center; justify-content: center; position: relative;
+                    border: 1px solid rgba(255, 255, 255, 0.08); overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
                 ">
-                    <canvas id="${canvasId}" width="128" height="128" style="
-                        image-rendering: pixelated; width: 120px; height: 120px; max-width: 90%; max-height: 90%;
+                    <canvas id="${canvasId}" width="256" height="256" style="
+                        image-rendering: pixelated; width: 150px; height: 150px; max-width: 85%; max-height: 85%; object-fit: contain; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.7));
                     "></canvas>
                     <div style="
                         position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px);
@@ -1227,23 +1218,36 @@
         let frameIdx = 0;
         const resX = item.resX || 16;
         const resY = item.resY || 16;
+        const isTile = item.category === 'tile';
 
-        // 🚨 保证像素为 1:1 绝对正方形，居中排布，彻底消除任何拉伸形变
+        // 🚨 保证像素为 1:1 绝对正方形，居中排布，超高精细度 256x256
+        canvas.width = 256;
+        canvas.height = 256;
+
         const maxDim = Math.max(resX, resY);
-        const cellSize = Math.floor(Math.min(canvas.width, canvas.height) / maxDim);
-        const drawW = resX * cellSize;
-        const drawH = resY * cellSize;
-        const offsetX = Math.floor((canvas.width - drawW) / 2);
-        const offsetY = Math.floor((canvas.height - drawH) / 2);
+        // 如果是无缝瓦片分类，以 2×2 自动平铺无缝展现；其他分类以单体最佳居中比例放大呈现
+        const repeatCount = isTile ? 2 : 1;
+        const effectiveDim = maxDim * repeatCount;
+        const cellSize = Math.floor(256 / effectiveDim);
+        const drawW = resX * cellSize * repeatCount;
+        const drawH = resY * cellSize * repeatCount;
+        const offsetX = Math.floor((256 - drawW) / 2);
+        const offsetY = Math.floor((256 - drawH) / 2);
 
         const drawFrame = (fBuf) => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (let y = 0; y < resY; y++) {
-                for (let x = 0; x < resX; x++) {
-                    const col = fBuf[y] ? fBuf[y][x] : null;
-                    if (col && col !== 'transparent') {
-                        ctx.fillStyle = col;
-                        ctx.fillRect(offsetX + x * cellSize, offsetY + y * cellSize, cellSize, cellSize);
+            ctx.clearRect(0, 0, 256, 256);
+            for (let ry = 0; ry < repeatCount; ry++) {
+                for (let rx = 0; rx < repeatCount; rx++) {
+                    const blockOffsetX = offsetX + rx * resX * cellSize;
+                    const blockOffsetY = offsetY + ry * resY * cellSize;
+                    for (let y = 0; y < resY; y++) {
+                        for (let x = 0; x < resX; x++) {
+                            const col = fBuf[y] ? fBuf[y][x] : null;
+                            if (col && col !== 'transparent') {
+                                ctx.fillStyle = col;
+                                ctx.fillRect(blockOffsetX + x * cellSize, blockOffsetY + y * cellSize, cellSize, cellSize);
+                            }
+                        }
                     }
                 }
             }
