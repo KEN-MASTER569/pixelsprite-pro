@@ -6610,6 +6610,8 @@ document.addEventListener('DOMContentLoaded', () => {
     window.getCompositedFrameBuffer = getCompositedFrameBuffer;
     window.engine = engine;
     window.getCurrentFrame = () => currentFrame;
+    window.applyCanvasResolution = applyCanvasResolution;
+    window.updateCanvasDOMDimensions = updateCanvasDOMDimensions;
 
 
     async function promptSaveFilePicker(contentData, defaultFilename, fileTypes) {

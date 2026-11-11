@@ -46,6 +46,210 @@
     // ============================================================
     // 🎨 世界各地创作者精选作品库 (Global Showcase Works)
     // ============================================================
+// Helper: 将 Palette 字典字符映射转换为 2D 颜色数组
+    function parsePaletteArt(asciiRows, paletteMap, resX = 16, resY = 16) {
+        const grid = [];
+        for (let y = 0; y < resY; y++) {
+            const row = [];
+            const line = asciiRows[y] || '';
+            for (let x = 0; x < resX; x++) {
+                const ch = line[x] || '.';
+                row.push(paletteMap[ch] || null);
+            }
+            grid.push(row);
+        }
+        return grid;
+    }
+
+    // ============================================================
+    // 🎨 世界各地创作者精选作品库 (Global Showcase Works)
+    // ============================================================
+    const pSamurai = { '.': null, 'K': '#0a0c14', 'C': '#00f2fe', 'M': '#ff007f', 'W': '#ffffff', 'P': '#7f00ff', 'B': '#1a2035', 'G': '#2c3e50' };
+    const samuraiFrames = [
+        parsePaletteArt([
+            "....MMMMMM......",
+            "...MWWWWWWM.....",
+            "..MCCCCCCWMK....",
+            "..MCCWWCWMKK....",
+            "...MPPPPMKK.....",
+            "....PPKKK.......",
+            "...CCCCCCM......",
+            "..MCCCCCCWM.....",
+            "..MCCBKKKK......",
+            "...PBKKKK.......",
+            "....BKBK........",
+            "....GGGG........",
+            "...MM..MM.......",
+            "..CC....CC......",
+            "................",
+            "................"
+        ], pSamurai)
+    ];
+
+    const pPaladin = { '.': null, 'K': '#050b14', 'W': '#ffffff', 'S': '#bdc3c7', 'G': '#7f8c8d', 'D': '#2c3e50', 'Y': '#f1c40f', 'O': '#e67e22', 'B': '#3498db' };
+    const paladinFrames = [
+        parsePaletteArt([
+            ".....KKKKK......",
+            "....KWWWWWK.....",
+            "...KWWKKWWK.....",
+            "...KWKBBKWK.....",
+            "...KWWKKWWK.....",
+            "....KSSSSK......",
+            "...KGGYYGGK.....",
+            "..KSDYYYYDSK....",
+            "..KSBSSSSBSK....",
+            "..KGGDDDDGGK....",
+            "...KDDDDDK......",
+            "...KDDDDDK......",
+            "...KSS..SSK.....",
+            "..KGG....GGK....",
+            "..KK......KK....",
+            "................"
+        ], pPaladin),
+        parsePaletteArt([
+            ".....KKKKK......",
+            "....KWWWWWK.....",
+            "...KWWKKWWK.....",
+            "...KWKBBKWK.....",
+            "...KWWKKWWK.....",
+            "....KSSSSK......",
+            "...KGGYYGGK.....",
+            "..KSDYYYYDSK....",
+            "..KSBSSSSBSK....",
+            "..KGGDDDDGGK....",
+            "...KDDDDDK......",
+            "...KDDDDDK......",
+            "...KSS..SSK.....",
+            "..KGG....GGK....",
+            "................",
+            "................"
+        ], pPaladin)
+    ];
+
+    const pMeadow = { '.': null, 'G': '#27ae60', 'L': '#2ecc71', 'D': '#1e8449', 'F': '#145a32', 'Y': '#f1c40f', 'W': '#ffffff', 'R': '#e74c3c' };
+    const meadowFrames = [
+        parsePaletteArt([
+            "GLGGDFLGLDGLGDFL",
+            "LLGLFDLLGLFDFDLL",
+            "GGDLLGDGGDLLGGDG",
+            "GDLGLYWYDLLGLGDL",
+            "DFLGGYWYGDFLGGDF",
+            "GGLGGDFLGGLGGDFL",
+            "LGDGLDFLGDGLDFLL",
+            "GDLGLGDLGDLGLGDL",
+            "GLDGGLLDGLDGGLLD",
+            "DFLLRRFFDFLLRRFF",
+            "FLLRWWLLFLLRWWLL",
+            "GDLFRRFFGDLFRRFF",
+            "GGDGLDFLGGDGLDFL",
+            "DFLGLGDFDFLGLGDF",
+            "FLLGLDFFFLLGLDFF",
+            "GLGGDFLGLDGLGDFL"
+        ], pMeadow)
+    ];
+
+    const pFighter = { '.': null, 'K': '#0a0c14', 'W': '#ffffff', 'C': '#3498db', 'R': '#e74c3c', 'D': '#c0392b', 'Y': '#f1c40f', 'O': '#e67e22', 'G': '#7f8c8d' };
+    const fighterFrames = [
+        parsePaletteArt([
+            ".......WW.......",
+            "......KCCK......",
+            "......KCCK......",
+            ".....KRCCRK.....",
+            ".....KRCCRK.....",
+            "....KRRCCRRK....",
+            "...KRRWCCWRRK...",
+            "..KRRCCDDCCRRK..",
+            ".KRRCCDDDDCCRRK.",
+            "KRRWWDDDDDDWWKKK",
+            "KDDWWDDDDDDWWKKK",
+            "KKKKGGKKKKGGKKKK",
+            "....KYY..YYK....",
+            "....KOO..OOK....",
+            ".....KR..RK.....",
+            "................"
+        ], pFighter),
+        parsePaletteArt([
+            ".......WW.......",
+            "......KCCK......",
+            "......KCCK......",
+            ".....KRCCRK.....",
+            ".....KRCCRK.....",
+            "....KRRCCRRK....",
+            "...KRRWCCWRRK...",
+            "..KRRCCDDCCRRK..",
+            ".KRRCCDDDDCCRRK.",
+            "KRRWWDDDDDDWWKKK",
+            "KDDWWDDDDDDWWKKK",
+            "KKKKGGKKKKGGKKKK",
+            ".....KYYKYY.....",
+            ".....KOOKOO.....",
+            "......KRKKR.....",
+            ".......KK......."
+        ], pFighter)
+    ];
+
+    const pSlime = { '.': null, 'K': '#050b14', 'L': '#2ecc71', 'D': '#27ae60', 'H': '#a3e4d7', 'W': '#ffffff', 'F': '#145a32' };
+    const slimeFrames = [
+        parsePaletteArt([
+            "................",
+            "......KKKK......",
+            "....KLLLLLLK....",
+            "...KLLLLLLLLK...",
+            "..KLLLLLLLLLLK..",
+            "..KLLKWKLLKWKK..",
+            ".KLLLKWKLLKWKKK.",
+            ".KLLHLLLLLLLLLK.",
+            ".KDLLLLLLLLLLDK.",
+            ".KDDLLLLLLLLDDK.",
+            "..KDDDDDDDDDDK..",
+            "...KFFFFFFFFK...",
+            "................",
+            "................",
+            "................",
+            "................"
+        ], pSlime),
+        parsePaletteArt([
+            "................",
+            "................",
+            "................",
+            "................",
+            "................",
+            "....KKKKKKKK....",
+            "...KLLLLLLLLK...",
+            "..KLLKWKLLKWKK..",
+            ".KLLLKWKLLKWKKK.",
+            ".KLLHLLLLLLLLLK.",
+            ".KDLLLLLLLLLLDK.",
+            ".KDDDDDDDDDDDDK.",
+            "..KFFFFFFFFFFK..",
+            "...KKKKKKKKKK...",
+            "................",
+            "................"
+        ], pSlime)
+    ];
+
+    const pSword = { '.': null, 'K': '#050b14', 'W': '#ffffff', 'S': '#bdc3c7', 'G': '#95a5a6', 'Y': '#f1c40f', 'O': '#f39c12', 'R': '#e74c3c', 'B': '#3498db' };
+    const swordFrames = [
+        parsePaletteArt([
+            "..............WW",
+            "............KWKW",
+            "...........KWSK.",
+            "..........KWSK..",
+            ".........KWSK...",
+            "........KWSK....",
+            ".......KWSK.....",
+            "......KWSK......",
+            "....KYYWSK......",
+            "..KYOBYYK.......",
+            ".KYRRKYY........",
+            "KYYKKYOBK.......",
+            "KOBKKYY.........",
+            ".KK.KOBK........",
+            ".....KK.........",
+            "................"
+        ], pSword)
+    ];
+
     const GLOBAL_PRESET_WORKS = [
         {
             id: 'work_samurai_tokyo',
@@ -66,26 +270,7 @@
                 { author: 'NeonRider', country: '🇺🇸', text: 'Used this in my Godot cyber action demo, thanks!', time: '1小时前' },
                 { author: '老六像素', country: '🇨🇳', text: '面罩的高光细节处理得特别棒，已一键 Remix 临摹！', time: '3小时前' }
             ],
-            frames: [
-                [
-                    "....#ff007f####.....",
-                    "...#00f2fe#ffffff#....",
-                    "..#00f2fe4facfe#ffffff#...",
-                    "..#00f2fe#ffffff#00f2fe#...",
-                    "...#ff007f##7f00ff#....",
-                    "....#7f00ff#1a2035#....",
-                    "...#00f2fe#ffffff#00f2fe#..",
-                    "..#ff007f#2c3e50#ff007f#.",
-                    "..#00f2fe#2c3e50#00f2fe#.",
-                    "...#7f00ff#1a2035#....",
-                    "....#1a2035#1a2035#....",
-                    "....#2c3e50#2c3e50#....",
-                    "...#ff007f##ff007f#...",
-                    "..#00f2fe#..#00f2fe#..",
-                    "................",
-                    "................"
-                ]
-            ]
+            frames: samuraiFrames
         },
         {
             id: 'work_paladin_paris',
@@ -95,54 +280,17 @@
             category: 'character',
             resX: 16,
             resY: 16,
-            fps: 4,
+            fps: 3,
             likes: 312,
             bookmarks: 104,
             tags: ['RPG', '骑士', '动画', '角色'],
             desc: '经典法式复古奇幻圣骑士，附带呼吸与待机微动作，适合中世纪地牢冒险。',
-            palette: ['#000000', '#ffffff', '#2c3e50', '#7f8c8d', '#bdc3c7', '#f1c40f', '#e67e22', '#e74c3c', '#3498db'],
+            palette: ['#050b14', '#ffffff', '#2c3e50', '#7f8c8d', '#bdc3c7', '#f1c40f', '#e67e22', '#3498db'],
             comments: [
                 { author: 'Artisan_Pixel', country: '🇫🇷', text: 'Magnifique animation subtile sur la respiration !', time: '2小时前' },
                 { author: 'GameDev_Alex', country: '🇨🇦', text: 'Perfect idle frame for retro adventure platformers.', time: '5小时前' }
             ],
-            frames: [
-                [
-                    "................",
-                    ".....######.....",
-                    "....#ffffff#....",
-                    "...#ffffffff#...",
-                    "...#ff####ff#...",
-                    "...#f#3498db#f#...",
-                    "...#f#ffffff#f#...",
-                    "....#ffffff#....",
-                    ".....#7f8c8d#....",
-                    "....#bdc3c7#....",
-                    "...#f1c40f#bdc3c7#..",
-                    "...#f1c40f#bdc3c7#..",
-                    "....#2c3e50#....",
-                    "....#2c3e50#....",
-                    "...#7f8c8d##7f8c8d#.",
-                    "................"
-                ],
-                [
-                    "................",
-                    ".....######.....",
-                    "....#ffffff#....",
-                    "...#ffffffff#...",
-                    "...#ff####ff#...",
-                    "...#f#3498db#f#...",
-                    "...#f#ffffff#f#...",
-                    "....#ffffff#....",
-                    ".....#7f8c8d#....",
-                    "....#bdc3c7#....",
-                    "...#f1c40f#bdc3c7#..",
-                    "...#f1c40f#bdc3c7#..",
-                    "....#2c3e50#....",
-                    "...#7f8c8d##7f8c8d#.",
-                    "................",
-                    "................"
-                ]
-            ]
+            frames: paladinFrames
         },
         {
             id: 'work_seamless_meadow',
@@ -162,26 +310,7 @@
                 { author: 'TileCrafter', country: '🇺🇸', text: 'The wrapping in Tile Mode looks seamless and smooth!', time: '40分钟前' },
                 { author: '独立独立鸭', country: '🇨🇳', text: '配合新版 3x3 平铺预览简直绝配，省了好多拼接时间！', time: '2小时前' }
             ],
-            frames: [
-                [
-                    "27ae60 2ecc71 27ae60 27ae60 1e8449 27ae60 2ecc71 27ae60 27ae60 1e8449 27ae60 2ecc71 27ae60 27ae60 1e8449 27ae60",
-                    "2ecc71 2ecc71 27ae60 1e8449 145a32 2ecc71 2ecc71 27ae60 1e8449 145a32 2ecc71 2ecc71 27ae60 1e8449 145a32 2ecc71",
-                    "27ae60 27ae60 1e8449 145a32 27ae60 27ae60 f1c40f 1e8449 145a32 27ae60 27ae60 27ae60 1e8449 145a32 27ae60 27ae60",
-                    "27ae60 1e8449 145a32 27ae60 2ecc71 f1c40f ffffff f1c40f 27ae60 2ecc71 27ae60 1e8449 145a32 27ae60 2ecc71 27ae60",
-                    "1e8449 145a32 27ae60 2ecc71 27ae60 27ae60 f1c40f 2ecc71 27ae60 27ae60 1e8449 145a32 27ae60 2ecc71 27ae60 1e8449",
-                    "27ae60 27ae60 2ecc71 27ae60 27ae60 1e8449 145a32 27ae60 2ecc71 27ae60 27ae60 27ae60 2ecc71 27ae60 27ae60 27ae60",
-                    "2ecc71 27ae60 27ae60 1e8449 145a32 27ae60 2ecc71 27ae60 27ae60 1e8449 145a32 27ae60 2ecc71 27ae60 27ae60 1e8449",
-                    "27ae60 1e8449 145a32 27ae60 2ecc71 27ae60 27ae60 1e8449 145a32 27ae60 2ecc71 27ae60 27ae60 1e8449 145a32 27ae60",
-                    "27ae60 145a32 27ae60 2ecc71 27ae60 27ae60 1e8449 145a32 27ae60 2ecc71 27ae60 27ae60 1e8449 145a32 27ae60 27ae60",
-                    "1e8449 27ae60 2ecc71 27ae60 e74c3c 1e8449 145a32 27ae60 2ecc71 27ae60 1e8449 27ae60 2ecc71 27ae60 1e8449 145a32",
-                    "145a32 2ecc71 27ae60 e74c3c ffffff e74c3c 2ecc71 27ae60 27ae60 1e8449 145a32 2ecc71 27ae60 27ae60 1e8449 145a32",
-                    "27ae60 27ae60 1e8449 145a32 e74c3c 27ae60 27ae60 1e8449 145a32 27ae60 27ae60 27ae60 1e8449 145a32 27ae60 27ae60",
-                    "27ae60 1e8449 145a32 27ae60 2ecc71 27ae60 1e8449 145a32 27ae60 2ecc71 27ae60 1e8449 145a32 27ae60 2ecc71 27ae60",
-                    "1e8449 145a32 27ae60 2ecc71 27ae60 1e8449 145a32 27ae60 2ecc71 27ae60 1e8449 145a32 27ae60 2ecc71 27ae60 1e8449",
-                    "145a32 27ae60 2ecc71 27ae60 1e8449 145a32 27ae60 2ecc71 27ae60 1e8449 145a32 27ae60 2ecc71 27ae60 1e8449 145a32",
-                    "27ae60 2ecc71 27ae60 1e8449 145a32 27ae60 2ecc71 27ae60 1e8449 145a32 27ae60 2ecc71 27ae60 1e8449 145a32 27ae60"
-                ]
-            ]
+            frames: meadowFrames
         },
         {
             id: 'work_starfighter_austin',
@@ -191,53 +320,16 @@
             category: 'arcade',
             resX: 16,
             resY: 16,
-            fps: 6,
+            fps: 5,
             likes: 275,
             bookmarks: 118,
             tags: ['街机', '战机', '飞行射击', '动画'],
             desc: '经典纵向街机飞行射击战机，机翼镀金防反光，尾喷推进器动态喷射火焰。',
-            palette: ['#000000', '#ffffff', '#e74c3c', '#c0392b', '#3498db', '#f1c40f', '#e67e22', '#7f8c8d'],
+            palette: ['#0a0c14', '#ffffff', '#e74c3c', '#c0392b', '#3498db', '#f1c40f', '#e67e22', '#7f8c8d'],
             comments: [
                 { author: 'ShmupFan', country: '🇬🇧', text: 'Classic Raiden aesthetic, looks sweet!', time: '1小时前' }
             ],
-            frames: [
-                [
-                    ".......##.......",
-                    "......#ff#......",
-                    "......#ff#......",
-                    ".....#3498db#.....",
-                    ".....#3498db#.....",
-                    "....#e74c3c##....",
-                    "...#e74c3c#ff#...",
-                    "..#e74c3c#3498db#..",
-                    ".#e74c3c###e74c3c#.",
-                    "#e74c3c#ffffff#e74c3c#",
-                    "#c0392b#ffffff#c0392b#",
-                    "####7f8c8d##7f8c8d####",
-                    "....#f1c40f#....",
-                    "....#e67e22#....",
-                    ".....#e74c3c#.....",
-                    "................"
-                ],
-                [
-                    ".......##.......",
-                    "......#ff#......",
-                    "......#ff#......",
-                    ".....#3498db#.....",
-                    ".....#3498db#.....",
-                    "....#e74c3c##....",
-                    "...#e74c3c#ff#...",
-                    "..#e74c3c#3498db#..",
-                    ".#e74c3c###e74c3c#.",
-                    "#e74c3c#ffffff#e74c3c#",
-                    "#c0392b#ffffff#c0392b#",
-                    "####7f8c8d##7f8c8d####",
-                    "...#f1c40f##....",
-                    "...#e67e22##....",
-                    "....#e74c3c##....",
-                    ".....#e74c3c#....."
-                ]
-            ]
+            frames: fighterFrames
         },
         {
             id: 'work_slime_berlin',
@@ -247,54 +339,17 @@
             category: 'animated',
             resX: 16,
             resY: 16,
-            fps: 5,
+            fps: 4,
             likes: 410,
             bookmarks: 165,
             tags: ['怪物', '史莱姆', '动画', 'RPG'],
             desc: '挤压与拉伸的经典史莱姆蹦跳动画，手感极其 Q 弹。',
-            palette: ['#000000', '#2ecc71', '#27ae60', '#a3e4d7', '#ffffff', '#145a32'],
+            palette: ['#050b14', '#2ecc71', '#27ae60', '#a3e4d7', '#ffffff', '#145a32'],
             comments: [
                 { author: 'IndieGamer', country: '🇩🇪', text: 'Sehr süß! Die Animation ist sehr lebendig.', time: '15分钟前' },
                 { author: 'PixelBoi', country: '🇨🇦', text: 'Remixed with purple shade, perfect toxic slime!', time: '1小时前' }
             ],
-            frames: [
-                [
-                    "................",
-                    "......####......",
-                    "....#2ecc71##....",
-                    "...#2ecc712ecc71##...",
-                    "..#2ecc712ecc712ecc71#..",
-                    "..#2ecc71#ff#2ecc71#..",
-                    ".#2ecc712ecc71#ff#2ecc71#.",
-                    ".#2ecc71a3e4d72ecc712ecc71#.",
-                    ".#27ae602ecc712ecc712ecc71#.",
-                    ".#27ae6027ae602ecc712ecc71#.",
-                    "..#27ae6027ae6027ae60#..",
-                    "...#145a32145a32##...",
-                    "................",
-                    "................",
-                    "................",
-                    "................"
-                ],
-                [
-                    "................",
-                    "................",
-                    "................",
-                    "................",
-                    "....########....",
-                    "...#2ecc712ecc712ecc71#...",
-                    "..#2ecc71#ff#2ecc71#ff#..",
-                    ".#2ecc712ecc71#ff#2ecc71#ff#.",
-                    ".#2ecc71a3e4d72ecc712ecc712ecc71#.",
-                    ".#27ae602ecc712ecc712ecc712ecc71#.",
-                    ".#27ae6027ae6027ae6027ae6027ae60#.",
-                    "..#145a32145a32145a32145a32#..",
-                    "...##########...",
-                    "................",
-                    "................",
-                    "................"
-                ]
-            ]
+            frames: slimeFrames
         },
         {
             id: 'work_sword_london',
@@ -309,32 +364,14 @@
             bookmarks: 88,
             tags: ['武器', '圣剑', '装备', '黄金'],
             desc: '对角线经典构图的传奇像素大剑，镀金剑柄与发光锋刃，可直接作为 RPG 顶级装备。',
-            palette: ['#000000', '#ffffff', '#bdc3c7', '#95a5a6', '#f1c40f', '#f39c12', '#e74c3c', '#3498db'],
+            palette: ['#050b14', '#ffffff', '#bdc3c7', '#95a5a6', '#f1c40f', '#f39c12', '#e74c3c', '#3498db'],
             comments: [
                 { author: 'Lancelot', country: '🇬🇧', text: 'The golden crossguard details are sharp!', time: '3小时前' }
             ],
-            frames: [
-                [
-                    "..............##",
-                    "............#ff#",
-                    "...........#ff#.",
-                    "..........#bdc#.",
-                    ".........#bdc#..",
-                    "........#bdc#...",
-                    ".......#bdc#....",
-                    "......#bdc#.....",
-                    "....#f1c#bdc#...",
-                    "..#f1c##f1c#....",
-                    ".#f39#e74##.....",
-                    "#f1c##f39#......",
-                    "#f39##f1c#......",
-                    ".##.#f39#.......",
-                    ".....##.........",
-                    "................"
-                ]
-            ]
+            frames: swordFrames
         }
     ];
+
 
     // Helper: 将 ASCII / HEX 字符串帧转化为 2D 颜色数组
     function parseAsciiFrame(strArray, resX, resY) {
@@ -415,16 +452,23 @@
         const resX = workData.resX || 16;
         const resY = workData.resY || 16;
 
-        if (window.engine) {
-            window.engine.resX = resX;
-            window.engine.resY = resY;
-            window.engine.resolution = resX;
+        if (typeof window.applyCanvasResolution === 'function') {
+            window.applyCanvasResolution(resX, resY);
+        } else {
+            if (window.engine) {
+                window.engine.resX = resX;
+                window.engine.resY = resY;
+                window.engine.resolution = resX;
+            }
+            if (typeof window.updateCanvasDOMDimensions === 'function') {
+                window.updateCanvasDOMDimensions(resX, resY);
+            }
         }
 
         const resSelect = document.getElementById('resolution-select');
         if (resSelect) {
             const matchOpt = Array.from(resSelect.options).find(o => o.value == resX);
-            if (matchOpt) resSelect.value = resX;
+            if (matchOpt && resX === resY) resSelect.value = resX;
             else resSelect.value = 'custom';
         }
 
@@ -432,10 +476,6 @@
         const ryInput = document.getElementById('res-custom-y');
         if (rxInput) rxInput.value = resX;
         if (ryInput) ryInput.value = resY;
-
-        if (typeof window.updateCanvasDOMDimensions === 'function') {
-            window.updateCanvasDOMDimensions(resX, resY);
-        }
 
         // 注入帧与图层
         const frames = workData.frames;
@@ -1170,8 +1210,14 @@
         let frameIdx = 0;
         const resX = item.resX || 16;
         const resY = item.resY || 16;
-        const cellW = canvas.width / resX;
-        const cellH = canvas.height / resY;
+
+        // 🚨 保证像素为 1:1 绝对正方形，居中排布，彻底消除任何拉伸形变
+        const maxDim = Math.max(resX, resY);
+        const cellSize = Math.floor(Math.min(canvas.width, canvas.height) / maxDim);
+        const drawW = resX * cellSize;
+        const drawH = resY * cellSize;
+        const offsetX = Math.floor((canvas.width - drawW) / 2);
+        const offsetY = Math.floor((canvas.height - drawH) / 2);
 
         const drawFrame = (fBuf) => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1180,7 +1226,7 @@
                     const col = fBuf[y] ? fBuf[y][x] : null;
                     if (col && col !== 'transparent') {
                         ctx.fillStyle = col;
-                        ctx.fillRect(x * cellW, y * cellH, cellW, cellH);
+                        ctx.fillRect(offsetX + x * cellSize, offsetY + y * cellSize, cellSize, cellSize);
                     }
                 }
             }
