@@ -692,7 +692,7 @@
                                 <div class="option-row"
                                     style="margin-top: 8px; flex-direction: column; align-items: flex-start; gap: 4px;">
                                     <label data-i18n="label_mirror">镜像对称绘画:</label>
-                                    <select id="select-mirror-mode" class="select-input" style="width: 100%;">
+                                    <select id="select-mirror-mode" class="select-input" style="width: 100%;" onchange="window.setSymmetryMode(this.value)">
                                         <option value="none" data-i18n="mirror_none">关闭对称 (Off)</option>
                                         <option value="horizontal" data-i18n="mirror_horiz">↔️ 水平对称</option>
                                         <option value="vertical" data-i18n="mirror_vert">↕️ 垂直对称</option>
@@ -832,15 +832,15 @@
 
                             <!-- 对称镜像快捷切换栏 (Symmetry Quick Toggles) -->
                             <div class="tool-group" id="quick-symmetry-group" data-i18n-title="tip_symmetry_mode" title="对称镜像绘制模式">
-                                <button id="btn-sym-none" class="tool-btn active" data-i18n="btn_sym_none" title="关闭对称镜像" data-i18n-title="title_sym_none">🚫 关</button>
-                                <button id="btn-sym-h" class="tool-btn" data-i18n="btn_sym_h" title="水平镜像 (↔️)" data-i18n-title="title_sym_h">↔️ 水平</button>
-                                <button id="btn-sym-v" class="tool-btn" data-i18n="btn_sym_v" title="垂直镜像 (↕️)" data-i18n-title="title_sym_v">↕️ 垂直</button>
-                                <button id="btn-sym-dual" class="tool-btn" data-i18n="btn_sym_dual" title="双轴十字镜像 (✖️)" data-i18n-title="title_sym_dual">✖️ 双轴</button>
+                                <button id="btn-sym-none" class="tool-btn active" data-i18n="btn_sym_none" onclick="window.setSymmetryMode('none')" title="关闭对称镜像" data-i18n-title="title_sym_none">🚫 关</button>
+                                <button id="btn-sym-h" class="tool-btn" data-i18n="btn_sym_h" onclick="window.setSymmetryMode('horizontal')" title="水平镜像 (↔️)" data-i18n-title="title_sym_h">↔️ 水平</button>
+                                <button id="btn-sym-v" class="tool-btn" data-i18n="btn_sym_v" onclick="window.setSymmetryMode('vertical')" title="垂直镜像 (↕️)" data-i18n-title="title_sym_v">↕️ 垂直</button>
+                                <button id="btn-sym-dual" class="tool-btn" data-i18n="btn_sym_dual" onclick="window.setSymmetryMode('dual')" title="双轴十字镜像 (✖️)" data-i18n-title="title_sym_dual">✖️ 双轴</button>
                             </div>
 
                             <!-- 画布内 3x3 无缝平铺快捷按钮 (In-Canvas 3x3 Tile Mode) -->
                             <div class="tool-group">
-                                <button id="btn-quick-tile-mode" class="tool-btn" data-i18n="btn_quick_tile" title="画布内 3×3 无缝平铺模式与环绕绘制 (Tile Mode)" data-i18n-title="title_quick_tile">🧱 3×3 平铺</button>
+                                <button id="btn-quick-tile-mode" class="tool-btn" data-i18n="btn_quick_tile" onclick="window.toggleQuickTileMode()" title="画布内 3×3 无缝平铺模式与环绕绘制 (Tile Mode)" data-i18n-title="title_quick_tile">🧱 3×3 平铺</button>
                             </div>
                         </div>
 
@@ -1059,7 +1059,7 @@
                                     <option value="solarized" data-i18n="palette_solarized">☀️ Solarized (16 色)</option>
                                     <option value="monochrome" data-i18n="palette_monochrome">🏁 1-Bit 纯黑白 (2 色)</option>
                                 </select>
-                                <button id="btn-palette-remap" class="btn btn-secondary btn-xs" title="一键将画布颜色转换为当前色板中的最接近色" data-i18n-title="title_palette_remap" style="height: 28px; padding: 0 8px; font-size: 11px; white-space: nowrap; border-color: rgba(0, 242, 254, 0.4); color: var(--accent-cyan);">
+                                <button id="btn-palette-remap" class="btn btn-secondary btn-xs" data-i18n="btn_palette_remap" title="一键将画布颜色转换为当前色板中的最接近色" data-i18n-title="title_palette_remap" style="height: 28px; padding: 0 8px; font-size: 11px; white-space: nowrap; border-color: rgba(0, 242, 254, 0.4); color: var(--accent-cyan);">
                                     ✨ 映射画布
                                 </button>
                             </div>
@@ -2074,13 +2074,7 @@
             </div>
 
             <div class="modal-header"
-                style="position: relative; z-index: 2; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 12px 18px; display: flex; align-items: center; justify-content: space-between;">
-                <!-- 🌐 语言切换按钮 (Language Switcher) -->
-                <div class="about-modal-lang-bar" style="display: flex; align-items: center; gap: 6px;">
-                    <button type="button" class="about-lang-btn" onclick="window.changeAppLanguage('zh')" data-lang="zh" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s;">🇨🇳 中文</button>
-                    <button type="button" class="about-lang-btn" onclick="window.changeAppLanguage('en')" data-lang="en" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s;">🇺🇸 English</button>
-                    <button type="button" class="about-lang-btn" onclick="window.changeAppLanguage('ja')" data-lang="ja" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s;">🇯🇵 日本語</button>
-                </div>
+                style="position: relative; z-index: 2; border-bottom: none; padding: 12px 18px 0; display: flex; align-items: center; justify-content: flex-end;">
                 <button id="about-modal-close" class="modal-close-btn"
                     onclick="document.getElementById('about-app-modal').style.display='none'"
                     style="color: #ffffff; pointer-events: auto !important; font-size: 20px; cursor: pointer; border: none; background: transparent;">&times;</button>

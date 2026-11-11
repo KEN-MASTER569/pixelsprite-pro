@@ -4342,8 +4342,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Mirror Symmetry Selection & Quick Buttons
         function setSymmetryMode(mode) {
             mirrorMode = mode;
-            if (selectMirrorMode && selectMirrorMode.value !== mode) {
-                selectMirrorMode.value = mode;
+            window.mirrorMode = mode;
+            const sel = selectMirrorMode || document.getElementById('select-mirror-mode');
+            if (sel && sel.value !== mode) {
+                sel.value = mode;
             }
             const symBtns = {
                 'none': document.getElementById('btn-sym-none'),
@@ -4354,18 +4356,28 @@ document.addEventListener('DOMContentLoaded', () => {
             Object.keys(symBtns).forEach(k => {
                 if (symBtns[k]) symBtns[k].classList.toggle('active', k === mode);
             });
-            drawSymmetryOverlay();
+            if (typeof drawSymmetryOverlay === 'function') {
+                drawSymmetryOverlay();
+            }
 
-            const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
+            const dict = (window.I18N_TRANSLATIONS && window.I18N_TRANSLATIONS[window.currentLang]) || (window.I18N_TRANSLATIONS && window.I18N_TRANSLATIONS.en) || {};
             const modeNames = {
                 'none': dict.mirror_none || '关闭 (Off)',
                 'horizontal': dict.mirror_horiz || '↔️ 水平对称',
                 'vertical': dict.mirror_vert || '↕️ 垂直对称',
                 'dual': dict.mirror_dual || '✖️ 双轴对称'
             };
-            showToast((dict.toast_mirror_on || '↔️ 镜像对称模式: {mode}').replace('{mode}', modeNames[mode] || mode));
+            if (typeof showToast === 'function') {
+                showToast((dict.toast_mirror_on || '↔️ 镜像对称模式: {mode}').replace('{mode}', modeNames[mode] || mode));
+            }
         }
         window.setSymmetryMode = setSymmetryMode;
+
+        window.toggleQuickTileMode = function () {
+            if (typeof setTileMode === 'function') {
+                setTileMode(!isTileMode);
+            }
+        };
 
         const btnSymNone = document.getElementById('btn-sym-none');
         const btnSymH = document.getElementById('btn-sym-h');
