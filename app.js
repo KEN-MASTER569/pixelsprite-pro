@@ -69,6 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const pixelCanvas = document.getElementById('pixel-canvas');
     const gridCanvas = document.getElementById('grid-overlay');
     const symmetryCanvas = document.getElementById('symmetry-overlay');
+    const tileOverlayCanvas = document.getElementById('tile-overlay-canvas');
     const canvasWrapper = document.getElementById('canvas-wrapper');
     const canvasContainerBox = document.querySelector('.canvas-container-box');
 
@@ -872,9 +873,15 @@ document.addEventListener('DOMContentLoaded', () => {
         let x = Math.floor((clientX - rect.left) / (rect.width / resX));
         let y = Math.floor((clientY - rect.top) / (rect.height / resY));
 
-        // 限制边界
-        x = Math.max(0, Math.min(resX - 1, x));
-        y = Math.max(0, Math.min(resY - 1, y));
+        if (isTileMode) {
+            // 🧱 平铺模式：允许从 3×3 九宫格任意方位取模映射穿透回画布内部
+            x = ((x % resX) + resX) % resX;
+            y = ((y % resY) + resY) % resY;
+        } else {
+            // 普通模式：限制边界
+            x = Math.max(0, Math.min(resX - 1, x));
+            y = Math.max(0, Math.min(resY - 1, y));
+        }
 
         return { x, y };
     }
@@ -885,17 +892,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const resX = (buf[0] && buf[0].length) ? buf[0].length : (engine.resX || engine.resolution || 32);
 
         const applyStamp = (px, py) => {
-            if (px < 0 || px >= resX || py < 0 || py >= resY) return;
+            if (!isTileMode) {
+                if (px < 0 || px >= resX || py < 0 || py >= resY) return;
+            }
             for (let sy = 0; sy < brushSize; sy++) {
                 for (let sx = 0; sx < brushSize; sx++) {
-                    const targetX = px + sx;
-                    const targetY = py + sy;
+                    let targetX = px + sx;
+                    let targetY = py + sy;
+                    if (isTileMode) {
+                        // 🧱 边界自动穿透环绕绘制 (Wrap-around Drawing)
+                        targetX = ((targetX % resX) + resX) % resX;
+                        targetY = ((targetY % resY) + resY) % resY;
+                    }
                     if (targetX >= 0 && targetX < resX && targetY >= 0 && targetY < resY) {
                         if (selection && !isInsideSelection(targetX, targetY)) {
                             continue;
                         }
                         if (buf[targetY]) {
-                            // 简单直接地画上去，平铺效果交给 CSS 处理
                             buf[targetY][targetX] = color;
                         }
                     }
@@ -1236,10 +1249,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const resX = engine.resX || engine.resolution || 32;
+        const resY = engine.resY || engine.resolution || 32;
+        const isTileWrapJump = isTileMode && (Math.abs(x - lastStrokeX) > resX / 2 || Math.abs(y - lastStrokeY) > resY / 2);
+
         if (activeTool === 'pencil') {
             if (x === lastStrokeX && y === lastStrokeY) return;
             const drawColor = isRightClickStroke ? secondaryColor : activeColor;
-            if (lastStrokeX >= 0 && lastStrokeY >= 0) {
+            if (lastStrokeX >= 0 && lastStrokeY >= 0 && !isTileWrapJump) {
                 const colorToDraw = (ditherPattern !== 'none' && checkIsProActive()) ? getDitherColor(x, y, drawColor) : drawColor;
                 drawBresenhamLine(buf, lastStrokeX, lastStrokeY, x, y, colorToDraw);
             } else {
@@ -1254,7 +1271,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderMainCanvas();
         } else if (activeTool === 'eraser') {
             if (x === lastStrokeX && y === lastStrokeY) return;
-            if (lastStrokeX >= 0 && lastStrokeY >= 0) {
+            if (lastStrokeX >= 0 && lastStrokeY >= 0 && !isTileWrapJump) {
                 drawBresenhamLine(buf, lastStrokeX, lastStrokeY, x, y, null);
             } else {
                 setPixelSymmetric(buf, x, y, null);
@@ -1264,7 +1281,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderMainCanvas();
         } else if (activeTool === 'shading') {
             if (x === lastStrokeX && y === lastStrokeY) return;
-            if (lastStrokeX >= 0 && lastStrokeY >= 0) {
+            if (lastStrokeX >= 0 && lastStrokeY >= 0 && !isTileWrapJump) {
                 drawBresenhamShadingLine(buf, lastStrokeX, lastStrokeY, x, y, isRightClickStroke);
             } else {
                 applyShadingBrush(buf, x, y, isRightClickStroke);
@@ -1845,38 +1862,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.clearRect(0, 0, pixelCanvas.width, pixelCanvas.height);
 
         // ========================================================
-        // 🚨 强行视觉平铺：只要开启瓷砖模式，周围直接铺满半透明的分身！
-        // ========================================================
-        if (isTileMode) {
-            const activeBuf = getCompositedFrameBuffer(currentFrame);
-            const resX = engine.resX || 32;
-            const resY = engine.resY || 32;
-            const cellW = pixelCanvas.width / resX;
-            const cellH = pixelCanvas.height / resY;
-
-            ctx.globalAlpha = 0.3; // 半透明，突出中心
-            for (let row = 0; row < 3; row++) {
-                for (let col = 0; col < 3; col++) {
-                    if (row === 1 && col === 1) continue; // 中心留给主图层
-
-                    const offsetX = (col - 1) * pixelCanvas.width;
-                    const offsetY = (row - 1) * pixelCanvas.height;
-
-                    for (let y = 0; y < resY; y++) {
-                        for (let x = 0; x < resX; x++) {
-                            const color = activeBuf[y] && activeBuf[y][x];
-                            if (color) {
-                                ctx.fillStyle = color;
-                                ctx.fillRect(offsetX + x * cellW, offsetY + y * cellH, cellW, cellH);
-                            }
-                        }
-                    }
-                }
-            }
-            ctx.globalAlpha = 1.0; // 恢复
-        }
-
-        // ========================================================
         // 🚨 核心改造：绘制高级防眩光棋盘格
         // ========================================================
         if (bgMode === 'transparent') {
@@ -1970,6 +1955,60 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isPlaying) {
             updateActiveFrameThumbnail();
         }
+
+        // 🧱 画布内 3×3 无缝平铺渲染 (In-Canvas Tile Mode)
+        if (isTileMode && typeof renderTileOverlay === 'function') {
+            renderTileOverlay();
+        }
+    }
+
+    // 🧱 渲染画布内 3×3 无缝平铺克隆与九宫格参考线
+    function renderTileOverlay() {
+        if (!tileOverlayCanvas || !pixelCanvas) return;
+        const ctx = tileOverlayCanvas.getContext('2d');
+        const w = pixelCanvas.width;
+        const h = pixelCanvas.height;
+
+        if (tileOverlayCanvas.width !== w * 3 || tileOverlayCanvas.height !== h * 3) {
+            tileOverlayCanvas.width = w * 3;
+            tileOverlayCanvas.height = h * 3;
+        }
+
+        ctx.clearRect(0, 0, tileOverlayCanvas.width, tileOverlayCanvas.height);
+        if (!isTileMode) return;
+
+        ctx.imageSmoothingEnabled = false;
+
+        // 1. 周围 8 个方位克隆分身 (半透明展示接缝，让你直观看到接缝处的每一个像素是否严丝合缝)
+        ctx.save();
+        ctx.globalAlpha = 0.55;
+        for (let row = 0; row < 3; row++) {
+            for (let col = 0; col < 3; col++) {
+                if (row === 1 && col === 1) continue; // 中心正位留给主绘图区
+                ctx.drawImage(pixelCanvas, col * w, row * h, w, h);
+            }
+        }
+        ctx.restore();
+
+        // 2. 绘制 3×3 九宫格虚线参考线
+        ctx.save();
+        ctx.strokeStyle = 'rgba(0, 242, 254, 0.45)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([6, 6]);
+
+        ctx.beginPath();
+        // 两条竖向分割线
+        ctx.moveTo(w, 0); ctx.lineTo(w, h * 3);
+        ctx.moveTo(w * 2, 0); ctx.lineTo(w * 2, h * 3);
+        // 两条横向分割线
+        ctx.moveTo(0, h); ctx.lineTo(w * 3, h);
+        ctx.moveTo(0, h * 2); ctx.lineTo(w * 3, h * 2);
+        ctx.stroke();
+
+        // 外围边界线
+        ctx.strokeStyle = 'rgba(0, 242, 254, 0.2)';
+        ctx.strokeRect(1, 1, w * 3 - 2, h * 3 - 2);
+        ctx.restore();
     }
 
     // ⚡ 极速实时更新当前帧缩略图（直接复用现有 canvas，不触发 DOM 重构，0 延迟）
@@ -2221,7 +2260,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const w = symmetryCanvas.width;
         const h = symmetryCanvas.height;
 
-        ctx.strokeStyle = 'rgba(0, 242, 254, 0.8)';
+        ctx.save();
+
+        // 🌟 发光对称中轴线 (Neon Glowing Symmetry Axis)
+        ctx.strokeStyle = '#00f2fe';
+        ctx.shadowColor = '#00f2fe';
+        ctx.shadowBlur = 8;
         ctx.lineWidth = 2;
         ctx.setLineDash([6, 6]);
 
@@ -2238,7 +2282,45 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.stroke();
         }
 
-        ctx.setLineDash([]);
+        // 🌟 实时绘制镜像光标 (Mirror Hover Cursor Indicators)
+        if (currentHoverPixelX >= 0 && currentHoverPixelY >= 0 && activeTool !== 'move' && !isSpacePressed) {
+            const resX = engine.resX || engine.resolution || 32;
+            const resY = engine.resY || engine.resolution || 32;
+            const cellW = w / resX;
+            const cellH = h / resY;
+            const x = currentHoverPixelX;
+            const y = currentHoverPixelY;
+
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = 'rgba(255, 0, 127, 0.35)'; // 洋红色半透明镜像指示框
+            ctx.strokeStyle = '#ff007f';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([2, 2]);
+
+            const drawMirrorBox = (mx, my) => {
+                const bw = Math.min(brushSize, resX - mx);
+                const bh = Math.min(brushSize, resY - my);
+                ctx.fillRect(mx * cellW, my * cellH, bw * cellW, bh * cellH);
+                ctx.strokeRect(mx * cellW, my * cellH, bw * cellW, bh * cellH);
+            };
+
+            if (mirrorMode === 'horizontal' || mirrorMode === 'dual') {
+                const mx = resX - 1 - x - (brushSize - 1);
+                drawMirrorBox(mx, y);
+            }
+            if (mirrorMode === 'vertical' || mirrorMode === 'dual') {
+                const my = resY - 1 - y - (brushSize - 1);
+                drawMirrorBox(x, my);
+            }
+            if (mirrorMode === 'dual') {
+                const mx = resX - 1 - x - (brushSize - 1);
+                const my = resY - 1 - y - (brushSize - 1);
+                drawMirrorBox(mx, my);
+            }
+        }
+
+        ctx.restore();
     }
 
     // ============================================================
@@ -2377,18 +2459,13 @@ document.addEventListener('DOMContentLoaded', () => {
     box-shadow: 0 -2px 6px rgba(0,0,0,0.3); color: #050b14;
     background-color: ${tagStart.color};
 `;
-                badge.title = '点击删除此动画段落';
+                badge.title = '点击编辑或管理此动画动作段落';
 
                 badge.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    // 🚨 修改这里，支持多语言
-                    const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
-                    const msg = (dict.tag_delete_confirm || '确定要删除动画段落【{name}】吗？').replace('{name}', tagStart.name);
-
-                    if (confirm(msg)) {
-                        frameTags = frameTags.filter(t => t !== tagStart);
-                        renderFilmstripThumbnails();
-                        showToast(`🗑️ 已删除段落【${tagStart.name}】`);
+                    const tagIdx = frameTags.indexOf(tagStart);
+                    if (typeof openTagManagerModal === 'function') {
+                        openTagManagerModal(tagIdx);
                     }
                 });
                 card.appendChild(badge);
@@ -2643,6 +2720,176 @@ document.addEventListener('DOMContentLoaded', () => {
 
         renderFrameTags();
         updateTagSelectorUI(); // 👈 补上这句，每次刷新时间轴都同步刷新下拉框
+    }
+
+    // ============================================================
+    // 🏷️ 动画动作标签管理弹窗控制逻辑 (Tag Manager Modal)
+    // ============================================================
+    let editingTagIndex = -1;
+
+    function openTagManagerModal(tagIndex = -1) {
+        const modal = document.getElementById('anim-tag-modal');
+        if (!modal) return;
+        editingTagIndex = tagIndex;
+
+        const modalTitle = document.getElementById('tag-modal-title');
+        const nameInput = document.getElementById('tag-input-name');
+        const fromInput = document.getElementById('tag-input-from');
+        const toInput = document.getElementById('tag-input-to');
+        const colorInput = document.getElementById('tag-input-color');
+        const btnDelete = document.getElementById('btn-tag-modal-delete');
+
+        const totalFrames = (frameBuffers && frameBuffers.length > 0) ? frameBuffers.length : 1;
+        if (fromInput) fromInput.max = totalFrames;
+        if (toInput) toInput.max = totalFrames;
+
+        if (tagIndex >= 0 && frameTags[tagIndex]) {
+            const tag = frameTags[tagIndex];
+            if (modalTitle) modalTitle.textContent = `🏷️ 编辑动作标签【${tag.name}】`;
+            if (nameInput) nameInput.value = tag.name;
+            if (fromInput) fromInput.value = tag.from + 1;
+            if (toInput) toInput.value = tag.to + 1;
+            if (colorInput) colorInput.value = tag.color || '#00f2fe';
+            if (btnDelete) btnDelete.style.display = 'inline-block';
+        } else {
+            if (modalTitle) modalTitle.textContent = '🏷️ 创建动画动作标签 (Animation Tag)';
+            const sorted = (selectedFrames && selectedFrames.length > 0)
+                ? [...selectedFrames].sort((a, b) => a - b)
+                : [currentFrame];
+            const minF = Math.min(...sorted);
+            const maxF = Math.max(...sorted);
+
+            const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
+            if (nameInput) nameInput.value = (dict.tag_prompt_default || '动画 {n}').replace('{n}', frameTags.length + 1);
+            if (fromInput) fromInput.value = minF + 1;
+            if (toInput) toInput.value = maxF + 1;
+
+            const colors = ['#00f2fe', '#ffc439', '#ff007f', '#4ade80', '#a855f7', '#f97316'];
+            if (colorInput) colorInput.value = colors[frameTags.length % colors.length];
+            if (btnDelete) btnDelete.style.display = 'none';
+        }
+
+        renderTagExistingList();
+        modal.style.display = 'flex';
+    }
+
+    function closeTagManagerModal() {
+        const modal = document.getElementById('anim-tag-modal');
+        if (modal) modal.style.display = 'none';
+        editingTagIndex = -1;
+    }
+
+    function renderTagExistingList() {
+        const listContainer = document.getElementById('tag-existing-list');
+        if (!listContainer) return;
+        listContainer.innerHTML = '';
+
+        if (!frameTags || frameTags.length === 0) {
+            listContainer.innerHTML = '<span style="color:var(--text-muted); font-size:11px; font-style:italic;">暂无动画段落，请在上方输入并创建</span>';
+            return;
+        }
+
+        frameTags.forEach((tag, idx) => {
+            const row = document.createElement('div');
+            row.className = 'tag-item-row';
+            row.innerHTML = `
+                <div class="tag-item-left">
+                    <span class="tag-item-badge" style="background:${tag.color};">${tag.name}</span>
+                    <span style="color:var(--text-muted);">第 ${tag.from + 1} - ${tag.to + 1} 帧 (${tag.to - tag.from + 1} 帧)</span>
+                </div>
+                <div class="tag-item-actions">
+                    <button type="button" class="btn btn-secondary btn-xs btn-edit-tag" data-idx="${idx}" style="padding:2px 6px; font-size:10px;">✏️ 编辑</button>
+                    <button type="button" class="btn btn-secondary btn-xs danger-btn btn-del-tag" data-idx="${idx}" style="padding:2px 6px; font-size:10px;">🗑️</button>
+                </div>
+            `;
+            row.querySelector('.btn-edit-tag').addEventListener('click', () => {
+                openTagManagerModal(idx);
+            });
+            row.querySelector('.btn-del-tag').addEventListener('click', () => {
+                const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
+                const msg = (dict.tag_delete_confirm || '确定要删除动画段落【{name}】吗？').replace('{name}', tag.name);
+                if (confirm(msg)) {
+                    frameTags.splice(idx, 1);
+                    renderFilmstripThumbnails();
+                    updateTagSelectorUI();
+                    if (editingTagIndex === idx) openTagManagerModal(-1);
+                    else renderTagExistingList();
+                    showToast(`🗑️ 已删除动画段落【${tag.name}】`);
+                }
+            });
+            listContainer.appendChild(row);
+        });
+    }
+
+    function saveTagFromModal() {
+        const nameInput = document.getElementById('tag-input-name');
+        const fromInput = document.getElementById('tag-input-from');
+        const toInput = document.getElementById('tag-input-to');
+        const colorInput = document.getElementById('tag-input-color');
+
+        const name = (nameInput ? nameInput.value : '').trim();
+        if (!name) {
+            alert('请输入动作标签名称 (例如: Idle / Run)');
+            if (nameInput) nameInput.focus();
+            return;
+        }
+
+        const totalFrames = (frameBuffers && frameBuffers.length > 0) ? frameBuffers.length : 1;
+        let from = parseInt(fromInput ? fromInput.value : 1) || 1;
+        let to = parseInt(toInput ? toInput.value : 1) || 1;
+
+        if (from > to) {
+            const tmp = from;
+            from = to;
+            to = tmp;
+        }
+
+        from = Math.max(1, Math.min(from, totalFrames));
+        to = Math.max(1, Math.min(to, totalFrames));
+
+        const fromIdx = from - 1;
+        const toIdx = to - 1;
+        const color = colorInput ? colorInput.value : '#00f2fe';
+
+        // 检查重叠
+        const overlap = frameTags.find((t, i) => {
+            if (i === editingTagIndex) return false;
+            return (fromIdx >= t.from && fromIdx <= t.to) || (toIdx >= t.from && toIdx <= t.to) || (fromIdx <= t.from && toIdx >= t.to);
+        });
+
+        if (overlap) {
+            const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
+            const overlapMsg = (dict.tag_overlap_alert || '⚠️ 选中的帧与已有段落【{name}】重叠，请重新调整起止帧。').replace('{name}', overlap.name);
+            alert(overlapMsg);
+            return;
+        }
+
+        if (editingTagIndex >= 0 && frameTags[editingTagIndex]) {
+            frameTags[editingTagIndex] = { name, color, from: fromIdx, to: toIdx };
+        } else {
+            frameTags.push({ name, color, from: fromIdx, to: toIdx });
+        }
+
+        frameTags.sort((a, b) => a.from - b.from);
+        renderFilmstripThumbnails();
+        updateTagSelectorUI();
+        closeTagManagerModal();
+        showToast(`🎬 已保存动作段落【${name}】(第 ${from}-${to} 帧)`);
+    }
+
+    function deleteTagFromModal() {
+        if (editingTagIndex >= 0 && frameTags[editingTagIndex]) {
+            const tag = frameTags[editingTagIndex];
+            const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
+            const msg = (dict.tag_delete_confirm || '确定要删除动画段落【{name}】吗？').replace('{name}', tag.name);
+            if (confirm(msg)) {
+                frameTags.splice(editingTagIndex, 1);
+                renderFilmstripThumbnails();
+                updateTagSelectorUI();
+                closeTagManagerModal();
+                showToast(`🗑️ 已删除动画段落【${tag.name}】`);
+            }
+        }
     }
     // #endregion [R7] 动画时间轴与段落标签 (Timeline & Tags)
 
@@ -4092,12 +4339,46 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Mirror Symmetry Selection
+        // Mirror Symmetry Selection & Quick Buttons
+        function setSymmetryMode(mode) {
+            mirrorMode = mode;
+            if (selectMirrorMode && selectMirrorMode.value !== mode) {
+                selectMirrorMode.value = mode;
+            }
+            const symBtns = {
+                'none': document.getElementById('btn-sym-none'),
+                'horizontal': document.getElementById('btn-sym-h'),
+                'vertical': document.getElementById('btn-sym-v'),
+                'dual': document.getElementById('btn-sym-dual')
+            };
+            Object.keys(symBtns).forEach(k => {
+                if (symBtns[k]) symBtns[k].classList.toggle('active', k === mode);
+            });
+            drawSymmetryOverlay();
+
+            const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
+            const modeNames = {
+                'none': dict.mirror_none || '关闭 (Off)',
+                'horizontal': dict.mirror_horiz || '↔️ 水平对称',
+                'vertical': dict.mirror_vert || '↕️ 垂直对称',
+                'dual': dict.mirror_dual || '✖️ 双轴对称'
+            };
+            showToast((dict.toast_mirror_on || '↔️ 镜像对称模式: {mode}').replace('{mode}', modeNames[mode] || mode));
+        }
+        window.setSymmetryMode = setSymmetryMode;
+
+        const btnSymNone = document.getElementById('btn-sym-none');
+        const btnSymH = document.getElementById('btn-sym-h');
+        const btnSymV = document.getElementById('btn-sym-v');
+        const btnSymDual = document.getElementById('btn-sym-dual');
+        if (btnSymNone) btnSymNone.addEventListener('click', () => setSymmetryMode('none'));
+        if (btnSymH) btnSymH.addEventListener('click', () => setSymmetryMode('horizontal'));
+        if (btnSymV) btnSymV.addEventListener('click', () => setSymmetryMode('vertical'));
+        if (btnSymDual) btnSymDual.addEventListener('click', () => setSymmetryMode('dual'));
+
         if (selectMirrorMode) {
             selectMirrorMode.addEventListener('change', (e) => {
-                mirrorMode = e.target.value;
-                drawSymmetryOverlay();
-                showToast(t('toast_mirror_on', { mode: selectMirrorMode.options[selectMirrorMode.selectedIndex].text }));
+                setSymmetryMode(e.target.value);
             });
         }
 
@@ -4477,6 +4758,105 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // ============================================================
+        // 🎨 经典复古色板切换与画布颜色自动重映射 (Preset Palettes & Remap)
+        // ============================================================
+        const PRESET_PALETTES = {
+            default: ['#0f172a', '#1e293b', '#334155', '#475569', '#0284c7', '#38bdf8', '#7dd3fc', '#e0f2fe', '#fbbf24', '#f59e0b', '#d97706', '#92400e', '#ffffff', '#cbd5e1', '#64748b', '#0f172a'],
+            pico8: ['#000000', '#1D2B53', '#7E2553', '#008751', '#AB5236', '#5F574F', '#C2C3C7', '#FFF1E8', '#FF004D', '#FFA300', '#FFEC27', '#00E436', '#29ADFF', '#83769C', '#FF77A8', '#FFCCAA'],
+            gameboy: ['#0f380f', '#306230', '#8bac0f', '#9bbc0f'],
+            gameboy_pocket: ['#081820', '#346856', '#88c070', '#e0f8cf'],
+            endesga32: ['#be4a2f', '#d77643', '#ead4aa', '#e4a672', '#b86f56', '#733e39', '#3e2731', '#a22633', '#e43b44', '#f77622', '#feae34', '#fee761', '#63c74d', '#3e8948', '#265c42', '#193c3e', '#124e89', '#0099db', '#2ce8f5', '#ffffff', '#c0cbdc', '#8b9bb4', '#5a6988', '#3a4466', '#262b44', '#181425', '#ff0044', '#68386c', '#b55088', '#f6757a', '#e8b796', '#c28569'],
+            nes: ['#000000', '#2038ec', '#0058f8', '#3cbcfc', '#98f898', '#58d854', '#a81000', '#e40058', '#f83800', '#f87800', '#fca044', '#f8b800', '#f8d878', '#ffffff', '#b8b8b8', '#7c7c7c'],
+            cyberpunk: ['#0d0221', '#0f084b', '#26408b', '#0d0835', '#0f4c5c', '#00f0ff', '#7000ff', '#ff007f', '#ff003c', '#ffe600', '#05ffa1', '#f0f3f4', '#39ff14', '#1b003a', '#9400d3', '#ffffff'],
+            pastel: ['#6c567b', '#c06c84', '#f67280', '#f8b195', '#ffe5b4', '#b5ead7', '#c7ceea', '#e2f0cb', '#ffdac1', '#ffb7b2', '#b28dff', '#aff8db', '#ffabab', '#e0bbe4', '#957dad', '#d291bc'],
+            c64: ['#000000', '#ffffff', '#880000', '#aaffee', '#cc44cc', '#00cc55', '#0000aa', '#eeee77', '#dd8855', '#664400', '#ff7777', '#333333', '#777777', '#aaff66', '#0088ff', '#bbbbbb'],
+            solarized: ['#002b36', '#073642', '#586e75', '#657b83', '#839496', '#93a1a1', '#eee8d5', '#fdf6e3', '#b58900', '#cb4b16', '#dc322f', '#d33682', '#6c71c4', '#268bd2', '#2aa198', '#859900'],
+            monochrome: ['#000000', '#ffffff']
+        };
+
+        const selectPresetPalette = document.getElementById('select-preset-palette');
+        if (selectPresetPalette) {
+            selectPresetPalette.addEventListener('change', (e) => {
+                const key = e.target.value;
+                const colors = PRESET_PALETTES[key] || PRESET_PALETTES.default;
+                customPalette = [...colors.map(c => safeHex6(c).toUpperCase())];
+                updatePaletteSwatchesUI();
+                if (colors[0]) setActiveColor(colors[0]);
+                const selName = selectPresetPalette.options[selectPresetPalette.selectedIndex]?.text || key;
+                showToast(`🎨 已切换为【${selName}】`);
+            });
+        }
+
+        function hexToRgbComponents(hex) {
+            const h = safeHex6(hex);
+            const r = parseInt(h.slice(1, 3), 16) || 0;
+            const g = parseInt(h.slice(3, 5), 16) || 0;
+            const b = parseInt(h.slice(5, 7), 16) || 0;
+            return { r, g, b };
+        }
+
+        function findClosestPaletteColor(hex, palette) {
+            const target = hexToRgbComponents(hex);
+            let minD = Infinity;
+            let closest = palette[0];
+            for (let i = 0; i < palette.length; i++) {
+                const p = hexToRgbComponents(palette[i]);
+                const dr = target.r - p.r;
+                const dg = target.g - p.g;
+                const db = target.b - p.b;
+                const d = dr * dr + dg * dg + db * db;
+                if (d < minD) {
+                    minD = d;
+                    closest = palette[i];
+                    if (d === 0) break;
+                }
+            }
+            return closest;
+        }
+
+        const btnPaletteRemap = document.getElementById('btn-palette-remap');
+        if (btnPaletteRemap) {
+            btnPaletteRemap.addEventListener('click', () => {
+                if (!customPalette || customPalette.length === 0) return;
+                pushUndo();
+
+                let mappedPixels = 0;
+                frameLayers.forEach((frame, f) => {
+                    if (!Array.isArray(frame)) return;
+                    frame.forEach(layer => {
+                        if (!layer || !layer.buffer) return;
+                        const buf = layer.buffer;
+                        for (let y = 0; y < buf.length; y++) {
+                            for (let x = 0; x < buf[y].length; x++) {
+                                const col = buf[y][x];
+                                if (col && col !== 'transparent' && col !== 'rgba(0,0,0,0)') {
+                                    buf[y][x] = findClosestPaletteColor(col, customPalette);
+                                    mappedPixels++;
+                                }
+                            }
+                        }
+                    });
+                    if (frameBuffers[f]) {
+                        const fBuf = frameBuffers[f];
+                        for (let y = 0; y < fBuf.length; y++) {
+                            for (let x = 0; x < fBuf[y].length; x++) {
+                                const col = fBuf[y][x];
+                                if (col && col !== 'transparent' && col !== 'rgba(0,0,0,0)') {
+                                    fBuf[y][x] = findClosestPaletteColor(col, customPalette);
+                                }
+                            }
+                        }
+                    }
+                });
+
+                syncCurrentFrameBuffer();
+                renderAll();
+                renderFilmstripThumbnails();
+                showToast(`✨ 画布颜色已按当前色板重新量化映射 (${mappedPixels} 像素)！`);
+            });
+        }
+
         // Mouse Drawing Events on Canvas Wrapper
         const targetElement = canvasWrapper || gridCanvas;
 
@@ -4484,8 +4864,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (canvasWrapper) canvasWrapper.addEventListener('dragstart', (e) => e.preventDefault());
         if (pixelCanvas) pixelCanvas.addEventListener('dragstart', (e) => e.preventDefault());
         if (gridCanvas) gridCanvas.addEventListener('dragstart', (e) => e.preventDefault());
+        if (tileOverlayCanvas) tileOverlayCanvas.addEventListener('dragstart', (e) => e.preventDefault());
 
-        targetElement.addEventListener('mousedown', (e) => {
+        const handleCanvasPointerDown = (e) => {
             if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
             if (isSpacePressed || e.button === 1) return;
             if (isPlaying) {
@@ -4516,7 +4897,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 isMouseDown = false;
                 isDrawingNow = false;
             }
-        });
+        };
+
+        targetElement.addEventListener('mousedown', handleCanvasPointerDown);
+        if (tileOverlayCanvas) {
+            tileOverlayCanvas.addEventListener('mousedown', handleCanvasPointerDown);
+        }
 
         window.addEventListener('mousemove', (e) => {
             if (isPlaying) return;
@@ -4526,13 +4912,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 strokeCurrentY = coords.y;
             }
 
-            // 🚨 只要坐标变了，就重新画指示框
+            // 🚨 只要坐标变了，就重新画指示框与发光对称镜像光标
             if (coords.x !== currentHoverPixelX || coords.y !== currentHoverPixelY) {
                 currentHoverPixelX = coords.x;
                 currentHoverPixelY = coords.y;
 
-                // 🚨 加这句！鼠标移动时刷新悬停框！
                 drawGridOverlay();
+                drawSymmetryOverlay();
             }
 
             if (activeTool === 'select') {
@@ -4954,6 +5340,160 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // ============================================================
+        // 📤 现代化卡片式导出菜单与配置弹窗逻辑 (Export Cards & Config Modal)
+        // ============================================================
+        let currentExportFormat = 'png';
+
+        function openExportConfigModal(format = 'png') {
+            currentExportFormat = format;
+            if (exportMenu) exportMenu.style.display = 'none';
+            if (exportArrow) exportArrow.style.transform = 'rotate(0deg)';
+
+            const modal = document.getElementById('export-config-modal');
+            if (!modal) return;
+
+            const titleEl = document.getElementById('export-config-title');
+            const badgeEl = document.getElementById('export-config-badge');
+            const noteEl = document.getElementById('export-info-note');
+
+            const formatMeta = {
+                png: { title: '🖼️ 导出 PNG 单帧原图', badge: 'FREE', isPro: false, note: '单帧高质量原图 (支持透明通道)' },
+                gif: { title: '🎞️ 导出 GIF 动画动图', badge: '👑 PRO', isPro: true, note: '多帧动态流畅循环动图' },
+                sheet: { title: '📊 导出 Sprite Sheet 精灵图集', badge: '👑 PRO', isPro: true, note: '游戏引擎标准序列贴图' },
+                json: { title: '🎮 导出 JSON 动画 Atlas', badge: '👑 PRO', isPro: true, note: '包含坐标贴图与动作标签 (Aseprite / Godot 兼容)' },
+                svg: { title: '🎨 导出矢量 SVG 格式', badge: '👑 PRO', isPro: true, note: '无损无限放大矢量像素文件' },
+                zip: { title: '📦 导出全套资产 ZIP 包', badge: '👑 PRO 推荐 ⭐', isPro: true, note: '一键打包全套游戏产品资产' }
+            };
+
+            const meta = formatMeta[format] || formatMeta.png;
+            if (titleEl) titleEl.textContent = meta.title;
+            if (badgeEl) {
+                badgeEl.textContent = meta.badge;
+                badgeEl.className = 'export-card-badge ' + (meta.isPro ? (format === 'zip' ? 'pro-gold' : 'pro') : 'free');
+            }
+            if (noteEl) noteEl.textContent = meta.note;
+
+            ['png', 'gif', 'sheet', 'json', 'svg', 'zip'].forEach(f => {
+                const sec = document.getElementById(`export-settings-${f}`);
+                if (sec) sec.style.display = (f === format) ? 'flex' : 'none';
+            });
+
+            updateExportConfigModalPreview();
+            modal.style.display = 'flex';
+        }
+
+        function closeExportConfigModal() {
+            const modal = document.getElementById('export-config-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function updateExportConfigModalPreview() {
+            const canvas = document.getElementById('export-config-preview-canvas');
+            if (canvas && typeof getCompositedFrameBuffer === 'function' && engine) {
+                const buf = getCompositedFrameBuffer(currentFrame);
+                engine.renderToCanvas(buf, canvas, true);
+            }
+
+            const resX = engine.resX || 32;
+            const resY = engine.resY || 32;
+            const totalFrames = (frameBuffers && frameBuffers.length > 0) ? frameBuffers.length : 1;
+
+            let scale = 1;
+            if (currentExportFormat === 'png') {
+                const sel = document.getElementById('select-png-scale');
+                scale = sel ? (parseInt(sel.value) || 1) : 1;
+            } else if (currentExportFormat === 'gif') {
+                const sel = document.getElementById('select-gif-scale');
+                scale = sel ? (parseInt(sel.value) || 1) : 1;
+            } else if (currentExportFormat === 'sheet' || currentExportFormat === 'json' || currentExportFormat === 'zip') {
+                const sel = document.getElementById('select-sheet-scale');
+                scale = sel ? (parseInt(sel.value) || 1) : 1;
+            }
+
+            const targetW = resX * scale;
+            const targetH = resY * scale;
+
+            const dimEl = document.getElementById('export-info-dimension');
+            if (dimEl) {
+                if (currentExportFormat === 'sheet' || currentExportFormat === 'json' || currentExportFormat === 'zip') {
+                    const colsInput = document.getElementById('param-sheet-cols');
+                    let cols = colsInput ? parseInt(colsInput.value) : 0;
+                    if (isNaN(cols) || cols <= 0) cols = totalFrames;
+                    cols = Math.max(1, Math.min(cols, 64));
+                    const rows = Math.ceil(totalFrames / cols);
+                    dimEl.textContent = `单帧: ${targetW}×${targetH} px | 图集: ${cols * targetW}×${rows * targetH} px (${cols}列×${rows}行)`;
+                } else {
+                    dimEl.textContent = `尺寸计算: ${resX} × ${resY} px ➔ ${targetW} × ${targetH} px (${scale}x)`;
+                }
+            }
+
+            const detailsEl = document.getElementById('export-info-details');
+            if (detailsEl) {
+                detailsEl.textContent = `当前工程共 ${totalFrames} 帧 | 播放帧率 ${fps || 12} FPS`;
+            }
+        }
+
+        // 绑定 6 个卡片点击
+        document.querySelectorAll('.export-card-btn').forEach(card => {
+            card.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const format = card.getAttribute('data-format');
+                if (format) openExportConfigModal(format);
+            });
+        });
+
+        // 弹窗关闭与取消
+        const exportConfigClose = document.getElementById('export-config-modal-close');
+        if (exportConfigClose) exportConfigClose.addEventListener('click', closeExportConfigModal);
+
+        const btnExportConfigCancel = document.getElementById('btn-export-config-cancel');
+        if (btnExportConfigCancel) btnExportConfigCancel.addEventListener('click', closeExportConfigModal);
+
+        // 实时更新分辨率预览监听
+        ['select-png-scale', 'select-gif-scale', 'select-sheet-scale', 'param-sheet-cols'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('change', updateExportConfigModalPreview);
+                el.addEventListener('input', updateExportConfigModalPreview);
+            }
+        });
+
+        // 🚀 立即导出执行按钮
+        const btnExportConfigConfirm = document.getElementById('btn-export-config-confirm');
+        if (btnExportConfigConfirm) {
+            btnExportConfigConfirm.addEventListener('click', async () => {
+                const isProFormat = (currentExportFormat !== 'png');
+                if (isProFormat && !checkIsProActive()) {
+                    closeExportConfigModal();
+                    openProModal();
+                    return;
+                }
+
+                closeExportConfigModal();
+
+                if (currentExportFormat === 'png') {
+                    if (typeof window.handleExportPng === 'function') {
+                        window.handleExportPng();
+                    } else if (btnExportPng) {
+                        btnExportPng.click();
+                    } else {
+                        exportPng();
+                    }
+                } else if (currentExportFormat === 'gif') {
+                    await exportGif();
+                } else if (currentExportFormat === 'sheet') {
+                    await exportSpritesheet();
+                } else if (currentExportFormat === 'json') {
+                    await exportJsonAtlas();
+                } else if (currentExportFormat === 'svg') {
+                    await exportSvg();
+                } else if (currentExportFormat === 'zip') {
+                    await exportZipBundle();
+                }
+            });
+        }
+
         if (btnExportPng) btnExportPng.addEventListener('click', exportPng);
         // 🚨 绑定 Sprite Sheet 设置弹窗的事件
         const sheetConfigClose = document.getElementById('sheet-config-close');
@@ -5320,75 +5860,71 @@ document.addEventListener('DOMContentLoaded', () => {
         bindProFeature('btn-header-buy-pro', openProModal);
         bindProFeature('btn-open-advanced-palette', openAdvancedPaletteModal);
 
-        // Tile 模式特殊处理
         // ============================================================
-        // 🚨 终极强制平铺开关
+        // 🧱 画布内 3×3 真实无缝平铺模式 (In-Canvas 3x3 Tile Mode)
         // ============================================================
+        function setTileMode(active) {
+            if (active && !checkIsProActive()) {
+                openProModal();
+                return;
+            }
+            isTileMode = !!active;
+            window.isTileMode = isTileMode;
+
+            const tileBtn = document.getElementById('btn-toggle-tile-mode');
+            if (tileBtn) tileBtn.classList.toggle('active', isTileMode);
+            const quickTileBtn = document.getElementById('btn-quick-tile-mode');
+            if (quickTileBtn) quickTileBtn.classList.toggle('active', isTileMode);
+
+            if (canvasWrapper) {
+                canvasWrapper.classList.toggle('tile-mode-active', isTileMode);
+            }
+            if (tileOverlayCanvas) {
+                tileOverlayCanvas.style.display = isTileMode ? 'block' : 'none';
+                tileOverlayCanvas.style.pointerEvents = isTileMode ? 'auto' : 'none';
+            }
+
+            // 清理旧版 CSS 背景
+            const box = document.querySelector('.canvas-container-box');
+            if (box) {
+                box.style.backgroundImage = '';
+                box.style.boxShadow = '';
+            }
+            document.body.classList.remove('tile-mode-active');
+            if (pixelCanvas) pixelCanvas.style.opacity = '';
+
+            const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
+            if (isTileMode) {
+                renderTileOverlay();
+                showToast(dict.toast_tile_on || '🧱 已开启画布内 3×3 无缝平铺模式 (支持跨边穿透环绕绘制)！');
+            } else {
+                if (tileOverlayCanvas) {
+                    const ctx = tileOverlayCanvas.getContext('2d');
+                    ctx.clearRect(0, 0, tileOverlayCanvas.width, tileOverlayCanvas.height);
+                }
+                showToast(dict.toast_tile_off || '🧱 已关闭 3×3 无缝平铺模式');
+            }
+        }
+        window.setTileMode = setTileMode;
+
         const tileBtn = document.getElementById('btn-toggle-tile-mode');
         if (tileBtn) {
-            tileBtn.onclick = function () {
-                // 1. 权限拦截
-                if (typeof checkIsProActive === 'function' && !checkIsProActive()) {
-                    if (typeof openProModal === 'function') openProModal();
-                    return;
-                }
-
-                // 2. 状态切换
-                window.isTileMode = !window.isTileMode;
-                tileBtn.classList.toggle('active', window.isTileMode);
-
-                // 3. 语言提示
-                const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
-                if (typeof showToast === 'function') {
-                    showToast(window.isTileMode ? (dict.toast_tile_on || '🧱 Seamless ON') : (dict.toast_tile_off || '🧱 Seamless OFF'));
-                }
-
-                // 4. 纯视觉爆炸特效！
-                const box = document.querySelector('.canvas-container-box');
-                if (window.isTileMode) {
-                    // 截取当前画布
-                    const dataUrl = document.getElementById('pixel-canvas').toDataURL();
-                    // 暴力注入背景，大号平铺
-                    box.style.backgroundImage = `url(${dataUrl})`;
-                    box.style.backgroundRepeat = 'repeat';
-                    box.style.backgroundSize = '128px 128px'; // 铺满小瓷砖
-                    box.style.boxShadow = 'inset 0 0 100px rgba(0, 242, 254, 0.4)';
-                    document.getElementById('pixel-canvas').style.opacity = '0.5';
-                } else {
-                    // 恢复原状
-                    box.style.backgroundImage = '';
-                    box.style.backgroundRepeat = '';
-                    box.style.backgroundSize = '';
-                    box.style.boxShadow = '';
-                    document.getElementById('pixel-canvas').style.opacity = '1';
-                }
+            tileBtn.onclick = (e) => {
+                e.preventDefault();
+                setTileMode(!isTileMode);
             };
+        }
+        const quickTileBtn = document.getElementById('btn-quick-tile-mode');
+        if (quickTileBtn) {
+            quickTileBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                setTileMode(!isTileMode);
+            });
         }
         // ============================================================
 
         // PRO Tool Buttons
         if (btnOpenSlicer) btnOpenSlicer.addEventListener('click', openSpriteSheetSlicer);
-        if (btnToggleTileMode) {
-            btnToggleTileMode.addEventListener('click', () => {
-                if (!checkIsProActive()) { openProModal(); return; }
-
-                isTileMode = !isTileMode;
-                btnToggleTileMode.classList.toggle('active', isTileMode);
-
-                const dict = window.I18N_TRANSLATIONS[window.currentLang] || window.I18N_TRANSLATIONS.en;
-
-                if (isTileMode) {
-                    // 🚨 终极魔法：把当前画布变成平铺背景
-                    const dataUrl = pixelCanvas.toDataURL();
-                    document.body.style.setProperty('--tile-bg', `url(${dataUrl})`);
-                    document.body.classList.add('tile-mode-active');
-                    showToast(dict.toast_tile_on || '🧱 Seamless Mode ON');
-                } else {
-                    document.body.classList.remove('tile-mode-active');
-                    showToast(dict.toast_tile_off || '🧱 Seamless Mode OFF');
-                }
-            });
-        }
         if (btnOpenPixelate) btnOpenPixelate.addEventListener('click', openPixelateConverter);
         if (selectDitherPattern) {
             selectDitherPattern.addEventListener('change', (e) => {
@@ -5596,6 +6132,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateFrameUI();
             });
         }
+
+        // ============================================================
+        // 🏷️ 动画动作标签管理弹窗事件绑定
+        // ============================================================
+        const btnFrameTag = document.getElementById('btn-frame-tag');
+        if (btnFrameTag) {
+            btnFrameTag.addEventListener('click', () => {
+                if (!checkIsProActive()) { openProModal(); return; }
+                openTagManagerModal(-1);
+            });
+        }
+
+        const tagModalClose = document.getElementById('tag-modal-close');
+        if (tagModalClose) tagModalClose.addEventListener('click', closeTagManagerModal);
+
+        const btnTagModalCancel = document.getElementById('btn-tag-modal-cancel');
+        if (btnTagModalCancel) btnTagModalCancel.addEventListener('click', closeTagManagerModal);
+
+        const btnTagModalSave = document.getElementById('btn-tag-modal-save');
+        if (btnTagModalSave) btnTagModalSave.addEventListener('click', saveTagFromModal);
+
+        const btnTagModalDelete = document.getElementById('btn-tag-modal-delete');
+        if (btnTagModalDelete) btnTagModalDelete.addEventListener('click', deleteTagFromModal);
+
+        document.querySelectorAll('.tag-preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const name = btn.getAttribute('data-name');
+                const nameInput = document.getElementById('tag-input-name');
+                if (nameInput && name) nameInput.value = name;
+            });
+        });
+
+        document.querySelectorAll('.tag-color-circle').forEach(circle => {
+            circle.addEventListener('click', () => {
+                const col = circle.getAttribute('data-color');
+                const colorInput = document.getElementById('tag-input-color');
+                if (colorInput && col) colorInput.value = col;
+            });
+        });
 
         if (btnToggleOnion) {
             btnToggleOnion.addEventListener('click', () => {
@@ -5924,6 +6499,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (symmetryCanvas) {
             symmetryCanvas.width = displayW;
             symmetryCanvas.height = displayH;
+        }
+        if (tileOverlayCanvas) {
+            tileOverlayCanvas.width = displayW * 3;
+            tileOverlayCanvas.height = displayH * 3;
+            if (isTileMode) renderTileOverlay();
         }
         if (canvasWrapper) {
             canvasWrapper.style.width = displayW + 'px';
@@ -6609,13 +7189,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 zip.file('spritesheet.png', sheetBase64, { base64: true });
 
                 // ==============================
-                // C. 生成 spritesheet.json (Atlas)
+                // C. 生成 spritesheet.json (Atlas - 兼容 Aseprite & Godot)
                 // ==============================
                 const atlasData = {
                     frames: atlasFrames,
                     meta: {
                         app: 'PixelSprite Pro',
-                        version: '2.0',
+                        version: '3.0',
                         image: 'spritesheet.png',
                         format: 'RGBA8888',
                         size: { w: sheetW, h: sheetH },
@@ -6624,14 +7204,35 @@ document.addEventListener('DOMContentLoaded', () => {
                         totalFrames: totalFrames
                     }
                 };
+
+                // 兼容游戏引擎的动画标签元数据 (Godot AnimatedSprite2D / Phaser / Pixi.js)
+                if (frameTags && frameTags.length > 0) {
+                    atlasData.meta.frameTags = frameTags.map(t => ({
+                        name: t.name,
+                        from: t.from,
+                        to: t.to,
+                        direction: 'forward',
+                        color: t.color || '#00f2fe'
+                    }));
+
+                    atlasData.animations = {};
+                    frameTags.forEach(t => {
+                        const frameNames = [];
+                        for (let i = t.from; i <= t.to; i++) {
+                            frameNames.push(`frame_${String(i + 1).padStart(3, '0')}.png`);
+                        }
+                        atlasData.animations[t.name] = frameNames;
+                    });
+                }
+
                 zip.file('spritesheet.json', JSON.stringify(atlasData, null, 2));
 
                 // ==============================
                 // D. 生成 animation.gif (多帧预览)
                 // ==============================
+                const delayMs = Math.round(1000 / (fps || 12));
                 if (totalFrames > 1 && typeof encodeGIF === 'function') {
                     try {
-                        const delayMs = Math.round(1000 / (fps || 12));
                         const gifBlob = encodeGIF(gifCanvasList, delayMs);
                         if (gifBlob) {
                             zip.file('animation.gif', gifBlob);
@@ -6642,10 +7243,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // ==============================
+                // D2. 生成 animations/ 独立动作 GIF 分包 (PRO 游戏资产独享)
+                // ==============================
+                if (frameTags && frameTags.length > 0 && typeof encodeGIF === 'function') {
+                    const animFolder = zip.folder('animations');
+                    frameTags.forEach(t => {
+                        const tagCanvases = gifCanvasList.slice(t.from, t.to + 1);
+                        if (tagCanvases && tagCanvases.length > 0) {
+                            try {
+                                const tagGifBlob = encodeGIF(tagCanvases, delayMs);
+                                if (tagGifBlob) {
+                                    const safeName = (t.name || 'action').replace(/[^a-zA-Z0-9_\-\u4e00-\u9fa5]/g, '_');
+                                    animFolder.file(`${safeName}.gif`, tagGifBlob);
+                                }
+                            } catch (tagErr) {
+                                console.warn('Tag GIF export failed:', t.name, tagErr);
+                            }
+                        }
+                    });
+                }
+
+                // ==============================
                 // E. 生成 README.txt 资产使用说明
                 // ==============================
                 const dateStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
-                const readmeContent = [
+                const readmeLines = [
                     '====================================================',
                     '👑 PixelSprite PRO - Game Asset Package',
                     '====================================================',
@@ -6660,17 +7282,31 @@ document.addEventListener('DOMContentLoaded', () => {
                     '1. spritesheet.png  : Full Sprite Sheet (Transparent Alpha Channel)',
                     '2. spritesheet.json : Texture Atlas (Phaser / Pixi / Godot / Unity compatible)',
                     '3. frames/          : Individual PNG frame sequence (e.g. frame_001.png...)',
-                    (totalFrames > 1 ? '4. animation.gif    : Animated preview for asset stores and quick viewing\n' : '') +
-                    '5. README.txt       : Asset specifications and license notice',
-                    '',
+                    (totalFrames > 1 ? '4. animation.gif    : Full animation preview\n' : '') +
+                    (frameTags && frameTags.length > 0 ? '5. animations/      : Per-action GIF clips (e.g. Idle.gif, Run.gif)\n' : '') +
+                    '6. README.txt       : Asset specifications and license notice',
+                    ''
+                ];
+
+                if (frameTags && frameTags.length > 0) {
+                    readmeLines.push('🎞️ Animation Action Clips (Clips & Tags):');
+                    readmeLines.push('----------------------------------------');
+                    frameTags.forEach(t => {
+                        readmeLines.push(`- ${t.name}: Frames ${t.from + 1} - ${t.to + 1} (${t.to - t.from + 1} frames) -> animations/${t.name}.gif`);
+                    });
+                    readmeLines.push('');
+                }
+
+                readmeLines.push(
                     '🎮 Engine Compatibility:',
-                    '- Godot Engine (AnimatedSprite2D / SpriteFrames)',
+                    '- Godot Engine (AnimatedSprite2D / SpriteFrames / Aseprite JSON import)',
                     '- Unity (Sprite Editor / Multiple Sprite Mode)',
                     '- Unreal Engine / GameMaker / RPG Maker / Cocos Creator',
                     '',
                     '⚖️ License: PixelSprite PRO Commercial & Personal License (Royalty-Free)',
-                    'Created with PixelSprite Studio Pro: https://pixelsprite-pro.vercel.app'
-                ].join('\n');
+                    'Created with PixelSprite Studio Pro: https://pixelsprite.xyz'
+                );
+                const readmeContent = readmeLines.join('\n');
                 zip.file('README.txt', readmeContent);
 
                 // ==============================

@@ -18,6 +18,11 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Share+Tech+Mono&display=swap">
     <link rel="stylesheet" href="styles.css?v=99.2">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#00f2fe">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="logo.png">
     <script src="https://cdn.jsdelivr.net/npm/pica@9.0.1/dist/pica.min.js"></script>
 </head>
 
@@ -407,6 +412,14 @@
                     title="导入图片或工程文件 (PNG/JPG/GIF/.pixelsprite)" data-i18n-title="title_import_project">📂 导入文件</button>
                 <input type="file" id="file-import-input" accept="image/*,.pixelsprite,.json" style="display: none;">
 
+                <!-- 社区灵感与一键 Remix 二创 -->
+                <button id="btn-open-community" class="btn btn-secondary" data-i18n="btn_community_remix"
+                    title="浏览精选社区模板与一键 Remix 二创" data-i18n-title="title_community_remix">🌐 社区 / Remix</button>
+
+                <!-- PWA 桌面端离线安装按钮 -->
+                <button id="btn-pwa-install" class="btn btn-outline btn-xs" data-i18n="btn_pwa_install"
+                    title="安装为独立桌面应用程序，支持离线运行" data-i18n-title="title_pwa_install" style="display: none; padding: 6px 12px; border-radius: var(--radius-sm); align-items: center; gap: 4px;">📲 安装桌面版</button>
+
                 <!-- 导出菜单 Dropdown -->
                 <div class="export-dropdown-wrapper" style="position: relative;">
                     <button id="btn-export-main" class="btn btn-primary"
@@ -433,158 +446,104 @@
                         }
                     </style>
                     <div id="export-menu" class="export-menu"
-                        style="display: none; position: absolute; top: calc(100% + 6px); right: 0; background: rgba(10, 15, 25, 0.98); backdrop-filter: blur(16px); border: 1px solid rgba(0, 242, 254, 0.4); border-radius: var(--radius-md); padding: 8px; box-shadow: 0 12px 40px rgba(0,0,0,0.8), 0 0 20px rgba(0,242,254,0.15); z-index: 1000; min-width: 260px; flex-direction: column; gap: 6px;">
+                        style="display: none; position: absolute; top: calc(100% + 6px); right: 0; background: rgba(10, 15, 25, 0.98); backdrop-filter: blur(16px); border: 1px solid rgba(0, 242, 254, 0.4); border-radius: var(--radius-md); padding: 8px; box-shadow: 0 12px 40px rgba(0,0,0,0.8), 0 0 20px rgba(0,242,254,0.15); z-index: 1000; width: 330px; flex-direction: column; gap: 6px;">
 
-                        <!-- 免费版：普通样式 -->
-                        <button id="btn-export-png" class="btn btn-secondary"
-                            style="width: 100%; justify-content: flex-start; text-align: left; font-size: 13px; padding: 10px 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); border-radius: 6px; color: #e2e8f0; transition: all 0.2s;"
-                            onmouseover="this.style.background='rgba(255,255,255,0.1)'"
-                            onmouseout="this.style.background='rgba(255,255,255,0.03)'" data-i18n="export_png"
-                            title="导出单帧 PNG 图片" data-i18n-title="title_export_png">🖼️ 导出 PNG 单图 (Free)</button>
-
-                        <!-- PNG 尺寸设置区 -->
-                        <div
-                            style="padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 6px; margin-bottom: 4px; border-left: 2px solid rgba(255,255,255,0.4);">
-                            <label style="font-size: 12px; color: #e2e8f0; display: block; margin-bottom: 4px;"
-                                data-i18n="png_scale_label">🔍 PNG 尺寸倍数:</label>
-                            <select id="select-png-scale" class="select-input"
-                                style="width: 100%; padding: 6px; font-size: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255, 255, 255, 0.2); color: #e2e8f0;">
-                                <option value="1" selected data-i18n="scale_1x">1x (原尺寸，游戏开发推荐)</option>
-                                <option value="2" data-i18n="scale_2x">2x (双倍清晰)</option>
-                                <option value="4" data-i18n="scale_4x">4x 高清</option>
-                                <option value="8" data-i18n="scale_8x">8x 超清</option>
-                                <option value="16" data-i18n="scale_16x">16x 极致 (社交头像/展示)</option>
-                            </select>
+                        <!-- 1. PNG 卡片 -->
+                        <div class="export-card-btn" data-format="png" id="card-export-png">
+                            <div class="export-card-icon" style="color: #38bdf8;">🖼️</div>
+                            <div class="export-card-content">
+                                <div class="export-card-title-row">
+                                    <span class="export-card-title" data-i18n="export_png_title">PNG 单帧高清图</span>
+                                    <span class="export-card-badge free">FREE</span>
+                                </div>
+                                <div class="export-card-desc" data-i18n="export_png_desc">当前画面原图，适合角色头像、插画与社交展示</div>
+                            </div>
                         </div>
 
-                        <div
-                            style="height: 1px; background: linear-gradient(90deg, transparent, rgba(0, 242, 254, 0.5), transparent); margin: 4px 0;">
+                        <!-- 2. GIF 卡片 -->
+                        <div class="export-card-btn pro" data-format="gif" id="card-export-gif">
+                            <div class="export-card-icon" style="color: #ffea70;">🎞️</div>
+                            <div class="export-card-content">
+                                <div class="export-card-title-row">
+                                    <span class="export-card-title" data-i18n="export_gif_title">GIF 动画动图</span>
+                                    <span class="export-card-badge pro">PRO</span>
+                                </div>
+                                <div class="export-card-desc" data-i18n="export_gif_desc">多帧连续流畅循环动图，适合 itch.io 与社交媒体发布</div>
+                            </div>
                         </div>
 
-                        <!-- 🚨 PRO 专属：赛博朋克霓虹按钮 (GIF) -->
-                        <button id="btn-export-gif" class="btn btn-secondary pro-feature-element"
-                            style="width: 100%; justify-content: space-between; text-align: left; font-size: 13px; padding: 10px 12px; border: 1px solid rgba(255, 234, 112, 0.5); background: linear-gradient(90deg, rgba(255, 234, 112, 0.1) 0%, transparent 100%); border-radius: 6px; color: #ffea70; transition: all 0.2s; box-shadow: inset 0 0 10px rgba(255, 234, 112, 0.1); position: relative; overflow: hidden;"
-                            onmouseover="this.style.boxShadow='inset 0 0 15px rgba(255, 234, 112, 0.3), 0 0 15px rgba(255, 234, 112, 0.2)'; this.style.borderColor='#ffea70'"
-                            onmouseout="this.style.boxShadow='inset 0 0 10px rgba(255, 234, 112, 0.1)'; this.style.borderColor='rgba(255, 234, 112, 0.5)'"
-                            title="导出多帧 GIF 动态动画 (PRO)" data-i18n-title="title_export_gif">
-                            <div
-                                style="position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 234, 112, 0.3), transparent); animation: exportScan 3s infinite;">
+                        <!-- 3. Sprite Sheet 图集卡片 -->
+                        <div class="export-card-btn pro" data-format="sheet" id="card-export-sheet">
+                            <div class="export-card-icon" style="color: #00f2fe;">📊</div>
+                            <div class="export-card-content">
+                                <div class="export-card-title-row">
+                                    <span class="export-card-title" data-i18n="export_sheet_title">Sprite Sheet 精灵图集</span>
+                                    <span class="export-card-badge pro">PRO</span>
+                                </div>
+                                <div class="export-card-desc" data-i18n="export_sheet_desc">横向或多行网格排列，游戏引擎标准素材图集</div>
                             </div>
-                            <span data-i18n="export_gif">🎞️ 导出 GIF 动画</span>
-                            <span class="pro-tag-badge"
-                                style="background: #ffea70; color: #050b14; border: none; box-shadow: 0 0 8px #ffea70; font-weight: 900;">PRO</span>
-                        </button>
-
-                        <!-- GIF 背景填充与尺寸设置区 -->
-                        <div
-                            style="padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 6px; margin-bottom: 4px; border-left: 2px solid #ffea70;">
-                            <label
-                                style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #e2e8f0; cursor: pointer; margin-bottom: 8px;">
-                                <input type="checkbox" id="check-gif-solid-bg" style="accent-color: #ffea70;">
-                                <span data-i18n="gif_solid_bg">🎨 填充纯色背景 (防黑边)</span>
-                            </label>
-                            <label style="font-size: 12px; color: #e2e8f0; display: block; margin-bottom: 4px;"
-                                data-i18n="gif_scale_label">🔍 GIF 清晰度 (放大倍数):</label>
-                            <select id="select-gif-scale" class="select-input"
-                                style="width: 100%; padding: 6px; font-size: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255, 234, 112, 0.3); color: #ffea70;">
-                                <option value="1" data-i18n="gif_scale_1x">1x (原尺寸)</option>
-                                <option value="4" data-i18n="gif_scale_4x">4x 高清</option>
-                                <option value="8" selected data-i18n="gif_scale_8x">8x 超清 (推荐)</option>
-                                <option value="16" data-i18n="gif_scale_16x">16x 极致</option>
-                            </select>
                         </div>
 
-                        <!-- Sprite Sheet 参数设置与按钮 -->
-                        <div
-                            style="padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 6px; margin-bottom: 4px; border-left: 2px solid #00f2fe;">
-                            <label style="font-size: 12px; color: #e2e8f0; display: block; margin-bottom: 4px;"
-                                data-i18n="sheet_cols_label">📊 Sprite Sheet 每行帧数:</label>
-                            <input type="number" id="param-sheet-cols" value="0" min="0" max="64" class="select-input"
-                                style="width: 100%; padding: 6px; font-size: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0, 242, 254, 0.3); color: #00f2fe; margin-bottom: 6px;"
-                                placeholder="填 0 自动横向排满" data-i18n-placeholder="sheet_cols_placeholder">
-
-                            <label style="font-size: 12px; color: #e2e8f0; display: block; margin-bottom: 4px;"
-                                data-i18n="sheet_scale_label">🔍 图集单帧倍数:</label>
-                            <select id="select-sheet-scale" class="select-input"
-                                style="width: 100%; padding: 6px; font-size: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0, 242, 254, 0.3); color: #00f2fe;">
-                                <option value="1" selected data-i18n="scale_1x">1x (原尺寸，游戏开发推荐)</option>
-                                <option value="2" data-i18n="scale_2x">2x</option>
-                                <option value="4" data-i18n="scale_4x">4x 高清</option>
-                                <option value="8" data-i18n="scale_8x">8x 超清</option>
-                                <option value="16" data-i18n="scale_16x">16x 极致</option>
-                            </select>
+                        <!-- 4. JSON Atlas 卡片 -->
+                        <div class="export-card-btn pro" data-format="json" id="card-export-json">
+                            <div class="export-card-icon" style="color: #a855f7;">🎮</div>
+                            <div class="export-card-content">
+                                <div class="export-card-title-row">
+                                    <span class="export-card-title" data-i18n="export_json_title">JSON 动画 Atlas</span>
+                                    <span class="export-card-badge pro">PRO</span>
+                                </div>
+                                <div class="export-card-desc" data-i18n="export_json_desc">含动作标签、帧坐标与时长，原生支持 Godot / Unity</div>
+                            </div>
                         </div>
 
-                        <button id="btn-export-sheet" class="btn btn-secondary pro-feature-element"
-                            style="width: 100%; justify-content: space-between; text-align: left; font-size: 13px; padding: 10px 12px; border: 1px solid rgba(0, 242, 254, 0.5); background: linear-gradient(90deg, rgba(0, 242, 254, 0.1) 0%, transparent 100%); border-radius: 6px; color: #00f2fe; transition: all 0.2s; box-shadow: inset 0 0 10px rgba(0, 242, 254, 0.1); position: relative; overflow: hidden;"
-                            onmouseover="this.style.boxShadow='inset 0 0 15px rgba(0, 242, 254, 0.3), 0 0 15px rgba(0, 242, 254, 0.2)'; this.style.borderColor='#00f2fe'"
-                            onmouseout="this.style.boxShadow='inset 0 0 10px rgba(0, 242, 254, 0.1)'; this.style.borderColor='rgba(0, 242, 254, 0.5)'"
-                            title="导出游戏 Sprite Sheet 图集 (PRO)" data-i18n-title="title_export_sheet">
-                            <div
-                                style="position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(0, 242, 254, 0.3), transparent); animation: exportScan 3s infinite;">
+                        <!-- 5. SVG 卡片 -->
+                        <div class="export-card-btn pro" data-format="svg" id="card-export-svg">
+                            <div class="export-card-icon" style="color: #ff007f;">🎨</div>
+                            <div class="export-card-content">
+                                <div class="export-card-title-row">
+                                    <span class="export-card-title" data-i18n="export_svg_title">矢量 SVG 格式</span>
+                                    <span class="export-card-badge pro">PRO</span>
+                                </div>
+                                <div class="export-card-desc" data-i18n="export_svg_desc">矢量路径导出，支持无限放大清晰不失真</div>
                             </div>
-                            <span data-i18n="export_sheet">📊 导出 Sprite Sheet</span>
-                            <span class="pro-tag-badge"
-                                style="background: #00f2fe; color: #050b14; border: none; box-shadow: 0 0 8px #00f2fe; font-weight: 900;">PRO</span>
-                        </button>
-
-                        <!-- JSON Atlas 按钮 -->
-                        <button id="btn-export-json-atlas" class="btn btn-secondary pro-feature-element"
-                            style="width: 100%; justify-content: space-between; text-align: left; font-size: 13px; padding: 10px 12px; border: 1px solid rgba(168, 85, 247, 0.5); background: linear-gradient(90deg, rgba(168, 85, 247, 0.1) 0%, transparent 100%); border-radius: 6px; color: #a855f7; transition: all 0.2s; box-shadow: inset 0 0 10px rgba(168, 85, 247, 0.1); position: relative; overflow: hidden;"
-                            onmouseover="this.style.boxShadow='inset 0 0 15px rgba(168, 85, 247, 0.3), 0 0 15px rgba(168, 85, 247, 0.2)'; this.style.borderColor='#a855f7'"
-                            onmouseout="this.style.boxShadow='inset 0 0 10px rgba(168, 85, 247, 0.1)'; this.style.borderColor='rgba(168, 85, 247, 0.5)'"
-                            title="导出 Cocos / Unity JSON 动画元数据 (PRO)" data-i18n-title="title_export_json">
-                            <div
-                                style="position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.3), transparent); animation: exportScan 3s infinite;">
-                            </div>
-                            <span data-i18n="export_json">🎮 导出 JSON 动画 Atlas</span>
-                            <span class="pro-tag-badge"
-                                style="background: #a855f7; color: #050b14; border: none; box-shadow: 0 0 8px #a855f7; font-weight: 900;">PRO</span>
-                        </button>
-
-                        <!-- SVG 按钮 -->
-                        <button id="btn-export-svg" class="btn btn-secondary pro-feature-element"
-                            style="width: 100%; justify-content: space-between; text-align: left; font-size: 13px; padding: 10px 12px; border: 1px solid rgba(255, 0, 127, 0.5); background: linear-gradient(90deg, rgba(255, 0, 127, 0.1) 0%, transparent 100%); border-radius: 6px; color: #ff007f; transition: all 0.2s; box-shadow: inset 0 0 10px rgba(255, 0, 127, 0.1); position: relative; overflow: hidden;"
-                            onmouseover="this.style.boxShadow='inset 0 0 15px rgba(255, 0, 127, 0.3), 0 0 15px rgba(255, 0, 127, 0.2)'; this.style.borderColor='#ff007f'"
-                            onmouseout="this.style.boxShadow='inset 0 0 10px rgba(255, 0, 127, 0.1)'; this.style.borderColor='rgba(255, 0, 127, 0.5)'"
-                            title="导出矢量 SVG 高清像素格式 (PRO)" data-i18n-title="title_export_svg">
-                            <div
-                                style="position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 0, 127, 0.3), transparent); animation: exportScan 3s infinite;">
-                            </div>
-                            <span data-i18n="export_svg">🎨 导出矢量 SVG</span>
-                            <span class="pro-tag-badge"
-                                style="background: #ff007f; color: #050b14; border: none; box-shadow: 0 0 8px #ff007f; font-weight: 900;">PRO</span>
-                        </button>
-
-                        <!-- 📦 PRO 专属：一键打包导出游戏资产全套 ZIP 包 -->
-                        <button id="btn-export-zip" class="btn btn-secondary pro-feature-element"
-                            style="width: 100%; justify-content: space-between; text-align: left; font-size: 13px; padding: 10px 12px; border: 1px solid rgba(245, 158, 11, 0.6); background: linear-gradient(90deg, rgba(245, 158, 11, 0.15) 0%, transparent 100%); border-radius: 6px; color: #fbbf24; transition: all 0.2s; box-shadow: inset 0 0 10px rgba(245, 158, 11, 0.1); position: relative; overflow: hidden;"
-                            onmouseover="this.style.boxShadow='inset 0 0 15px rgba(245, 158, 11, 0.3), 0 0 15px rgba(245, 158, 11, 0.2)'; this.style.borderColor='#fbbf24'"
-                            onmouseout="this.style.boxShadow='inset 0 0 10px rgba(245, 158, 11, 0.1)'; this.style.borderColor='rgba(245, 158, 11, 0.6)'"
-                            title="一键打包导出游戏产品资产包 (SpriteSheet + 逐帧PNG + JSON Atlas + GIF动图)" data-i18n-title="title_export_zip">
-                            <div
-                                style="position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.3), transparent); animation: exportScan 3s infinite;">
-                            </div>
-                            <span data-i18n="export_zip">📦 导出全套资产 ZIP 包</span>
-                            <span class="pro-tag-badge"
-                                style="background: #fbbf24; color: #050b14; border: none; box-shadow: 0 0 8px #fbbf24; font-weight: 900;">PRO</span>
-                        </button>
-
-                        <div
-                            style="height: 1px; background: linear-gradient(90deg, transparent, rgba(0, 242, 254, 0.5), transparent); margin: 4px 0;">
                         </div>
+
+                        <!-- 6. 全套资产 ZIP 包 (推荐) -->
+                        <div class="export-card-btn pro highlight" data-format="zip" id="card-export-zip">
+                            <div class="export-card-icon" style="color: #fbbf24;">📦</div>
+                            <div class="export-card-content">
+                                <div class="export-card-title-row">
+                                    <span class="export-card-title" data-i18n="export_zip_title">全套资产 ZIP 包</span>
+                                    <span class="export-card-badge pro-gold" data-i18n="badge_pro_recommend">PRO 推荐 ⭐</span>
+                                </div>
+                                <div class="export-card-desc" data-i18n="export_zip_desc">一键打包图集 + 逐帧图 + 独立动作 GIF + 说明文档</div>
+                            </div>
+                        </div>
+
+                        <div style="height: 1px; background: rgba(255, 255, 255, 0.1); margin: 2px 0;"></div>
 
                         <!-- 云端保存/读取 -->
                         <button id="btn-cloud-save" class="btn btn-secondary" data-i18n="btn_cloud_save"
-                            title="保存到云端，在任何电脑凭提取码恢复"
-                            style="width: 100%; justify-content: flex-start; text-align: left; font-size: 13px; padding: 10px 12px; border: none; background: transparent; color: #e2e8f0; border-radius: 6px;"
+                            data-i18n-title="tip_cloud_save" title="保存到云端，在任何电脑凭提取码恢复"
+                            style="width: 100%; justify-content: flex-start; text-align: left; font-size: 12px; padding: 8px 10px; border: none; background: rgba(255,255,255,0.03); color: #cbd5e1; border-radius: 6px;"
                             onmouseover="this.style.background='rgba(255,255,255,0.1)'"
-                            onmouseout="this.style.background='transparent'">
-                            ☁️ 云端保存
+                            onmouseout="this.style.background='rgba(255,255,255,0.03)'">
+                            ☁️ 云端工程保存与读取
                         </button>
 
+                        <!-- 兼容隐藏桩元素，防止旧绑定报错 -->
+                        <div style="display: none !important;">
+                            <button id="btn-export-png"></button>
+                            <button id="btn-export-gif"></button>
+                            <button id="btn-export-sheet"></button>
+                            <button id="btn-export-json-atlas"></button>
+                            <button id="btn-export-svg"></button>
+                            <button id="btn-export-zip"></button>
+                        </div>
+                    </div>
+
                         <button id="btn-cloud-load" class="btn btn-secondary" data-i18n="btn_cloud_load"
-                            title="输入提取码从云端恢复作品"
+                            data-i18n-title="tip_cloud_load" title="输入提取码从云端恢复作品"
                             style="width: 100%; justify-content: flex-start; text-align: left; font-size: 13px; padding: 10px 12px; border: none; background: transparent; color: #e2e8f0; border-radius: 6px;"
                             onmouseover="this.style.background='rgba(255,255,255,0.1)'"
                             onmouseout="this.style.background='transparent'">
@@ -649,7 +608,7 @@
                         <!-- 👇 新增这个按钮 👇 -->
                         <button id="btn-edit-profile" class="dropdown-item-btn"
                             style="color: var(--accent-cyan); border-color: rgba(0, 242, 254, 0.3);">
-                            <span>✏️ 修改昵称与头像</span>
+                            <span data-i18n="btn_edit_profile">✏️ 修改昵称与头像</span>
                         </button>
                         <!-- 👆 新增结束 👆 -->
                         <button id="btn-dropdown-pro-upgrade" class="dropdown-item-btn pro-btn-item">
@@ -674,6 +633,15 @@
                     <aside class="sidebar left-sidebar">
                         <!-- 🚨 加上这一行，作为拖拽线 -->
                         <div class="sidebar-resizer" id="left-resizer"></div>
+
+                        <!-- 🌐 全球社区作品与分享 (Global Community & Share) -->
+                        <div class="panel-section" style="padding: 6px 8px; margin-bottom: 8px;">
+                            <button id="btn-left-share-community" class="btn" style="width: 100%; background: linear-gradient(135deg, rgba(255, 0, 127, 0.25) 0%, rgba(0, 242, 254, 0.2) 100%); border: 1px solid #ff007f; color: #ffffff; font-weight: 800; font-size: 13px; padding: 10px 12px; border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(255, 0, 127, 0.3); transition: all 0.25s;" onmouseover="this.style.background='linear-gradient(135deg, rgba(255, 0, 127, 0.45) 0%, rgba(0, 242, 254, 0.35) 100%)'; this.style.boxShadow='0 0 20px rgba(255, 0, 127, 0.6)';" onmouseout="this.style.background='linear-gradient(135deg, rgba(255, 0, 127, 0.25) 0%, rgba(0, 242, 254, 0.2) 100%)'; this.style.boxShadow='0 4px 15px rgba(255, 0, 127, 0.3)';">
+                                <span style="font-size: 16px;">🌐</span>
+                                <span data-i18n="btn_global_community">全球社区作品 / 分享二创</span>
+                                <span style="background: #ff007f; color: #fff; font-size: 9px; padding: 1px 5px; border-radius: 4px; font-weight: 800;">HOT</span>
+                            </button>
+                        </div>
 
                         <!-- 1. 绘图工具箱 (Free Drawing Tools) -->
                         <div class="panel-section collapsible-section">
@@ -874,18 +842,33 @@
                                 <button id="btn-zoom-in" class="tool-btn" title="放大"
                                     data-i18n-title="title_zoom_in">➕</button>
                             </div>
+
+                            <!-- 对称镜像快捷切换栏 (Symmetry Quick Toggles) -->
+                            <div class="tool-group" id="quick-symmetry-group" data-i18n-title="tip_symmetry_mode" title="对称镜像绘制模式">
+                                <button id="btn-sym-none" class="tool-btn active" data-i18n="btn_sym_none" title="关闭对称镜像" data-i18n-title="title_sym_none">🚫 关</button>
+                                <button id="btn-sym-h" class="tool-btn" data-i18n="btn_sym_h" title="水平镜像 (↔️)" data-i18n-title="title_sym_h">↔️ 水平</button>
+                                <button id="btn-sym-v" class="tool-btn" data-i18n="btn_sym_v" title="垂直镜像 (↕️)" data-i18n-title="title_sym_v">↕️ 垂直</button>
+                                <button id="btn-sym-dual" class="tool-btn" data-i18n="btn_sym_dual" title="双轴十字镜像 (✖️)" data-i18n-title="title_sym_dual">✖️ 双轴</button>
+                            </div>
+
+                            <!-- 画布内 3x3 无缝平铺快捷按钮 (In-Canvas 3x3 Tile Mode) -->
+                            <div class="tool-group">
+                                <button id="btn-quick-tile-mode" class="tool-btn" data-i18n="btn_quick_tile" title="画布内 3×3 无缝平铺模式与环绕绘制 (Tile Mode)" data-i18n-title="title_quick_tile">🧱 3×3 平铺</button>
+                            </div>
                         </div>
 
                         <!-- 画布容器 (Canvas Container Box) -->
                         <div class="canvas-container-box"
                             style="flex: 1 !important; min-height: 0 !important; overflow: auto !important; display: flex !important; align-items: center !important; justify-content: center !important; padding: 20px;">
                             <div class="canvas-wrapper" id="canvas-wrapper">
+                                <canvas id="tile-overlay-canvas" width="1536" height="1536"
+                                    style="display: none; position: absolute; top: -100%; left: -100%; width: 300%; height: 300%; pointer-events: none; z-index: 1;"></canvas>
                                 <canvas id="pixel-canvas" width="512" height="512"
-                                    style="display: block; width: 100%; height: 100%; pointer-events: auto;"></canvas>
+                                    style="display: block; width: 100%; height: 100%; pointer-events: auto; position: relative; z-index: 3;"></canvas>
                                 <canvas id="grid-overlay" width="512" height="512"
-                                    style="pointer-events: none !important; position: absolute; top: 0; left: 0;"></canvas>
+                                    style="pointer-events: none !important; position: absolute; top: 0; left: 0; z-index: 4;"></canvas>
                                 <canvas id="symmetry-overlay" width="512" height="512"
-                                    style="pointer-events: none !important; position: absolute; top: 0; left: 0;"></canvas>
+                                    style="pointer-events: none !important; position: absolute; top: 0; left: 0; z-index: 5;"></canvas>
                             </div>
                         </div>
 
@@ -923,7 +906,7 @@
                                                 <option value="pingpong" data-i18n="loop_mode_pingpong">🏓 乒乓往复</option>
                                             </select>
                                             <select id="select-tag-mode" class="select-input"
-                                                style="font-size: 11px; max-width: 120px;" title="选择播放的动画段落">
+                                                style="font-size: 11px; max-width: 120px;" data-i18n-title="tip_select_tag_mode" title="选择播放的动画段落">
                                                 <!-- 🚨 加上 data-i18n="tag_play_all" -->
                                                 <option value="all" data-i18n="tag_play_all">▶ 播放全部帧</option>
                                             </select>
@@ -953,6 +936,10 @@
                                             <button id="btn-frame-delete" class="anim-btn danger-btn"
                                                 data-i18n="btn_frame_del" title="删除当前帧"
                                                 data-i18n-title="title_frame_del">🗑️ 删除帧</button>
+                                            <button id="btn-frame-tag" class="anim-btn"
+                                                data-i18n="btn_frame_tag" title="为选中帧创建/管理动画动作标签"
+                                                data-i18n-title="title_frame_tag"
+                                                style="border-color: rgba(0, 242, 254, 0.4); color: var(--accent-cyan);">🏷️ 动作标签</button>
                                         </div>
 
                                         <!-- FPS 控制靠最右 -->
@@ -1010,7 +997,7 @@
                                 <!-- 互换按钮 -->
                                 <button id="addon-swap-btn"
                                     style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--accent-cyan); font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"
-                                    title="互换左键与右键颜色 (快捷键: X)">⇄</button>
+                                    data-i18n-title="tip_swap_colors" title="互换左键与右键颜色 (快捷键: X)">⇄</button>
 
                                 <!-- 右键色 -->
                                 <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
@@ -1068,6 +1055,26 @@
                                         data-i18n="btn_add_hex"
                                         style="white-space: nowrap; padding: 4px 10px; height: 26px;">➕ 加入</button>
                                 </div>
+                            </div>
+
+                            <!-- 经典复古色板一键切换 & 画面颜色映射 -->
+                            <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 8px;">
+                                <select id="select-preset-palette" class="select-input" style="flex: 1; font-size: 11px; height: 28px; padding: 2px 6px;">
+                                    <option value="default" data-i18n="palette_default">🎨 默认色板 (Default)</option>
+                                    <option value="pico8" data-i18n="palette_pico8">🕹️ PICO-8 (16 色)</option>
+                                    <option value="gameboy" data-i18n="palette_gameboy">👾 Game Boy 经典绿 (4 色)</option>
+                                    <option value="gameboy_pocket" data-i18n="palette_gb_pocket">📟 GB Pocket 灰阶 (4 色)</option>
+                                    <option value="endesga32" data-i18n="palette_endesga32">🌟 ENDESGA 32 (32 色)</option>
+                                    <option value="nes" data-i18n="palette_nes">📺 NES 红白机 (16 色)</option>
+                                    <option value="cyberpunk" data-i18n="palette_cyberpunk">⚡ 赛博霓虹 (16 色)</option>
+                                    <option value="pastel" data-i18n="palette_pastel">🍬 柔和马卡龙 (16 色)</option>
+                                    <option value="c64" data-i18n="palette_c64">🖥️ Commodore 64 (16 色)</option>
+                                    <option value="solarized" data-i18n="palette_solarized">☀️ Solarized (16 色)</option>
+                                    <option value="monochrome" data-i18n="palette_monochrome">🏁 1-Bit 纯黑白 (2 色)</option>
+                                </select>
+                                <button id="btn-palette-remap" class="btn btn-secondary btn-xs" title="一键将画布颜色转换为当前色板中的最接近色" data-i18n-title="title_palette_remap" style="height: 28px; padding: 0 8px; font-size: 11px; white-space: nowrap; border-color: rgba(0, 242, 254, 0.4); color: var(--accent-cyan);">
+                                    ✨ 映射画布
+                                </button>
                             </div>
                             <!-- 🚨 这里加一个容器，用来装色块 -->
                             <div class="palette-swatches" id="palette-swatches">
@@ -1160,7 +1167,7 @@
                                     <div style="display: flex; gap: 6px; align-items: stretch;">
                                         <input type="number" id="rotsprite-angle" value="45" min="0" max="360"
                                             style="width: 60px; background: rgba(0,0,0,0.5); color: #00f2fe; border: 1px solid rgba(0,242,254,0.3); border-radius: var(--radius-sm); text-align: center; font-weight: bold; font-size: 12px;"
-                                            title="输入旋转角度">
+                                            data-i18n-title="tip_rotsprite_angle" title="输入旋转角度">
                                         <button id="btn-rotsprite-rotate" class="btn btn-pro-item"
                                             style="flex: 1; margin: 0;">
                                             <span data-i18n="btn_rotsprite">🔄 RotSprite 旋转</span>
@@ -1199,16 +1206,16 @@
 
     <!-- 每一个小时巡游互动的像素人 (Hourly Pixel PRO Mascot Walker) -->
     <div id="pixel-pro-walker-track" class="pixel-pro-walker-track">
-        <div id="pixel-pro-walker" class="pixel-pro-walker" style="display: none;" title="点击升级 PRO 尊享版！">
+        <div id="pixel-pro-walker" class="pixel-pro-walker" style="display: none;" data-i18n-title="tip_pixel_walker" title="点击升级 PRO 尊享版！">
             <!-- 对话气泡 (Speech Bubble) -->
             <div class="walker-speech-bubble" id="walker-speech-bubble">
                 <div class="bubble-header">
                     <span class="bubble-crown">👑</span>
-                    <strong class="bubble-title">PixelSprite PRO 终身版</strong>
+                    <strong class="bubble-title" data-i18n="walker_bubble_title">PixelSprite PRO 终身版</strong>
                 </div>
                 <div class="bubble-body">
-                    <p class="bubble-main-text">✨ 点击我立即升级 PRO 尊享版！</p>
-                    <span class="bubble-timer-hint" id="walker-timer-hint">⏳ 24小时免费试用中 · 点击查看所有特权</span>
+                    <p class="bubble-main-text" data-i18n="walker_bubble_text">✨ 点击我立即升级 PRO 尊享版！</p>
+                    <span class="bubble-timer-hint" id="walker-timer-hint" data-i18n="walker_bubble_hint">⏳ 24小时免费试用中 · 点击查看所有特权</span>
                 </div>
                 <div class="bubble-tail"></div>
             </div>
@@ -1316,6 +1323,130 @@
         </div>
     </div>
 
+    <!-- 📤 导出参数配置弹窗 Export Config Modal -->
+    <div id="export-config-modal" class="modal-backdrop" style="display: none; z-index: 100000;">
+        <div class="modal-card" style="width: 520px; max-width: 95vw;">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <h3 id="export-config-title" style="margin: 0; font-size: 15px;">🖼️ 导出 PNG 单帧原图</h3>
+                    <span id="export-config-badge" class="export-card-badge free">FREE</span>
+                </div>
+                <button id="export-config-modal-close" class="modal-close-btn">&times;</button>
+            </div>
+
+            <div class="modal-body" style="padding: 16px; display: flex; flex-direction: column; gap: 14px;">
+                <!-- 顶部：实时预览与分辨率计算 -->
+                <div style="display: flex; gap: 14px; align-items: center; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-md); padding: 12px;">
+                    <div style="width: 72px; height: 72px; background: rgba(255,255,255,0.04); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+                        <canvas id="export-config-preview-canvas" width="64" height="64" style="image-rendering: pixelated; width: 64px; height: 64px; object-fit: contain;"></canvas>
+                    </div>
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                        <div style="font-size: 12px; font-weight: 700; color: #ffffff;" id="export-info-dimension">
+                            尺寸计算: 32 × 32 px ➔ 256 × 256 px
+                        </div>
+                        <div style="font-size: 11px; color: var(--text-muted);" id="export-info-details">
+                            当前工程共 1 帧 | 12 FPS
+                        </div>
+                        <div style="font-size: 11px; color: var(--accent-cyan);" id="export-info-note">
+                            高质量无损导出
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 格式配置区 -->
+                <!-- 1. PNG 设置区 -->
+                <div id="export-settings-png" class="export-settings-section" style="display: flex; flex-direction: column; gap: 10px;">
+                    <div>
+                        <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;" data-i18n="png_scale_label">🔍 PNG 尺寸倍数:</label>
+                        <select id="select-png-scale" class="select-input" style="width: 100%;">
+                            <option value="1" data-i18n="scale_1x">1x (原尺寸，游戏开发推荐)</option>
+                            <option value="2" data-i18n="scale_2x">2x (双倍清晰)</option>
+                            <option value="4" data-i18n="scale_4x">4x 高清</option>
+                            <option value="8" selected data-i18n="scale_8x">8x 超清 (社交推荐)</option>
+                            <option value="16" data-i18n="scale_16x">16x 极致 (大图头像)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 2. GIF 设置区 -->
+                <div id="export-settings-gif" class="export-settings-section" style="display: none; flex-direction: column; gap: 10px;">
+                    <div>
+                        <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;" data-i18n="gif_scale_label">🔍 GIF 清晰度 (放大倍数):</label>
+                        <select id="select-gif-scale" class="select-input" style="width: 100%;">
+                            <option value="1" data-i18n="gif_scale_1x">1x (原尺寸)</option>
+                            <option value="4" data-i18n="gif_scale_4x">4x 高清</option>
+                            <option value="8" selected data-i18n="gif_scale_8x">8x 超清 (推荐)</option>
+                            <option value="16" data-i18n="gif_scale_16x">16x 极致</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-main); cursor: pointer;">
+                            <input type="checkbox" id="check-gif-solid-bg" style="accent-color: #ffea70; cursor: pointer;">
+                            <span data-i18n="gif_solid_bg">🎨 填充纯色背景 (防外部播放黑边)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 3. Sprite Sheet 设置区 -->
+                <div id="export-settings-sheet" class="export-settings-section" style="display: none; flex-direction: column; gap: 10px;">
+                    <div>
+                        <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;" data-i18n="sheet_scale_label">🔍 图集单帧倍数:</label>
+                        <select id="select-sheet-scale" class="select-input" style="width: 100%;">
+                            <option value="1" selected data-i18n="scale_1x">1x (原尺寸，游戏开发推荐)</option>
+                            <option value="2" data-i18n="scale_2x">2x</option>
+                            <option value="4" data-i18n="scale_4x">4x 高清</option>
+                            <option value="8" data-i18n="scale_8x">8x 超清</option>
+                            <option value="16" data-i18n="scale_16x">16x 极致</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;" data-i18n="sheet_cols_label">📊 图集每行帧数 (Columns):</label>
+                        <input type="number" id="param-sheet-cols" value="0" min="0" max="64" class="select-input" style="width: 100%;" placeholder="填 0 自动横向单行排满" data-i18n-placeholder="sheet_cols_placeholder">
+                        <span style="font-size: 11px; color: var(--text-muted); margin-top: 2px; display: block;" data-i18n="sheet_cols_hint">填 0 将所有帧连成一条横带；填数字（如 4）将以 4 列网格排布。</span>
+                    </div>
+                </div>
+
+                <!-- 4. JSON Atlas 设置区 -->
+                <div id="export-settings-json" class="export-settings-section" style="display: none; flex-direction: column; gap: 10px;">
+                    <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5; background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.2); border-radius: var(--radius-sm); padding: 10px;">
+                        🎮 <strong>JSON Atlas 包含：</strong><br>
+                        • 完整 Texture Atlas 贴图信息<br>
+                        • 每一帧尺寸与 UV 坐标<br>
+                        • 动画动作标签（Idle, Run 等帧区间），原生兼容 Godot / Unity / Phaser。
+                    </div>
+                </div>
+
+                <!-- 5. SVG 设置区 -->
+                <div id="export-settings-svg" class="export-settings-section" style="display: none; flex-direction: column; gap: 10px;">
+                    <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5; background: rgba(255, 0, 127, 0.08); border: 1px solid rgba(255, 0, 127, 0.2); border-radius: var(--radius-sm); padding: 10px;">
+                        🎨 <strong>矢量 SVG 格式：</strong><br>
+                        将当前画面转换为绝对坐标矩形矢量路径，可在矢量绘图软件（Illustrator/Figma）或网页中无限放大，绝对不模糊。
+                    </div>
+                </div>
+
+                <!-- 6. ZIP 全套资产包设置区 -->
+                <div id="export-settings-zip" class="export-settings-section" style="display: none; flex-direction: column; gap: 10px;">
+                    <div style="background: rgba(251, 191, 36, 0.08); border: 1px solid rgba(251, 191, 36, 0.25); border-radius: var(--radius-sm); padding: 10px; font-size: 11px; color: #fbbf24; line-height: 1.5;">
+                        📦 <strong>一键打包资产清单：</strong><br>
+                        • <code>spritesheet.png</code> (全透明通道图集)<br>
+                        • <code>spritesheet.json</code> (Aseprite / Godot 兼容 Atlas)<br>
+                        • <code>frames/</code> (逐帧 PNG 序列)<br>
+                        • <code>animation.gif</code> (全帧动图预览)<br>
+                        • <code>animations/</code> (若设置了动作标签，分动作导出独立动图)<br>
+                        • <code>README.txt</code> (规格与商用授权说明)
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" id="btn-export-config-cancel" class="btn btn-secondary" data-i18n="btn_cancel">取消</button>
+                <button type="button" id="btn-export-config-confirm" class="btn btn-primary" data-i18n="btn_export_confirm" style="padding: 8px 24px; font-weight: 800; font-size: 13px; box-shadow: 0 0 16px rgba(0, 242, 254, 0.4);">
+                    🚀 立即导出
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- 导出预览弹窗 Export Preview Modal -->
     <div id="export-modal" class="modal-backdrop" style="display: none; z-index: 100000;">
         <div class="modal-card">
@@ -1336,7 +1467,7 @@
                             <input type="text" id="export-filename-input" class="select-input path-field"
                                 placeholder="project_32x32.png">
                             <button id="btn-custom-path-save" class="btn btn-secondary btn-path-picker"
-                                data-i18n="btn_browse_path" title="选择 Windows 本地保存路径">📂 浏览保存路径</button>
+                                data-i18n="btn_browse_path" data-i18n-title="tip_browse_path" title="选择 Windows 本地保存路径">📂 浏览保存路径</button>
                         </div>
                     </div>
 
@@ -1347,6 +1478,80 @@
                 <a id="modal-download-link" href="#" download="" class="btn btn-primary" data-i18n="btn_quick_download"
                     target="_blank">⬇️ 快速下载</a>
                 <button id="btn-modal-close" class="btn btn-secondary" data-i18n="btn_close">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 动画动作标签管理弹窗 Animation Tag Modal -->
+    <div id="anim-tag-modal" class="modal-backdrop" style="display: none; z-index: 100000;">
+        <div class="modal-card" style="max-width: 460px; width: 95vw;">
+            <div class="modal-header">
+                <h3 id="tag-modal-title" data-i18n="tag_modal_title">🏷️ 动画动作标签管理 (Animation Tags)</h3>
+                <button id="tag-modal-close" class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 18px; display: flex; flex-direction: column; gap: 14px;">
+                <!-- 预设动作快捷点选 -->
+                <div>
+                    <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px;" data-i18n="tag_quick_presets">常用动作快捷点选:</label>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                        <button type="button" class="btn btn-secondary btn-xs tag-preset-btn" data-name="Idle" data-i18n="tag_preset_idle" style="padding: 3px 8px;">Idle (待机)</button>
+                        <button type="button" class="btn btn-secondary btn-xs tag-preset-btn" data-name="Walk" data-i18n="tag_preset_walk" style="padding: 3px 8px;">Walk (行走)</button>
+                        <button type="button" class="btn btn-secondary btn-xs tag-preset-btn" data-name="Run" data-i18n="tag_preset_run" style="padding: 3px 8px;">Run (奔跑)</button>
+                        <button type="button" class="btn btn-secondary btn-xs tag-preset-btn" data-name="Attack" data-i18n="tag_preset_attack" style="padding: 3px 8px;">Attack (攻击)</button>
+                        <button type="button" class="btn btn-secondary btn-xs tag-preset-btn" data-name="Jump" data-i18n="tag_preset_jump" style="padding: 3px 8px;">Jump (跳跃)</button>
+                        <button type="button" class="btn btn-secondary btn-xs tag-preset-btn" data-name="Hurt" data-i18n="tag_preset_hurt" style="padding: 3px 8px;">Hurt (受击)</button>
+                        <button type="button" class="btn btn-secondary btn-xs tag-preset-btn" data-name="Die" data-i18n="tag_preset_die" style="padding: 3px 8px;">Die (阵亡)</button>
+                    </div>
+                </div>
+
+                <!-- 动作名称 -->
+                <div>
+                    <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;" data-i18n="tag_input_name">动作名称 (Tag Name):</label>
+                    <input type="text" id="tag-input-name" class="select-input" placeholder="e.g. Idle, Run, Attack" style="width: 100%;">
+                </div>
+
+                <!-- 帧区间 -->
+                <div style="display: flex; gap: 12px;">
+                    <div style="flex: 1;">
+                        <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;" data-i18n="tag_input_from">起始帧 (从 1 开始):</label>
+                        <input type="number" id="tag-input-from" min="1" class="select-input" style="width: 100%;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;" data-i18n="tag_input_to">结束帧:</label>
+                        <input type="number" id="tag-input-to" min="1" class="select-input" style="width: 100%;">
+                    </div>
+                </div>
+
+                <!-- 标签颜色 -->
+                <div>
+                    <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;" data-i18n="tag_input_color">标签色彩:</label>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="color" id="tag-input-color" value="#00f2fe" style="width: 36px; height: 30px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; background: transparent;">
+                        <div id="tag-color-palette-options" style="display: flex; gap: 6px;">
+                            <span class="tag-color-circle" data-color="#00f2fe" style="background:#00f2fe; width:22px; height:22px; border-radius:50%; cursor:pointer; display:inline-block; border: 1px solid rgba(255,255,255,0.3);"></span>
+                            <span class="tag-color-circle" data-color="#ffc439" style="background:#ffc439; width:22px; height:22px; border-radius:50%; cursor:pointer; display:inline-block; border: 1px solid rgba(255,255,255,0.3);"></span>
+                            <span class="tag-color-circle" data-color="#ff007f" style="background:#ff007f; width:22px; height:22px; border-radius:50%; cursor:pointer; display:inline-block; border: 1px solid rgba(255,255,255,0.3);"></span>
+                            <span class="tag-color-circle" data-color="#4ade80" style="background:#4ade80; width:22px; height:22px; border-radius:50%; cursor:pointer; display:inline-block; border: 1px solid rgba(255,255,255,0.3);"></span>
+                            <span class="tag-color-circle" data-color="#a855f7" style="background:#a855f7; width:22px; height:22px; border-radius:50%; cursor:pointer; display:inline-block; border: 1px solid rgba(255,255,255,0.3);"></span>
+                            <span class="tag-color-circle" data-color="#f97316" style="background:#f97316; width:22px; height:22px; border-radius:50%; cursor:pointer; display:inline-block; border: 1px solid rgba(255,255,255,0.3);"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 当前已有标签列表快捷管理 -->
+                <div id="tag-existing-list-wrapper" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; margin-top: 4px;">
+                    <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px;" data-i18n="tag_existing_title">已创建的动画段落:</label>
+                    <div id="tag-existing-list" style="display: flex; flex-direction: column; gap: 6px; max-height: 130px; overflow-y: auto;">
+                        <!-- 动态填充 -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="display: flex; justify-content: space-between;">
+                <button type="button" id="btn-tag-modal-delete" class="btn btn-secondary danger-btn" style="display: none;" data-i18n="btn_delete">删除段落</button>
+                <div style="display: flex; gap: 8px; margin-left: auto;">
+                    <button type="button" id="btn-tag-modal-cancel" class="btn btn-secondary" data-i18n="btn_cancel">取消</button>
+                    <button type="button" id="btn-tag-modal-save" class="btn btn-primary" data-i18n="btn_save">保存标签</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1638,7 +1843,7 @@
         <div class="modal-card"
             style="width: 600px; max-width: 95vw; background: rgba(10, 15, 25, 0.95); border: 1px solid rgba(0, 242, 254, 0.4);">
             <div class="modal-header">
-                <h3 style="color: var(--accent-cyan);">☁️ 我的云端工程库</h3>
+                <h3 style="color: var(--accent-cyan);" data-i18n="cloud_modal_title">☁️ 我的云端工程库</h3>
                 <button id="cloud-history-close" class="modal-close-btn">&times;</button>
             </div>
             <div class="modal-body" style="max-height: 60vh; overflow-y: auto; padding-right: 5px;">
@@ -1649,17 +1854,17 @@
                 <div id="cloud-history-empty"
                     style="display: none; text-align: center; color: var(--text-muted); padding: 40px 0;">
                     <span style="font-size: 40px; opacity: 0.5;">📭</span>
-                    <p style="margin-top: 10px;">您还没有保存过任何云端工程哦~</p>
+                    <p style="margin-top: 10px;" data-i18n="cloud_empty_hint">您还没有保存过任何云端工程哦~</p>
                 </div>
             </div>
             <div class="modal-footer"
                 style="justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
                 <div style="font-size: 12px; color: var(--text-muted);">
-                    还在用旧密码？
-                    <button id="btn-open-old-load"
+                    <span data-i18n="cloud_old_code_label">还在用旧提取码？</span>
+                    <button id="btn-open-old-load" data-i18n="cloud_btn_enter_code"
                         style="background: none; border: none; color: #00f2fe; cursor: pointer; text-decoration: underline;">输入提取码读取</button>
                 </div>
-                <button id="btn-close-history" class="btn btn-secondary">关闭</button>
+                <button id="btn-close-history" class="btn btn-secondary" data-i18n="btn_close">关闭</button>
             </div>
         </div>
     </div>
@@ -1803,7 +2008,7 @@
 
     <!-- Floating Language Switcher Widget -->
     <div class="lang-switcher-container">
-        <button id="lang-toggle-btn" class="lang-toggle-btn" title="切换语言 (Switch Language)">
+        <button id="lang-toggle-btn" class="lang-toggle-btn" data-i18n-title="tip_lang_switch" title="切换语言 (Switch Language)">
             <span id="lang-current-flag">🇨🇳</span>
             <span id="lang-current-label">简体中文</span>
             <span class="lang-arrow">▲</span>
@@ -1967,8 +2172,8 @@
 
                 <!-- 版本号徽章 -->
                 <div class="badge"
-                    style="background: rgba(0,242,254,0.1); border-color: rgba(0,242,254,0.3); color: var(--accent-cyan); font-size: 12px; padding: 4px 12px; margin-bottom: 10px;">
-                    <span data-i18n="about_version">版本</span> v2.9.2 (Build 2026)
+                    style="background: rgba(0,242,254,0.15); border-color: rgba(0,242,254,0.4); color: var(--accent-cyan); font-size: 12px; padding: 4px 12px; margin-bottom: 10px; font-weight: 800;">
+                    <span data-i18n="about_version">版本</span> v3.0.0 (Build 2026 Ultimate)
                 </div>
 
                 <!-- 介绍文字 -->
@@ -1976,20 +2181,21 @@
                     专业级 2D 像素画与游戏 Sprite 动画创作工坊。<br>专为独立游戏开发者与像素艺术家打造。
                 </p>
 
-                <!-- 🚨 更新日志区 (v2.9.2 专属版) -->
+                <!-- 🚨 更新日志区 (v3.0.0 专属版) -->
                 <div
                     style="width: 100%; background: rgba(0, 0, 0, 0.3); border-left: 3px solid #00f2fe; padding: 10px 14px; border-radius: 4px; text-align: left; margin-bottom: 16px;">
                     <h4 data-i18n="changelog_title"
-                        style="color: #fff; font-size: 13px; margin-bottom: 6px; font-weight: 700;">🚀 v2.9.2 更新日志 (最新版)
+                        style="color: #fff; font-size: 13px; margin-bottom: 6px; font-weight: 700;">🚀 v3.0.0 重大更新日志 (最新版)
                     </h4>
                     <ul
                         style="font-size: 11px; color: var(--text-muted); line-height: 1.6; padding-left: 16px; margin: 0;">
-                        <li data-i18n="changelog_item_1">📦 新增【PRO 全套资产 ZIP 一键打包】：SpriteSheet + 逐帧PNG + JSON Atlas + GIF动图一键出包。</li>
-                        <li data-i18n="changelog_item_2">🔍 重构【导出尺寸与透明通道】：修复尺寸强制放大问题，支持 1x~16x 自由倍数选择，默认 100% 透明背景。</li>
-                        <li data-i18n="changelog_item_3">⚡ 优化【时间轴极速实时同步】：画笔绘制或擦除时，时间轴缩略图 0 延迟实时更新反馈。</li>
-                        <li data-i18n="changelog_item_4">🎬 修复【新增帧即时渲染】：新增或复制帧无需点击其他帧即可瞬间出现，并自动平滑滚动居中。</li>
-                        <li data-i18n="changelog_item_5">☁️ 接入【PRO 终身版跨设备自动同步】：登录相同 Google 账号在任何电脑自动秒级激活 PRO。</li>
-                        <li data-i18n="changelog_item_6">⌨️ 新增【时间轴动画师专属快捷键】：[,] 切换帧，N 新建空白帧，Shift+D 复制帧，P 播放/暂停。</li>
+                        <li>🏷️ <b>新增【动画片段 Tag 标签系统】</b>：标记 Idle/Walk/Attack 动作，导出带 Tag 的 Godot/Aseprite JSON Atlas 与独立动作 GIF。</li>
+                        <li>🧱 <b>重构【画布内 3×3 无缝平铺模式】</b>：淘汰 CSS 背景假平铺，画布内实时渲染九宫格克隆，支持笔画跨边自动穿透环绕绘制。</li>
+                        <li>↔️ <b>升级【发光对称镜像工具】</b>：顶栏一键直切水平/垂直/双轴对称，发光霓虹中轴线 + 实时对称光标落点预判。</li>
+                        <li>📤 <b>重构【专业导出面板与智能尺寸计算器】</b>：独立弹窗设置，实时像素换算与自适应预览，支持 1x~16x 自由倍数导出。</li>
+                        <li>🌐 <b>新增【全球社区画廊 & 互动 Remix】</b>：浏览世界各地作品，支持发布新画作、点赞、收藏、发表评论与一键 Remix 二创！</li>
+                        <li>📲 <b>支持【PWA 桌面版独立安装】</b>：支持离线断网创作，在 Windows / Mac / 移动设备独立窗口秒开运行。</li>
+                        <li>🎨 <b>新增【经典复古预设色板与重新量化映射】</b>：内置 GameBoy/NES/Pico-8 等色板，支持欧氏距离智能画布量化重映射。</li>
                     </ul>
                 </div>
 
@@ -2137,7 +2343,7 @@
             style="width: 500px; max-width: 95vw; background: rgba(10, 15, 25, 0.95); border: 1px solid rgba(0, 242, 254, 0.4); box-shadow: 0 0 40px rgba(0,242,254,0.2);">
 
             <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px;">
-                <h3 style="color: #00f2fe; font-family: 'Outfit'; font-size: 20px;">📢 版本更新与社区链接</h3>
+                <h3 style="color: #00f2fe; font-family: 'Outfit'; font-size: 20px;" data-i18n="community_modal_title">📢 版本更新与社区链接</h3>
                 <button id="community-modal-close" class="modal-close-btn">&times;</button>
             </div>
 
@@ -2146,21 +2352,22 @@
                 <!-- 版本公告区 -->
                 <div
                     style="background: rgba(0, 0, 0, 0.4); border-left: 3px solid #00f2fe; padding: 12px 16px; border-radius: 4px;">
-                    <h4 style="color: #fff; font-size: 14px; margin-bottom: 6px; font-weight: 700;">🚀 v2.9.2 更新日志 (最新版)
+                    <h4 style="color: #fff; font-size: 14px; margin-bottom: 6px; font-weight: 700;">🚀 v3.0.0 重大更新日志 (最新版)
                     </h4>
                     <ul style="font-size: 12px; color: var(--text-muted); line-height: 1.6; padding-left: 16px;">
-                        <li>📦 新增【PRO 全套资产 ZIP 一键打包】：一键导出完整游戏资产包。</li>
-                        <li>🔍 重构【导出尺寸与透明通道】：修复 1x~16x 自由倍数并保留纯净透明背景。</li>
-                        <li>⚡ 时间轴极速绘制反馈：画笔涂画时，时间轴当前帧缩略图 0 延迟实时同步。</li>
-                        <li>🎬 修复时间轴新增帧渲染逻辑，新增/复制帧立刻显示并自动居中滚动。</li>
-                        <li>☁️ 接入 Google 账号 PRO 跨电脑多设备自动云端激活同步。</li>
-                        <li>⌨️ 新增专业动画师快捷键：[,] 翻帧、N 新帧、Shift+D 复制、P 播放。</li>
+                        <li>🏷️ <b>新增【动画片段 Tag 标签系统】</b>：标记 Idle/Walk/Attack 动作，导出带标签的 Godot/Aseprite JSON Atlas 与独立动作 GIF。</li>
+                        <li>🧱 <b>重构【画布内 3×3 无缝平铺模式】</b>：淘汰 CSS 背景假平铺，画布内原生渲染 3×3 九宫格，支持笔画边界穿透环绕绘制。</li>
+                        <li>↔️ <b>升级【发光对称镜像工具】</b>：顶栏一键直切水平/垂直/双轴对称，发光中轴线 + 实时镜像光标落点预判。</li>
+                        <li>📤 <b>重构【专业导出面板与智能尺寸计算器】</b>：实时像素换算与自适应预览，支持 1x~16x 自由倍数导出。</li>
+                        <li>🌐 <b>新增【全球社区画廊 & 互动 Remix】</b>：浏览世界各地作品，支持点赞、收藏、发表评论与一键 Remix 二创！</li>
+                        <li>📲 <b>支持【PWA 桌面版独立安装】</b>：支持离线断网创作，在 Windows / Mac / 移动设备独立窗口秒开运行。</li>
+                        <li>🎨 <b>新增【经典复古预设色板与重新量化映射】</b>：内置 GameBoy/NES/Pico-8 等色板，支持欧氏距离智能画布重映射。</li>
                     </ul>
                 </div>
 
                 <!-- 社区链接区 -->
                 <div>
-                    <h4 style="color: #fff; font-size: 14px; margin-bottom: 12px; font-weight: 700;">🌐 加入我们的创作者社区</h4>
+                    <h4 style="color: #fff; font-size: 14px; margin-bottom: 12px; font-weight: 700;" data-i18n="community_section_title">🌐 加入我们的创作者社区</h4>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
                         <!-- Itch.io -->
                         <a href="https://tiny-world-king-master.itch.io/pixelsprite-pro" target="_blank"
@@ -2197,8 +2404,8 @@
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <span style="font-size: 20px;">💬</span>
                                 <div>
-                                    <div style="font-weight: 700; font-size: 13px;">Discord 社区</div>
-                                    <div style="font-size: 11px; color: var(--text-muted);">交流技术、反馈 Bug、寻找画友</div>
+                                    <div style="font-weight: 700; font-size: 13px;" data-i18n="link_discord_title">Discord 社区</div>
+                                    <div style="font-size: 11px; color: var(--text-muted);" data-i18n="link_discord_desc">交流技术、反馈 Bug、寻找画友</div>
                                 </div>
                             </div>
                             <span style="color: #5865F2;">➔</span>
@@ -2212,8 +2419,8 @@
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <span style="font-size: 20px;">✖️</span>
                                 <div>
-                                    <div style="font-weight: 700; font-size: 13px;">X (Twitter)</div>
-                                    <div style="font-size: 11px; color: var(--text-muted);">关注开发者的日常与动态</div>
+                                    <div style="font-weight: 700; font-size: 13px;" data-i18n="link_twitter_title">X (Twitter)</div>
+                                    <div style="font-size: 11px; color: var(--text-muted);" data-i18n="link_twitter_desc">关注开发者的日常与动态</div>
                                 </div>
                             </div>
                             <span style="color: #fff;">➔</span>
@@ -2241,6 +2448,7 @@
     <!-- 引入我们的前端支付逻辑 -->
     <script src="addon-login-system.js?v=1.0"></script>
     <script src="addon-export-system.js?v=1.0"></script>
+    <script src="addon-community-remix.js?v=1.0"></script>
 
     <script>
         // 🚀 网页加载完成后，强行把左上角的发光魔方变成浏览器标签页的图标

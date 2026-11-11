@@ -17,6 +17,8 @@
         }
     });
 
+    window.handleExportPng = handleExportPng;
+
     function handleExportPng() {
         // ===== 1. PRO 状态检测（原逻辑不动）=====
         let isPro = false;
@@ -123,11 +125,20 @@
         const filename = isPro ? `pixelsprite_pro_${innerW}x${innerH}.png` : `pixelsprite_free_${innerW}x${innerH}.png`;
         const dataUrl = exportCanvas.toDataURL('image/png');
 
+        const isEn = window.currentLang === 'en';
+        const isJa = window.currentLang === 'ja';
+        const modalTitle = isPro ?
+            (isEn ? '✨ PRO Exported Successfully!' : isJa ? '✨ PRO 出力成功！' : '✨ PRO 导出成功！') :
+            (isEn ? '✨ Free Version Exported!' : isJa ? '✨ 無料版出力成功！' : '✨ 免费版导出成功！');
+        const modalDesc = isPro ?
+            (isEn ? 'Exported high-res clean pixel art without watermark.' : isJa ? '透かしなしの高画質原画を出力しました。' : '您已导出纯净无水印原图。') :
+            (isEn ? 'Click the button below to browse local save path.' : isJa ? '下のボタンをクリックしてローカル保存先を選択できます。' : '您可以点击下方按钮浏览本地路径。');
+
         if (window.promptSaveFilePicker) {
             window.promptSaveFilePicker(dataUrl, filename, [{ description: 'PNG Image', accept: { 'image/png': ['.png'] } }]).then(status => {
                 if (status === 'cancel') return;
                 if (typeof window.showExportModal === 'function') {
-                    window.showExportModal(dataUrl, filename, `PNG | ${innerW}x${innerH}px`, isPro ? '✨ PRO 导出成功！' : '✨ 免费版导出成功！', isPro ? '您已导出纯净无水印原图。' : '您可以点击下方按钮浏览本地路径。');
+                    window.showExportModal(dataUrl, filename, `PNG | ${innerW}x${innerH}px`, modalTitle, modalDesc);
                 }
             });
         } else {
@@ -141,6 +152,8 @@
 
     // 这是一个纯前端强行拉起“另存为”窗口的终极兜底方案
     async function saveFileAsync(dataUrl, filename, isPro) {
+        const isEn = window.currentLang === 'en';
+        const isJa = window.currentLang === 'ja';
         try {
             if ('showSaveFilePicker' in window) {
                 const handle = await window.showSaveFilePicker({
@@ -153,7 +166,10 @@
                 await writable.write(blob);
                 await writable.close();
                 if (typeof window.showExportModal === 'function') {
-                    window.showExportModal(dataUrl, filename, isPro ? 'PRO 纯净原图' : '免费版', '✨ 导出成功！', '已保存到本地。');
+                    const badgeText = isPro ? (isEn ? 'PRO Clean HD' : isJa ? 'PRO 高画質原画' : 'PRO 纯净原图') : (isEn ? 'Free' : isJa ? '無料版' : '免费版');
+                    const succTitle = isEn ? '✨ Exported Successfully!' : isJa ? '✨ 出力成功！' : '✨ 导出成功！';
+                    const succDesc = isEn ? 'Saved to local disk.' : isJa ? 'ローカルに保存しました。' : '已保存到本地。';
+                    window.showExportModal(dataUrl, filename, badgeText, succTitle, succDesc);
                 }
             } else {
                 // 极度古老浏览器降级

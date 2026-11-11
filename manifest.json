@@ -1,0 +1,32 @@
+{
+  "name": "PixelSprite Pro - 像素工坊",
+  "short_name": "PixelSprite",
+  "description": "专业级 2D 像素画与游戏 Sprite 动画创作工坊，支持 3×3 无缝平铺与对称绘制。",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0a0c14",
+  "theme_color": "#00f2fe",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["photo", "entertainment", "productivity"],
+  "shortcuts": [
+    {
+      "name": "新建画板 (New Canvas)",
+      "url": "./index.html?action=new",
+      "description": "快速新建 32x32 像素画板"
+    },
+    {
+      "name": "社区灵感 (Community Remix)",
+      "url": "./index.html?action=community",
+      "description": "浏览社区灵感与模板"
+    }
+  ]
+}
+

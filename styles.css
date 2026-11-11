@@ -4624,22 +4624,48 @@ body.logged-in #mandatory-auth-gate {
 }
 
 /* ============================================================ */
-/* 🧱 终极无缝瓷砖模式视觉预览 (3x3 铺满背景) */
+/* 🧱 画布内 3x3 真实无缝瓷砖平铺模式 (In-Canvas Tile Mode) */
 /* ============================================================ */
-/* 🧱 无缝平铺模式：给整个画布容器加上 3x3 平铺背景 */
-body.tile-mode-active .canvas-container-box {
-    background-image: var(--tile-bg) !important;
-    background-repeat: repeat !important;
-    /* 🚨 核心：把背景放大，露出更多瓷砖 */
-    background-size: 25% !important;
-    /* 加上一点发光和网格感，让画面更高级 */
-    box-shadow: inset 0 0 100px rgba(0, 242, 254, 0.2) !important;
+#tile-overlay-canvas {
+    position: absolute;
+    top: -100%;
+    left: -100%;
+    width: 300%;
+    height: 300%;
+    pointer-events: none;
+    z-index: 1;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    transition: opacity 0.2s ease;
 }
 
-/* 开启平铺时，主画布半透明，让背景透出来 */
-body.tile-mode-active #pixel-canvas {
-    opacity: 0.6 !important;
-    transition: opacity 0.3s ease;
+.canvas-wrapper.tile-mode-active {
+    outline: 2px solid #00f2fe !important;
+    box-shadow: 0 0 25px rgba(0, 242, 254, 0.45), inset 0 0 15px rgba(0, 242, 254, 0.2) !important;
+}
+
+#btn-quick-tile-mode.active {
+    background: rgba(0, 242, 254, 0.22) !important;
+    border-color: #00f2fe !important;
+    color: #00f2fe !important;
+    box-shadow: 0 0 12px rgba(0, 242, 254, 0.4) !important;
+    font-weight: 700;
+}
+
+#quick-symmetry-group .tool-btn.active {
+    background: rgba(255, 0, 127, 0.22) !important;
+    border-color: #ff007f !important;
+    color: #ff007f !important;
+    box-shadow: 0 0 10px rgba(255, 0, 127, 0.35) !important;
+    font-weight: 700;
+}
+
+#btn-sym-none.active {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-muted) !important;
+    box-shadow: none !important;
+    font-weight: normal;
 }
 
 /* 🚨 强行把 PRO 弹窗中间的横幅拉回中心 */
@@ -5538,3 +5564,220 @@ details>summary::-webkit-details-marker {
     background: rgba(0, 242, 254, 0.6);
     box-shadow: 0 0 10px rgba(0, 242, 254, 0.8);
 }
+
+/* ============================================================ */
+/* 🏷️ 动画动作标签管理 (Animation Tags) & 经典色板样式 */
+/* ============================================================ */
+.tag-preset-btn:hover {
+    background: rgba(0, 242, 254, 0.15);
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+}
+
+.tag-color-circle {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tag-color-circle:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 8px currentColor;
+}
+
+.tag-item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    transition: background 0.15s ease;
+}
+
+.tag-item-row:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.tag-item-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tag-item-badge {
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 700;
+    color: #050b14;
+    font-size: 10px;
+}
+
+.tag-item-actions {
+    display: flex;
+    gap: 6px;
+}
+
+/* ============================================================ */
+/* 📤 现代化卡片式导出菜单与弹窗 (Modern Export Card Menu & Modal) */
+/* ============================================================ */
+.export-card-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+}
+
+.export-card-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(0, 242, 254, 0.4);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.export-card-btn.highlight {
+    background: linear-gradient(90deg, rgba(245, 158, 11, 0.12) 0%, rgba(245, 158, 11, 0.03) 100%);
+    border-color: rgba(245, 158, 11, 0.4);
+}
+
+.export-card-btn.highlight:hover {
+    border-color: #fbbf24;
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.25);
+}
+
+.export-card-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.35);
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.export-card-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.export-card-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.export-card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.export-card-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.3;
+}
+
+.export-card-badge {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 1px 6px;
+    border-radius: 4px;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.export-card-badge.free {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.export-card-badge.pro {
+    background: rgba(168, 85, 247, 0.2);
+    color: #c084fc;
+    border: 1px solid rgba(168, 85, 247, 0.4);
+}
+
+.export-card-badge.pro-gold {
+    background: linear-gradient(135deg, #fbbf24, #d97706);
+    color: #050b14;
+    box-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+}
+
+/* ============================================================ */
+/* 🌐 社区展示与 Remix 二创面板 (Community & Remix Showcase) */
+/* ============================================================ */
+.cat-pill {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cat-pill:hover {
+    border-color: #00f2fe;
+    color: #ffffff;
+    background: rgba(0, 242, 254, 0.08);
+}
+
+.cat-pill.active {
+    background: rgba(0, 242, 254, 0.18);
+    border-color: #00f2fe;
+    color: #00f2fe;
+    box-shadow: 0 0 12px rgba(0, 242, 254, 0.3);
+}
+
+#btn-open-community {
+    border: 1px solid rgba(255, 0, 127, 0.4) !important;
+    color: #ff007f !important;
+    background: rgba(255, 0, 127, 0.08) !important;
+    font-weight: 700 !important;
+    transition: all 0.25s ease !important;
+}
+
+#btn-open-community:hover {
+    background: rgba(255, 0, 127, 0.2) !important;
+    border-color: #ff007f !important;
+    box-shadow: 0 0 15px rgba(255, 0, 127, 0.4) !important;
+    color: #ffffff !important;
+}
+
+#btn-pwa-install {
+    border: 1px solid #00f2fe !important;
+    color: #00f2fe !important;
+    background: rgba(0, 242, 254, 0.08) !important;
+    font-weight: 700 !important;
+    animation: pwaPulse 2.5s infinite;
+}
+
+#btn-pwa-install:hover {
+    background: rgba(0, 242, 254, 0.25) !important;
+    box-shadow: 0 0 15px rgba(0, 242, 254, 0.5) !important;
+    color: #ffffff !important;
+}
+
+@keyframes pwaPulse {
+    0%, 100% { box-shadow: 0 0 6px rgba(0, 242, 254, 0.2); }
+    50% { box-shadow: 0 0 15px rgba(0, 242, 254, 0.5); }
+}
+
